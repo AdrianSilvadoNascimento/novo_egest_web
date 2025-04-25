@@ -1,0 +1,49 @@
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <div class="flex flex-col items-center">
+      <lucide-icon [img]="LockKeyholeIcon" class="text-4xl text-[#3377bc] mb-4"></lucide-icon>
+      <h3 class="text-md font-bold text-gray-800 mb-2">Olá Novamente!</h3>
+    </div>
+    <form class="space-y-5 mb-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div>
+        <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
+        <div class="relative">
+          <input id="email" name="email" type="email" required formControlName="email"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+            placeholder="Insira seu email">
+          <div class="absolute right-3 top-2.5 text-gray-400">
+            <lucide-icon [img]="MailIcon" size="20"></lucide-icon>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label for="password" class="block text-gray-700 font-medium mb-1">Password</label>
+        <div class="relative">
+          <input id="password" name="password" type="password" required formControlName="password"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+            placeholder="Insira sua senha">
+          <div class="absolute right-3 top-2.5 text-gray-400">
+            <lucide-icon [img]="LockIcon" size="20"></lucide-icon>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input id="remember" type="checkbox"
+            class="h-4 w-4 text-[#3377bc] focus:ring-[#2fade3] border-gray-300 rounded">
+          <label for="remember" class="ml-2 block text-sm text-gray-600">Lembrar de mim</label>
+        </div>
+        <a routerLink="/" class="text-sm text-[#2fade3] hover:underline">Esqueceu a senha?</a>
+      </div>
+      <button type="submit" [disabled]="loginForm.invalid"
+        [class]="loginForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
+        class="w-full font-medium py-2 px-4 rounded-lg transition">
+        Entrar
+      </button>
+    </form>
+    <p class="text-center text-gray-500 text-sm">
+      Ainda não tem uma conta?
+      <a routerLink="/register" class="text-[#2fade3] hover:underline font-medium">Registre-se</a>
+    </p>
+  </div>
+</div>
