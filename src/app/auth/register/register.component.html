@@ -6,11 +6,11 @@
       <h3 class="text-2xl font-bold text-gray-800 mb-2">Criação de Conta</h3>
       <p class="text-gray-500 mb-6">Falta pouco para você acessar</p>
     </div>
-    <form class="space-y-5 mb-6" (ngSubmit)="onSubmit()">
+    <form class="space-y-5 mb-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div>
         <label for="name" class="block text-gray-700 font-medium mb-1">Nome</label>
         <div class="relative">
-          <input id="name" name="name" type="text" required
+          <input id="name" name="name" type="text" required formControlName="name"
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
             placeholder="Preencha seu nome">
           <div class="absolute right-3 top-2.5 text-gray-400">
@@ -21,7 +21,7 @@
       <div>
         <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
         <div class="relative">
-          <input id="email" name="email" type="email" required
+          <input id="email" name="email" type="email" required formControlName="email"
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
             placeholder="Preencha seu email">
           <div class="absolute right-3 top-2.5 text-gray-400">
@@ -32,7 +32,7 @@
       <div>
         <label for="password" class="block text-gray-700 font-medium mb-1">Senha</label>
         <div class="relative">
-          <input id="password" name="password" type="password" required
+          <input id="password" name="password" type="password" required formControlName="password"
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
             placeholder="Preencha sua senha">
           <div class="absolute right-3 top-2.5 text-gray-400">
@@ -40,8 +40,11 @@
           </div>
         </div>
       </div>
-      <button type="submit"
-        class="w-full bg-[#3377bc] hover:bg-[#2fade3] text-white font-bold py-2 px-4 rounded-lg transition">Cadastrar</button>
+      <button type="submit" [disabled]="registerForm.invalid"
+        [class]="registerForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
+        class="w-full font-medium py-2 px-4 rounded-lg transition">
+        Cadastrar
+      </button>
     </form>
     <p class="text-center text-gray-500 text-sm mt-6">
       Já possui uma conta?

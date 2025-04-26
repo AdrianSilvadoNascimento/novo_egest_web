@@ -16,12 +16,19 @@ export class AuthService {
   private toggleLogin = new BehaviorSubject<boolean>(this.isLoggedIn());
   $toggleLogin = this.toggleLogin.asObservable();
 
+  private registeredEmail = new BehaviorSubject<string>('');
+  $registeredEmail = this.registeredEmail.asObservable();
+
   constructor(private http: HttpClient, private router: Router) { }
 
   isLoggedIn(): boolean {
     const token = localStorage.getItem('token');
 
     return !!token && token.trim() !== ''
+  }
+
+  setEmail(email: string): void {
+    this.registeredEmail.next(email);
   }
 
   setLoginStatus(status: boolean, token?: string): void {
@@ -43,9 +50,12 @@ export class AuthService {
   }
 
   register(registerModel: RegisterModel): Observable<any> {
-    return this.http.post(this.API_URL + '/register', registerModel, {
+    return this.http.post(`${this.API_URL}/register`, registerModel, {
       headers: { 'Content-Type': 'application/json' },
-    })
+    }).pipe((tap((res: any) => {
+      this.setEmail(registerModel.email);
+      this.router.navigate(['/login'])
+    })))
   }
 
   setCache(token: string): void {

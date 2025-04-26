@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -29,6 +29,8 @@ export class LoginComponent implements OnInit {
   readonly MailIcon = Mail;
   readonly LockIcon = Lock;
 
+  private emailRegistered!: string
+
   loginForm: FormGroup = new FormGroup({});
 
   constructor(
@@ -37,7 +39,17 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.createForm(new LoginModel())
+    this.authService.$registeredEmail.subscribe((email) => {
+      this.emailRegistered = email || ''
+    })
+
+    if (this.emailRegistered) {
+      const model = new LoginModel()
+      model.email = this.emailRegistered
+      this.createForm(model)
+    } else {
+      this.createForm(new LoginModel())
+    }
   }
 
   createForm(model: LoginModel): void {
