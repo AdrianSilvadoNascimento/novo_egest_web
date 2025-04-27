@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -35,8 +35,7 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -64,6 +63,7 @@ export class LoginComponent implements OnInit {
         ],
       ],
       password: [model.password, Validators.required],
+      remember: [model.remember],
     });
   }
 
@@ -72,7 +72,6 @@ export class LoginComponent implements OnInit {
       next: () => {
         alert('Login realizado com sucesso!');
         this.loginForm.reset();
-        this.router.navigate(['/home']);
       },
       error: (err: any) => {
         alert('Erro ao realizar login!');
@@ -80,6 +79,7 @@ export class LoginComponent implements OnInit {
       }
     };
 
+    console.log('loginForm:', this.loginForm.value);
     this.authService.login(this.loginForm.value).subscribe(loginObserver);
   }
 }

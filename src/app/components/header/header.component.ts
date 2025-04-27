@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class HeaderComponent implements OnInit {
   readonly menuIcon = PanelLeft;
-  readonly logOutIcon = LogOut; // Use the appropriate icon for logout
+  readonly logOutIcon = LogOut;
   readonly userIcon = CircleUserRound
   @Output() toggleSidenav = new EventEmitter<void>()
 

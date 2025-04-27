@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,19 +18,21 @@ export class DashboardService {
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
   })
 
-  constructor(private http: HttpClient) { }
+  private accountId!: string | null
+
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   setDashboardData(data: DashboardModel): void {
     this.dashboardData.next(data);
-    localStorage.setItem('dashboardData', JSON.stringify(data));
+    sessionStorage.setItem('dashboardData', JSON.stringify(data));
   }
 
   getDashboardData(): Observable<DashboardModel> {
-    const accountId = localStorage.getItem('account_id');
-    return this.http.get<DashboardModel>(`${this.API_URL}/${accountId}`, { headers: this.headers }).pipe(
+    this.accountId = this.authService.getAccountId()
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`)
+    return this.http.get<DashboardModel>(`${this.API_URL}/${this.accountId}`, { headers: this.headers }).pipe(
       tap((data: DashboardModel) => {
         this.setDashboardData(data);
       })
