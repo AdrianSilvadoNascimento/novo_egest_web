@@ -1,11 +1,4 @@
 <mat-toolbar class="flex justify-between items-center shadow-md">
-  <span>
-    @if (isLogged) {
-    <button mat-icon-button (click)="toggleSidenav.emit()" class="text-gray-700">
-      <lucide-icon [img]="menuIcon" class="w-6 h-6"></lucide-icon>
-    </button>
-    }
-  </span>
   <img src="egest-logo.png" alt="Logo Egest" width="150px" />
   <div>
     @if (isLogged) {
@@ -15,6 +8,9 @@
           <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
         </mat-icon>
         <span class="text-gray-600 text-sm">Olá, {{userName}}</span>
+        <mat-icon class="ml-3">
+          <lucide-icon [img]="chevronDownIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
       </div>
     </button>
     <mat-menu #userMenu="matMenu">

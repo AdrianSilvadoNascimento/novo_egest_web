@@ -1,7 +1,7 @@
 <main class="main overflow-auto">
-  <app-header class="sticky-header" (toggleSidenav)="toggleSidenav()"></app-header>
+  <app-header class="sticky-header"></app-header>
   <app-loading></app-loading>
-  <app-sidenav [expanded]="sidenavExpanded">
+  <app-sidenav>
     <section [class]="isLogged ? 'flex flex-col h-full bg-gray-100 p-4 space-y-4' : ''">
       <router-outlet />
     </section>

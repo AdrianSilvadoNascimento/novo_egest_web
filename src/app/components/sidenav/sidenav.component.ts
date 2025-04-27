@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -12,7 +12,8 @@ import {
   Settings,
   NotebookTabs,
   FileChartColumn,
-  LucideIconData
+  LucideIconData,
+  PanelLeft
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 
@@ -25,23 +26,24 @@ import { AuthService } from '../../services/auth.service';
     MatIconModule,
     RouterModule,
     LucideAngularModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss'
 })
 export class SidenavComponent implements OnInit {
-  @Input() expanded: boolean = true;
+  readonly menuIcon = PanelLeft;
+
+  expanded: boolean = true;
+  isLogged: boolean = false;
 
   links: { route: string, label: string, icon: LucideIconData }[] = [
-    { route: '/dashboard', label: 'Dashboard', icon: Home },
+    { route: '/home', label: 'Dashboard', icon: Home },
     { route: '/products', label: 'Products', icon: Package },
     { route: '/customers', label: 'Customers', icon: NotebookTabs },
     { route: '/reports', label: 'Reports', icon: FileChartColumn },
     { route: '/settings', label: 'Settings', icon: Settings },
   ]
-
-  isLogged: boolean = false;
 
   constructor(private readonly authService: AuthService) { }
 

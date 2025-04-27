@@ -27,7 +27,6 @@ export class AppComponent implements OnInit {
   readonly HomeIcon = Home;
   readonly UserIcon = User;
 
-  sidenavExpanded: boolean = false;
   isLogged: boolean = false;
 
   constructor(private readonly authService: AuthService) { }
@@ -36,9 +35,5 @@ export class AppComponent implements OnInit {
     this.authService.$toggleLogin.subscribe((isLogged) => {
       this.isLogged = isLogged;
     });
-  }
-
-  toggleSidenav() {
-    this.sidenavExpanded = !this.sidenavExpanded;
   }
 }

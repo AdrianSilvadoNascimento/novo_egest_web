@@ -62,7 +62,6 @@ export class AuthService {
 
   login(loginModel: LoginModel): Observable<any> {
     if (loginModel.remember) {
-      console.log('LoginModel', loginModel);
       localStorage.setItem('remember_me', 'true');
       this.storage = localStorage;
     } else {
