@@ -19,12 +19,28 @@ export class AuthService {
   private registeredEmail = new BehaviorSubject<string>('');
   $registeredEmail = this.registeredEmail.asObservable();
 
+  private userName = new BehaviorSubject<string>(this.accountUserName());
+  $userName = this.userName.asObservable();
+
   constructor(private http: HttpClient, private router: Router) { }
 
   isLoggedIn(): boolean {
     const token = localStorage.getItem('token');
 
     return !!token && token.trim() !== ''
+  }
+
+  accountUserName(): string {
+    if (this.isLoggedIn()) {
+      return localStorage.getItem('userName') || '';
+    }
+
+    return '';
+  }
+
+  setAccountUserName(userName: string): void {
+    this.userName.next(userName);
+    localStorage.setItem('userName', userName);
   }
 
   setEmail(email: string): void {
@@ -44,9 +60,16 @@ export class AuthService {
   login(loginModel: LoginModel): Observable<any> {
     return this.http.post(this.API_URL + '/login', loginModel, {
       headers: { 'Content-Type': 'application/json' },
-    }).pipe((tap((res: any) => {
-      this.setCache(res['token']);
-    })))
+    }).pipe(
+      tap((res: any) => {
+        const token = res['token'];
+        const account_user = res['account_user'];
+        this.setCache({ token: token, account_id: res['account_id'], user_id: account_user['id'] });
+        this.setAccountUserName(account_user['name']);
+        this.setLoginStatus(true, token);
+        this.router.navigate(['/home']);
+      })
+    );
   }
 
   register(registerModel: RegisterModel): Observable<any> {
@@ -58,8 +81,10 @@ export class AuthService {
     })))
   }
 
-  setCache(token: string): void {
-    localStorage.setItem('token', token);
+  setCache(res: { token: string, account_id: string, user_id: string }): void {
+    localStorage.setItem('token', res.token);
+    localStorage.setItem('account_id', res.account_id);
+    localStorage.setItem('user_id', res.user_id);
   }
 
   logout(): void {

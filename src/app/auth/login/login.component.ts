@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -35,7 +35,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -70,7 +71,8 @@ export class LoginComponent implements OnInit {
     const loginObserver = {
       next: () => {
         alert('Login realizado com sucesso!');
-        this.createForm(new LoginModel());
+        this.loginForm.reset();
+        this.router.navigate(['/home']);
       },
       error: (err: any) => {
         alert('Erro ao realizar login!');

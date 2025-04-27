@@ -1,5 +1,9 @@
-<main class="main bg-gradient-to-br from-[#2fade3] to-[#3377bc]">
+<main class="main overflow-auto">
+  <app-header class="sticky-header" (toggleSidenav)="toggleSidenav()"></app-header>
   <app-loading></app-loading>
-
-  <router-outlet />
+  <app-sidenav [expanded]="sidenavExpanded">
+    <section [class]="isLogged ? 'flex flex-col h-full bg-gray-100 p-4 space-y-4' : ''">
+      <router-outlet />
+    </section>
+  </app-sidenav>
 </main>

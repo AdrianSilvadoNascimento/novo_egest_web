@@ -1,0 +1,23 @@
+<mat-sidenav-container class="h-screen">
+  @if (isLogged) {
+  <mat-sidenav mode="side" opened="true" class="bg-white shadow-lg transition-all duration-300"
+    [ngStyle]="expanded ? { 'width': '200px' } : { 'width': '80px' }">
+    <div class="h-full flex flex-col p-4 space-y-4">
+      @for (link of links; track link.route) {
+      <a [routerLink]="link.route" routerLinkActive="bg-gray-100"
+        class="flex items-center p-2 rounded-lg hover:bg-gray-100 transition">
+        <lucide-icon [img]="link.icon" class="w-6 h-6 text-gray-700" matTooltipPosition="right"
+          [matTooltip]="link.label"></lucide-icon>
+        <span class="ml-4 text-gray-700 text-sm transition-all duration-300" [class.hidden]="!expanded">
+          {{ link.label }}
+        </span>
+      </a>
+      }
+    </div>
+  </mat-sidenav>
+  }
+
+  <mat-sidenav-content class="bg-gray-100">
+    <ng-content></ng-content>
+  </mat-sidenav-content>
+</mat-sidenav-container>

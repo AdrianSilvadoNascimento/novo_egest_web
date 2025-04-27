@@ -1,0 +1,31 @@
+<mat-toolbar class="flex justify-between items-center shadow-md">
+  <span>
+    @if (isLogged) {
+    <button mat-icon-button (click)="toggleSidenav.emit()" class="text-gray-700">
+      <lucide-icon [img]="menuIcon" class="w-6 h-6"></lucide-icon>
+    </button>
+    }
+  </span>
+  <img src="egest-logo.png" alt="Logo Egest" width="150px" />
+  <div>
+    @if (isLogged) {
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu text-gray-700">
+      <div class="flex justify-between items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-gray-600 text-sm">Olá, {{userName}}</span>
+      </div>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>
+          <lucide-icon [img]="logOutIcon" class="w-5 h-5 mr-2"></lucide-icon>
+        </mat-icon>
+        <span>Sair</span>
+      </button>
+    </mat-menu>
+    }
+
+  </div>
+</mat-toolbar>

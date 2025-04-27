@@ -1,0 +1,14 @@
+mat-toolbar {
+  z-index: 1000;
+
+  .user-menu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  .mat-mdc-menu-panel {
+    padding: 0 !important;
+  }
+}
