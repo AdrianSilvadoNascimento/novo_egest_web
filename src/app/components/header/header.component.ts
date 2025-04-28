@@ -7,11 +7,12 @@ import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown } from 'lucid
 
 import { AuthService } from '../../services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, LucideAngularModule, MatMenuModule],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, LucideAngularModule, MatMenuModule, RouterLink],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

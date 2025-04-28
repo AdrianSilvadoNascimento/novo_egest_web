@@ -1,0 +1,28 @@
+.products-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.actions-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button {
+    margin-right: 8px;
+  }
+}
+
+table {
+  width: 100%;
+  max-height: 750px;
+}
+
+mat-paginator {
+  margin-top: 16px;
+}

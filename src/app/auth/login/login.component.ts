@@ -79,7 +79,6 @@ export class LoginComponent implements OnInit {
       }
     };
 
-    console.log('loginForm:', this.loginForm.value);
     this.authService.login(this.loginForm.value).subscribe(loginObserver);
   }
 }

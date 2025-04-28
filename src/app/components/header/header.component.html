@@ -1,5 +1,13 @@
 <mat-toolbar class="flex justify-between items-center shadow-md">
+  @if (!isLogged) {
   <img src="egest-logo.png" alt="Logo Egest" width="150px" />
+  }
+
+  @if (isLogged) {
+  <a routerLink="/home" routerLinkActive="router-link-active">
+    <img src="egest-logo.png" alt="Logo Egest" width="150px" />
+  </a>
+  }
   <div>
     @if (isLogged) {
     <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu text-gray-700">
