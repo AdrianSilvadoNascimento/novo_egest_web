@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
@@ -10,7 +11,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ItemsService } from '../../services/items.service';
 import { Subscription } from 'rxjs';
 import { PaginatedItemsModel } from '../../models/paginated-items.model';
-import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog } from '@angular/material/dialog';
+import { ProductFormComponent } from './product-form/product-form.component';
+import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 
 export function getPortuguesePaginatorIntl() {
   const paginatorIntl = new MatPaginatorIntl();
@@ -26,7 +30,19 @@ export function getPortuguesePaginatorIntl() {
   selector: 'app-products',
   standalone: true,
   providers: [{ provide: MatPaginatorIntl, useValue: getPortuguesePaginatorIntl() }],
-  imports: [MatPaginator, MatIcon, MatTableModule, MatFormFieldModule, MatButtonModule, MatTooltipModule, LucideAngularModule, CurrencyPipe],
+  imports: [
+    FormsModule,
+    MatPaginator,
+    MatIcon,
+    MatTableModule,
+    MatSidenavModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatSidenavModule,
+    LucideAngularModule,
+    CurrencyPipe
+  ],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
 })
@@ -45,8 +61,16 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private dataSubscription!: Subscription
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatDrawer) filterDrawer!: MatDrawer;
 
-  constructor(private itemService: ItemsService) { }
+  filters = {
+    startDate: '',
+    endDate: '',
+    sortOrder: '',
+    modifiedBy: ''
+  };
+
+  constructor(private itemService: ItemsService, private dialog: MatDialog) { }
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {
@@ -78,15 +102,36 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onAddProduct(): void {
-    console.log('Adicionar produto');
+    const dialogRef = this.dialog.open(ProductFormComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadProducts();
+      }
+    });
   }
 
   onImportExcel(): void {
     console.log('Importar Excel');
   }
 
-  toggleFilters(): void {
-    console.log('Abrir filtros');
+  toggleFilters() {
+    this.filterDrawer.toggle();
+  }
+
+  applyFilters() {
+    console.log('Aplicando filtros:', this.filters);
+    this.loadProducts();
+    this.filterDrawer.close();
+  }
+
+  resetFilters() {
+    this.filters = {
+      startDate: '',
+      endDate: '',
+      sortOrder: '',
+      modifiedBy: ''
+    };
   }
 
   onEditProduct(product: any): void {
