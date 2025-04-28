@@ -5,6 +5,8 @@ import { environment } from '../../environments/environment';
 import { PaginatedItemsModel } from '../models/paginated-items.model';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { ItemCreationModel } from '../models/item-creation.model';
+import { ItemModel } from '../models/item.model';
 
 @Injectable({
   providedIn: 'root'
@@ -44,13 +46,40 @@ export class ItemsService {
     })))
   }
 
+  createItem(item: ItemCreationModel): Observable<ItemModel> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const accountId = this.authService.getAccountId();
+    const accountUserId = this.authService.getAccountUserId();
+    const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
+
+    return this.http.post<ItemModel>(`${this.baseUrl}/register-item/${accountId}`, {
+      ...item,
+      account_id: accountId,
+      account_user_id: accountUserId
+    }, {
+      headers: this.headers
+    }).pipe((tap((data: ItemModel) => {
+      const paginatedItems = {
+        data: [...itemData.data, data],
+        nextCursor: itemData.nextCursor,
+      }
+      this.setItemData(paginatedItems as PaginatedItemsModel);
+    })))
+  }
+
   deleteItem(id: string): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
 
     return this.http.delete<PaginatedItemsModel>(`${this.baseUrl}/delete-item/${id}`, {
       headers: this.headers
     }).pipe((tap((data: PaginatedItemsModel) => {
-      this.setItemData(data);
+      const paginatedItems = {
+        data: itemData.data.filter((item: ItemModel) => item.id !== id),
+        nextCursor: itemData.nextCursor,
+      }
+
+      this.setItemData(paginatedItems as PaginatedItemsModel);
     })))
   }
 }

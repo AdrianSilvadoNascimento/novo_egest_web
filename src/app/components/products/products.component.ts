@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductFormComponent } from './product-form/product-form.component';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
+import { ItemModel } from '../../models/item.model';
 
 export function getPortuguesePaginatorIntl() {
   const paginatorIntl = new MatPaginatorIntl();
@@ -46,19 +47,27 @@ export function getPortuguesePaginatorIntl() {
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class ProductsComponent implements OnInit {
   readonly addIcon = PackagePlus;
   readonly packageIcon = PackageOpen;
   readonly importIcon = FileUp;
 
-  displayedColumns: string[] = ['name', 'price', 'actions'];
-  dataSource = new MatTableDataSource<any>([]);
+  displayedColumns: string[] = [
+    'image',
+    'name',
+    'barcode',
+    'unit_price',
+    'sale_price',
+    'category',
+    'quantity',
+    'actions'
+  ];
+  dataSource = new MatTableDataSource<ItemModel>([]);
   totalItems = 0;
   pageSize = 10;
+  isEmpty: boolean = true;
 
-  paginatedItems!: PaginatedItemsModel
-
-  private dataSubscription!: Subscription
+  paginatedItems!: PaginatedItemsModel;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatDrawer) filterDrawer!: MatDrawer;
@@ -72,12 +81,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   constructor(private itemService: ItemsService, private dialog: MatDialog) { }
 
-  ngOnDestroy(): void {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-  }
-
   ngOnInit(): void {
     this.itemService.getPaginatedItems('', this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
       this.paginatedItems = itemData;
@@ -87,8 +90,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   loadProducts(): void {
-    this.dataSubscription = this.itemService.$itemData.subscribe((itemData: PaginatedItemsModel) => {
+    this.itemService.$itemData.subscribe((itemData: PaginatedItemsModel) => {
       this.paginatedItems = itemData;
+
+      this.isEmpty = itemData.data?.length === 0;
 
       if (itemData.data) {
         this.dataSource.data = itemData.data;
@@ -107,6 +112,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadProducts();
+      } else {
+        sessionStorage.removeItem('product_form_draft');
       }
     });
   }

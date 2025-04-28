@@ -60,15 +60,15 @@
 
       <div class="flex-grow"></div>
 
-      @if (paginatedItems.data && paginatedItems.data.length > 0) {
+      @if (!isEmpty) {
       <button mat-icon-button matTooltip="Filtrar produtos" (click)="toggleFilters()">
         <mat-icon>filter_list</mat-icon>
       </button>
       }
     </div>
 
-    @if (paginatedItems.data && paginatedItems.data.length === 0) { <div
-      class="flex flex-col items-center rounded-md justify-center h-64 bg-white shadow">
+    @if (isEmpty) {
+    <div class="flex flex-col items-center rounded-md justify-center h-64 bg-white shadow">
       <lucide-icon [img]="packageIcon" class="w-16 h-16 text-gray-400"></lucide-icon>
       <p class="mt-4 text-gray-500 text-lg">Estoque vazio</p>
     </div>
@@ -78,21 +78,70 @@
     <div class="overflow-x-auto bg-white shadow rounded-lg">
       <table mat-table [dataSource]="paginatedItems.data" class="w-full">
 
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
+            Foto
+          </th>
+          <td mat-cell *matCellDef="let product" class="p-4">
+            <a routerLink="">
+              {{ product.product_image }}
+            </a>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
             Nome
           </th>
           <td mat-cell *matCellDef="let product" class="p-4">
-            {{ product.name }}
+            <a routerLink="">
+              {{ product.name }}
+            </a>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="price">
+        <ng-container matColumnDef="barcode">
           <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
-            Preço
+            Código de Barras
           </th>
           <td mat-cell *matCellDef="let product" class="p-4">
-            {{ product.price | currency: 'R$' : 'symbol' }}
+            {{ product.barcode }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="unit_price">
+          <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
+            Preço Unitário
+          </th>
+          <td mat-cell *matCellDef="let product" class="p-4">
+            {{ product.unit_price | currency: 'R$' : 'symbol' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="sale_price">
+          <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
+            Preço de Venda
+          </th>
+          <td mat-cell *matCellDef="let product" class="p-4">
+            {{ product.sale_price | currency: 'R$' : 'symbol' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
+            Categoria
+          </th>
+          <td mat-cell *matCellDef="let product" class="p-4">
+            {{ product.category }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef class="text-left p-4 font-semibold">
+            Em Estoque
+          </th>
+          <td mat-cell *matCellDef="let product" class="p-4">
+            {{ product.quantity }}
           </td>
         </ng-container>
 
@@ -110,7 +159,7 @@
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns" matHeaderRowDefSticky="true" class="bg-gray-100"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" matHeaderRowDefSticky="true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
 
       </table>

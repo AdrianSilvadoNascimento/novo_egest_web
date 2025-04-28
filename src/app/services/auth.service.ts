@@ -113,6 +113,10 @@ export class AuthService {
     return localStorage.getItem('account_id') || sessionStorage.getItem('account_id');
   }
 
+  getAccountUserId(): string | null {
+    return localStorage.getItem('account_id') || sessionStorage.getItem('account_id');
+  }
+
   register(registerModel: RegisterModel): Observable<any> {
     return this.http.post(`${this.API_URL}/register`, registerModel, {
       headers: { 'Content-Type': 'application/json' },

@@ -7,11 +7,22 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { ToastService } from '../../../services/toast.service';
+import { ItemCreationModel } from '../../../models/item-creation.model';
+import { ItemsService } from '../../../services/items.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [MatCheckboxModule, MatInputModule, MatDialogModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule],
+  imports: [
+    MatCheckboxModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule
+  ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
@@ -23,45 +34,53 @@ export class ProductFormComponent implements OnInit {
 
   constructor(
     private toast: ToastService,
+    private itemService: ItemsService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ProductFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-    this.form = this.fb.group({
-      name: ['', Validators.required],
-      description: [''],
-      price: [null, [Validators.required, Validators.min(0)]],
-      category: ['', Validators.required],
-      stock: [0, [Validators.required, Validators.min(0)]],
-      brand: ['', Validators.required],
-      active: [null],
-      image: [null]
-    });
+    @Inject(MAT_DIALOG_DATA) public data: ItemCreationModel
+  ) { }
 
-    if (data) {
-      this.form.patchValue(data);
-    } else {
-      this.loadDraft();
+  ngOnInit(): void {
+    if (this.data) {
+      this.createForm(this.data);
     }
 
     this.form.valueChanges.subscribe(() => this.saveDraft());
-  }
 
-  ngOnInit(): void {
     const draft = sessionStorage.getItem(this.draftKey);
     this.hasDraft = !!draft;
 
-    // Se quiser, pode restaurar o draft também
-    if (draft) {
-      this.form.patchValue(JSON.parse(draft));
+    if (this.hasDraft) {
+      this.loadDraft();
+    } else {
+      this.createForm(new ItemCreationModel());
     }
+  }
+
+  createForm(productModel: ItemCreationModel): void {
+    this.form = this.fb.group({
+      name: [productModel.name, Validators.required],
+      description: [productModel.description],
+      unit_price: [productModel.unit_price, [Validators.required, Validators.min(0)]],
+      sale_price: [productModel.sale_price, [Validators.required, Validators.min(0)]],
+      category: [productModel.category, Validators.required],
+      quantity: [productModel.quantity, [Validators.required, Validators.min(0)]],
+      barcode: [productModel.barcode],
+      active: [productModel.active],
+      product_image: [productModel.product_image],
+    });
   }
 
   save(): void {
     if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
-      this.toast.success('Produto salvo com sucesso!');
-      this.clearDraft();
+      this.itemService.createItem(this.form.value).subscribe(() => {
+        this.toast.success('Produto salvo com sucesso!');
+        this.clearDraft();
+        this.form.reset();
+      }, error => {
+        this.toast.error('Erro ao salvar o produto!');
+        console.error(error.error.message);
+      })
     }
   }
 
@@ -73,12 +92,13 @@ export class ProductFormComponent implements OnInit {
   onImageSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      this.form.patchValue({ image: file });
+      this.form.patchValue({ product_image: file });
 
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result;
       };
+
       reader.readAsDataURL(file);
     }
   }
@@ -87,14 +107,15 @@ export class ProductFormComponent implements OnInit {
     sessionStorage.setItem(this.draftKey, JSON.stringify(this.form.getRawValue()));
   }
 
-  private loadDraft(): void {
-    const draft = localStorage.getItem(this.draftKey);
+  loadDraft(): void {
+    const draft = sessionStorage.getItem(this.draftKey);
     if (draft) {
-      this.form.patchValue(JSON.parse(draft));
+      const parsedDraft = JSON.parse(draft);
+      this.form.patchValue(parsedDraft);
     }
   }
 
-  private clearDraft(): void {
+  clearDraft(): void {
     sessionStorage.removeItem(this.draftKey);
   }
 
