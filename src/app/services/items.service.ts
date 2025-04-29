@@ -67,6 +67,22 @@ export class ItemsService {
     })))
   }
 
+  updateItem(id: string, item: ItemCreationModel): Observable<ItemModel> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
+
+    return this.http.put<ItemModel>(`${this.baseUrl}/update-item/${id}`, item, {
+      headers: this.headers
+    }).pipe((tap((data: ItemModel) => {
+      const paginatedItems = {
+        data: itemData.data.map((item: ItemModel) => item.id === id ? data : item),
+        nextCursor: itemData.nextCursor,
+      }
+
+      this.setItemData(paginatedItems as PaginatedItemsModel);
+    })))
+  }
+
   deleteItem(id: string): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);

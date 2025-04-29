@@ -6,14 +6,12 @@
     Você tem alterações salvas como rascunho.
 
     <span class="flex gap-2">
-      <a (click)="loadDraft()" class="text-yellow-600 underline cursor-pointer">Clique aqui para carregar</a>
-
-      <a class="text-yellow-600 underline cursor-pointer" (click)="clearDraft()">Começar um novo</a>
+      <a class="text-yellow-600 underline cursor-pointer" (click)="newForm()">Começar um novo</a>
     </span>
   </div>
   }
 
-  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+  <form [formGroup]="form" class="space-y-6">
     <!-- Nome -->
     <mat-form-field class="w-full">
       <mat-label>Nome do Produto</mat-label>
@@ -103,16 +101,19 @@
       Produto Ativo
     </mat-checkbox>
 
-    <mat-dialog-actions>
+    <mat-dialog-actions class="gap-4 pt-8">
       <!-- Botões -->
-      <div class="flex justify-end gap-4 pt-8">
-        <button mat-stroked-button type="button" (click)="close()" class="btn-secondary">
-          Cancelar
-        </button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-          {{ data ? 'Salvar' : 'Criar' }}
-        </button>
-      </div>
+      <!-- <div class="flex justify-end gap-4 pt-8"> -->
+      <button mat-stroked-button type="button" (click)="close()" class="btn-secondary">
+        Cancelar e Fechar
+      </button>
+      <button mat-raised-button color="primary" type="submit" (click)="save()" [disabled]="form.invalid">
+        Salvar e Adicionar Novo Produto
+      </button>
+      <button mat-raised-button color="primary" type="submit" (click)="saveAndClose()" [disabled]="form.invalid">
+        {{ data ? 'Salvar Alterações' : 'Criar Produto' }}
+      </button>
+      <!-- </div> -->
     </mat-dialog-actions>
 
   </form>

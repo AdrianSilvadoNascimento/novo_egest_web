@@ -1,4 +1,5 @@
 export class ItemCreationModel {
+  id!: string;
   name!: string;
   category!: string;
   unit_price!: number;

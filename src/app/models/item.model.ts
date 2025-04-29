@@ -8,6 +8,8 @@ export class ItemModel {
   sale_price!: number;
   barcode!: string | null | undefined;
   quantity!: number;
+  description!: string;
+  active!: boolean;
   product_image!: string;
 
   created_at!: Date;

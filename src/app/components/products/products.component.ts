@@ -1,48 +1,38 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+
 import { MatIcon } from '@angular/material/icon';
-import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { LucideAngularModule, FileUp, PackagePlus, PackageOpen } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ItemsService } from '../../services/items.service';
-import { Subscription } from 'rxjs';
 import { PaginatedItemsModel } from '../../models/paginated-items.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductFormComponent } from './product-form/product-form.component';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { ItemModel } from '../../models/item.model';
-
-export function getPortuguesePaginatorIntl() {
-  const paginatorIntl = new MatPaginatorIntl();
-
-  paginatorIntl.itemsPerPageLabel = 'Itens por página';
-  paginatorIntl.nextPageLabel = 'Próxima página';
-  paginatorIntl.previousPageLabel = 'Página anterior';
-
-  return paginatorIntl;
-}
+import { ItemCreationModel } from '../../models/item-creation.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  providers: [{ provide: MatPaginatorIntl, useValue: getPortuguesePaginatorIntl() }],
+  providers: [],
   imports: [
     FormsModule,
-    MatPaginator,
     MatIcon,
-    MatTableModule,
     MatSidenavModule,
     MatFormFieldModule,
     MatButtonModule,
     MatTooltipModule,
     MatSidenavModule,
     LucideAngularModule,
-    CurrencyPipe
+    InfiniteScrollDirective,
+    CurrencyPipe,
   ],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
@@ -52,24 +42,15 @@ export class ProductsComponent implements OnInit {
   readonly packageIcon = PackageOpen;
   readonly importIcon = FileUp;
 
-  displayedColumns: string[] = [
-    'image',
-    'name',
-    'barcode',
-    'unit_price',
-    'sale_price',
-    'category',
-    'quantity',
-    'actions'
-  ];
-  dataSource = new MatTableDataSource<ItemModel>([]);
-  totalItems = 0;
   pageSize = 10;
   isEmpty: boolean = true;
 
-  paginatedItems!: PaginatedItemsModel;
+  paginatedItems: PaginatedItemsModel = new PaginatedItemsModel();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  hasNext: boolean = false;
+  loading: boolean = false;
+  nextCursor!: string;
+
   @ViewChild(MatDrawer) filterDrawer!: MatDrawer;
 
   filters = {
@@ -79,14 +60,16 @@ export class ProductsComponent implements OnInit {
     modifiedBy: ''
   };
 
-  constructor(private itemService: ItemsService, private dialog: MatDialog) { }
+  constructor(private itemService: ItemsService, private dialog: MatDialog, private toast: ToastService) { }
 
   ngOnInit(): void {
     this.itemService.getPaginatedItems('', this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
       this.paginatedItems = itemData;
+      this.isEmpty = itemData.data?.length === 0;
+      this.hasNext = !!itemData.nextCursor;
     })
 
-    this.loadProducts();
+    this.loadMore();
   }
 
   loadProducts(): void {
@@ -94,15 +77,32 @@ export class ProductsComponent implements OnInit {
       this.paginatedItems = itemData;
 
       this.isEmpty = itemData.data?.length === 0;
-
-      if (itemData.data) {
-        this.dataSource.data = itemData.data;
-        this.totalItems = itemData.data.length;
-        this.dataSource.paginator = this.paginator;
-      }
     }, error => {
       alert(error.error.message);
       console.error(error.error.message);
+    })
+  }
+
+  loadMore(): void {
+    if (this.loading || !this.hasNext) return;
+
+    this.loading = true;
+
+    this.toast.info('Carregando mais produtos...');
+    const lastCursor = localStorage.getItem('nextCursor') || sessionStorage.getItem('nextCursor') || '';
+
+    this.itemService.getPaginatedItems(lastCursor, this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
+      console.log('retorno:', itemData)
+      this.isEmpty = itemData.data?.length === 0;
+      this.loading = false;
+      this.hasNext = !!itemData.nextCursor;
+
+      this.paginatedItems.data = [...this.paginatedItems.data, ...itemData?.data];
+      this.paginatedItems.nextCursor = itemData.nextCursor;
+    }, error => {
+      this.toast.error(error.error.message);
+      this.loading = false;
+      this.paginatedItems = JSON.parse(sessionStorage.getItem('itemData')!!)
     })
   }
 
@@ -113,7 +113,9 @@ export class ProductsComponent implements OnInit {
       if (result) {
         this.loadProducts();
       } else {
-        sessionStorage.removeItem('product_form_draft');
+        if (!sessionStorage.getItem('product_form_draft')) {
+          sessionStorage.removeItem('product_form_draft');
+        }
       }
     });
   }
@@ -142,7 +144,22 @@ export class ProductsComponent implements OnInit {
   }
 
   onEditProduct(product: any): void {
-    console.log('Editar', product);
+    const item: ItemModel = this.paginatedItems.data.find((item: ItemModel) => item.id === product.id) as ItemModel;
+    const editItem = new ItemCreationModel()
+    editItem.id = item.id;
+    editItem.name = item.name;
+    editItem.description = item.description;
+    editItem.unit_price = item.unit_price;
+    editItem.sale_price = item.sale_price;
+    editItem.category = item.category;
+    editItem.quantity = item.quantity;
+    editItem.barcode = item.barcode;
+    editItem.active = item.active;
+    editItem.product_image = item.product_image;
+
+    this.dialog.open(ProductFormComponent, {
+      data: editItem as ItemCreationModel,
+    });
   }
 
   onDeleteProduct(product: any): void {
@@ -150,16 +167,5 @@ export class ProductsComponent implements OnInit {
     this.itemService.deleteItem(product.id).subscribe()
 
     this.loadProducts();
-  }
-
-  onPageChange(event: any): void {
-    const pageSize = event.pageSize;
-    const lastItem = localStorage.getItem('nextCursor') || sessionStorage.getItem('nextCursor') || '';
-    this.itemService.getPaginatedItems(lastItem, pageSize).subscribe()
-
-    this.pageSize = event.pageSize;
-    this.paginator.pageIndex = event.pageIndex;
-    this.paginator.pageSize = event.pageSize;
-    this.paginator.length = this.totalItems;
   }
 }

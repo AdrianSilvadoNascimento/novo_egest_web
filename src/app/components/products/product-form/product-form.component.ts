@@ -41,18 +41,18 @@ export class ProductFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    if (this.data) {
-      this.createForm(this.data);
-    }
-
+    console.log('ProductFormComponent initialized with data:', this.data);
     this.form.valueChanges.subscribe(() => this.saveDraft());
 
     const draft = sessionStorage.getItem(this.draftKey);
     this.hasDraft = !!draft;
 
-    if (this.hasDraft) {
+    if (this.data) {
+      this.createForm(this.data);
+      this.imagePreview = this.data.product_image;
+    } else if (this.hasDraft) {
       this.loadDraft();
-    } else {
+    } else if (!this.data && !this.hasDraft) {
       this.createForm(new ItemCreationModel());
     }
   }
@@ -71,16 +71,54 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  newForm(): void {
+    this.clearDraft();
+    this.createForm(new ItemCreationModel());
+    setTimeout(() => {
+      const nameField = document.querySelector('input[formControlName="name"]') as HTMLElement;
+      nameField?.focus();
+    });
+  }
+
   save(): void {
+    this.sendData(false);
+  }
+
+  saveAndClose(): void {
+    this.sendData();
+  }
+
+  sendData(isToClose: boolean = true): void {
     if (this.form.valid) {
-      this.itemService.createItem(this.form.value).subscribe(() => {
-        this.toast.success('Produto salvo com sucesso!');
-        this.clearDraft();
-        this.form.reset();
-      }, error => {
-        this.toast.error('Erro ao salvar o produto!');
-        console.error(error.error.message);
-      })
+      if (this.data) {
+        this.itemService.updateItem(this.data.id, this.form.value).subscribe(() => {
+          this.toast.success('Produto atualizado com sucesso!');
+          this.clearDraft();
+
+          if (isToClose) {
+            this.dialogRef.close();
+          }
+
+          this.form.reset();
+        }, error => {
+          this.toast.error('Erro ao atualizar o produto!');
+          console.error(error.error.message);
+        })
+      } else {
+        this.itemService.createItem(this.form.value).subscribe(() => {
+          this.toast.success('Produto salvo com sucesso!');
+          this.clearDraft();
+
+          if (isToClose) {
+            this.dialogRef.close();
+          }
+
+          this.form.reset();
+        }, error => {
+          this.toast.error('Erro ao salvar o produto!');
+          console.error(error.error.message);
+        })
+      }
     }
   }
 
@@ -104,6 +142,8 @@ export class ProductFormComponent implements OnInit {
   }
 
   private saveDraft(): void {
+    if (!this.form.dirty) return;
+
     sessionStorage.setItem(this.draftKey, JSON.stringify(this.form.getRawValue()));
   }
 
@@ -111,12 +151,25 @@ export class ProductFormComponent implements OnInit {
     const draft = sessionStorage.getItem(this.draftKey);
     if (draft) {
       const parsedDraft = JSON.parse(draft);
-      this.form.patchValue(parsedDraft);
+      const draftItem = new ItemCreationModel()
+      draftItem.name = parsedDraft.name;
+      draftItem.description = parsedDraft.description;
+      draftItem.unit_price = parsedDraft.unit_price;
+      draftItem.sale_price = parsedDraft.sale_price;
+      draftItem.category = parsedDraft.category;
+      draftItem.quantity = parsedDraft.quantity;
+      draftItem.barcode = parsedDraft.barcode;
+      draftItem.active = parsedDraft.active;
+      draftItem.product_image = parsedDraft.product_image;
+
+      this.createForm(draftItem as ItemCreationModel);
     }
   }
 
   clearDraft(): void {
     sessionStorage.removeItem(this.draftKey);
+    this.hasDraft = false;
+    this.imagePreview = null;
   }
 
   ngOnDestroy(): void {
