@@ -143,6 +143,54 @@ export class ProductsComponent implements OnInit {
     };
   }
 
+  onFileImportSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.toast.info('Por favor, selecione um arquivo .xls ou .xlsx válido.');
+      return;
+    }
+
+    this.itemService.importItems(file).subscribe({
+      next: (job) => {
+        this.toast.info(job.message || `Arquivo enviado. A importação de ${job.total} está em processamento...`);
+
+        const intervalId = setInterval(() => {
+          this.itemService.getImportStatus(job.jobId).subscribe({
+            next: (res) => {
+              const status = res.status;
+              if (status === 'completed') {
+                clearInterval(intervalId);
+                this.toast.success('Importação concluída com sucesso!');
+                this.loadProducts();
+              } else if (status === 'failed') {
+                clearInterval(intervalId);
+                this.toast.error('Erro ao processar a importação.');
+              }
+            },
+            error: () => {
+              clearInterval(intervalId);
+              this.toast.error('Erro ao verificar status da importação.');
+            }
+          });
+        }, 3000);
+      },
+      error: (err) => {
+        this.toast.error(err.error.message || 'Erro ao enviar o arquivo.');
+      }
+    });
+
+    input.value = '';
+  }
+
   onEditProduct(product: any): void {
     const item: ItemModel = this.paginatedItems.data.find((item: ItemModel) => item.id === product.id) as ItemModel;
     const editItem = new ItemCreationModel()

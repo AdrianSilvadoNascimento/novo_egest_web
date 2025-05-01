@@ -16,6 +16,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { LoginModel } from '../../models/login.model';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup = new FormGroup({});
 
   constructor(
+    private toast: ToastService,
     private formBuilder: FormBuilder,
     private authService: AuthService
   ) { }
@@ -70,11 +72,11 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     const loginObserver = {
       next: () => {
-        alert('Login realizado com sucesso!');
+        this.toast.success('Login realizado com sucesso!');
         this.loginForm.reset();
       },
       error: (err: any) => {
-        alert('Erro ao realizar login!');
+        this.toast.error('Erro ao realizar login!');
         console.error(err);
       }
     };

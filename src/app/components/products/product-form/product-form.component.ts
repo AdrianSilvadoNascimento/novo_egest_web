@@ -41,7 +41,6 @@ export class ProductFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('ProductFormComponent initialized with data:', this.data);
     this.form.valueChanges.subscribe(() => this.saveDraft());
 
     const draft = sessionStorage.getItem(this.draftKey);

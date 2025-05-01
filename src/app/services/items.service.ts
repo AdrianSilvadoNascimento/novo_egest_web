@@ -83,6 +83,34 @@ export class ItemsService {
     })))
   }
 
+  importItems(file: File): Observable<any> {
+    const formData = new FormData();
+
+    const accountId = this.authService.getAccountId();
+    const accountUserId = this.authService.getAccountUserId();
+
+    formData.append('file', file);
+    if (accountId && accountUserId) {
+      formData.append('account_id', accountId);
+      formData.append('account_user_id', accountUserId);
+    }
+
+    return this.http.post<any>(`${this.baseUrl}/import`, formData, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.authService.getToken()}`,
+        'X-Skip-Loading': 'true'
+      })
+    }).pipe(tap(data => data));
+  }
+
+  getImportStatus(jobId: string): Observable<{ status: string, result: any }> {
+    return this.http.get<{ status: string, result: any }>(`${this.baseUrl}/import/status/${jobId}`, {
+      headers: {
+        Authorization: `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
   deleteItem(id: string): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
