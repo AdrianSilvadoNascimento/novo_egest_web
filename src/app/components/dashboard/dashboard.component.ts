@@ -12,6 +12,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { DashboardModel } from '../../models/dashboard.model';
 import { DashboardService } from '../../services/dashboard.service';
+import { ProductFormComponent } from '../products/product-form/product-form.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,13 +31,31 @@ export class DashboardComponent implements OnInit {
 
   dashboardData!: DashboardModel
 
-  constructor(private readonly dashboardService: DashboardService) {
-
-  }
+  constructor(private readonly dashboardService: DashboardService, private dialog: MatDialog, private router: Router) { }
 
   ngOnInit(): void {
+    this.getData();
+  }
+
+  getData(): void {
     this.dashboardService.getDashboardData().subscribe((data) => {
       this.dashboardData = data
     })
+  }
+
+  onAddProduct(): void {
+    const dialogRef = this.dialog.open(ProductFormComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.getData();
+
+      if (result) {
+        this.router.navigate(['/products']);
+      } else {
+        if (!sessionStorage.getItem('product_form_draft')) {
+          sessionStorage.removeItem('product_form_draft');
+        }
+      }
+    });
   }
 }

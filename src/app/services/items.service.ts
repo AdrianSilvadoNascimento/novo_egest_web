@@ -35,8 +35,9 @@ export class ItemsService {
     }
   }
 
-  getPaginatedItems(page: string, limit: number): Observable<PaginatedItemsModel> {
+  getPaginatedItems(page: string, limit: number, isIgnoringLoading: boolean = false): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    this.headers = this.headers.set('X-Skip-Loading', isIgnoringLoading ? 'true' : 'false');
     const accountId = this.authService.getAccountId();
 
     return this.http.get<PaginatedItemsModel>(`${this.baseUrl}/${accountId}/paginated?offset=${page}&limit=${limit}`, {

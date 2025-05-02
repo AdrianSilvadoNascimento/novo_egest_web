@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -17,6 +17,8 @@ import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { ItemModel } from '../../models/item.model';
 import { ItemCreationModel } from '../../models/item-creation.model';
 import { ToastService } from '../../services/toast.service';
+import { ProductDetailsComponent } from './product-details/product-details.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-products',
@@ -33,6 +35,7 @@ import { ToastService } from '../../services/toast.service';
     LucideAngularModule,
     InfiniteScrollDirective,
     CurrencyPipe,
+    MatMenuModule,
   ],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
@@ -51,6 +54,7 @@ export class ProductsComponent implements OnInit {
   loading: boolean = false;
   nextCursor!: string;
 
+  @ViewChild('productsTable', { static: true }) productsTable!: ElementRef;
   @ViewChild(MatDrawer) filterDrawer!: MatDrawer;
 
   filters = {
@@ -91,8 +95,7 @@ export class ProductsComponent implements OnInit {
     this.toast.info('Carregando mais produtos...');
     const lastCursor = localStorage.getItem('nextCursor') || sessionStorage.getItem('nextCursor') || '';
 
-    this.itemService.getPaginatedItems(lastCursor, this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
-      console.log('retorno:', itemData)
+    this.itemService.getPaginatedItems(lastCursor, this.pageSize, true).subscribe((itemData: PaginatedItemsModel) => {
       this.isEmpty = itemData.data?.length === 0;
       this.loading = false;
       this.hasNext = !!itemData.nextCursor;
@@ -191,8 +194,19 @@ export class ProductsComponent implements OnInit {
     input.value = '';
   }
 
-  onEditProduct(product: any): void {
-    const item: ItemModel = this.paginatedItems.data.find((item: ItemModel) => item.id === product.id) as ItemModel;
+  openProductDetails(product: ItemModel): void {
+    this.dialog.open(ProductDetailsComponent, {
+      data: product,
+      panelClass: 'modern-dialog',
+    })
+  }
+
+  onMoveProduct(product: ItemModel): void {
+
+  }
+
+  onEditProduct(product: ItemModel): void {
+    const item = product;
     const editItem = new ItemCreationModel()
     editItem.id = item.id;
     editItem.name = item.name;

@@ -78,8 +78,9 @@
     }
 
     @if (!isEmpty) {
-    <div class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll [infiniteScrollDistance]="1"
-      [infiniteScrollThrottle]="150" (scrolled)="loadMore()">
+    <div #productsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll
+      [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="productsTable"
+      (scrolled)="loadMore()">
       <table class="min-w-full text-sm">
         <thead class="bg-blue-600 h-10 text-white sticky top-0 z-10 border-b">
           <tr>
@@ -97,7 +98,7 @@
           @for (product of paginatedItems.data; track product.id) {
           <tr class="hover:bg-gray-50 border-b">
             <td class="px-4 py-3">
-              <a routerLink="">
+              <a (click)="openProductDetails(product)" class="cursor-pointer">
                 @if (product.product_image) {
                 <img class="w-16 h-16 object-cover rounded-md" alt="Imagem do produto" src="{{ product.product_image }}"
                   loading="lazy" />
@@ -109,7 +110,7 @@
               </a>
             </td>
             <td class="px-4 py-3">
-              <a routerLink="">
+              <a (click)="openProductDetails(product)" class="cursor-pointer text-blue-600 hover:underline">
                 {{ product.name }}
               </a>
             </td>
@@ -123,12 +124,23 @@
             <td class="px-4 py-3">{{ product.category }}</td>
             <td class="px-4 py-3">{{ product.quantity }}</td>
             <td class="px-4 py-3 text-center">
-              <button mat-icon-button color="primary" (click)="onEditProduct(product)">
-                <mat-icon>edit</mat-icon>
+              <button mat-icon-button [matMenuTriggerFor]="productMenu">
+                <mat-icon>more_vert</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="onDeleteProduct(product)">
-                <mat-icon>delete</mat-icon>
-              </button>
+              <mat-menu #productMenu="matMenu">
+                <button mat-menu-item (click)="onMoveProduct(product)">
+                  <mat-icon>swap_horiz</mat-icon>
+                  <span>Mover</span>
+                </button>
+                <button mat-menu-item (click)="onEditProduct(product)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="onDeleteProduct(product)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Excluir</span>
+                </button>
+              </mat-menu>
             </td>
           </tr>
           }

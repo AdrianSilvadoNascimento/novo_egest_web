@@ -1,7 +1,6 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
   @if (dashboardData) {
   <mat-card class="flex flex-col items-center p-6 shadow-md">
-    <!-- <lucide-icon [img]="packageIcon" class="w-8 h-8 text-blue-600 mb-2"></lucide-icon> -->
     <lucide-icon [img]="packageIcon" class="w-8 h-8 text-white mb-2"></lucide-icon>
     <div class="text-black-200 font-semibold">Produtos</div>
     <div class="text-2xl mt-1 font-bold">{{dashboardData.products}}</div>
@@ -28,11 +27,11 @@
 </div>
 
 <div class="flex flex-wrap gap-4 justify-center mt-10">
-  <button mat-fab extended class="flex items-center gap-1">
+  <button mat-fab extended (click)="onAddProduct()" class="flex items-center gap-1">
     <mat-icon>
       <lucide-icon [img]="packageIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
     </mat-icon>
-    <span class="text-gray-700">
+    <span class="text-gray-700 font-[Lora]">
       Novo Produto
     </span>
   </button>
@@ -41,7 +40,7 @@
     <mat-icon>
       <lucide-icon [img]="arrowDownIcon" class="w-6 h-6 text-green-600"></lucide-icon>
     </mat-icon>
-    <span class="text-gray-700">
+    <span class="text-gray-700 font-[Lora]">
       Nova Entrada
     </span>
   </button>
@@ -50,15 +49,15 @@
     <mat-icon>
       <lucide-icon [img]="arrowUpIcon" class="w-6 h-6 text-red-500"></lucide-icon>
     </mat-icon>
-    <span class="text-gray-700">
+    <span class="text-gray-700 font-[Lora]">
       Nova Saída
     </span>
   </button>
 </div>
 
 <div class="mt-10">
-  <h2 class="text-xl font-bold mb-4">Últimas Movimentações</h2>
+  <p class="text-xl font-bold mb-4">Últimas Movimentações</p>
   <div class="bg-white rounded-lg shadow p-4">
-    <p class="text-gray-500">Nenhuma movimentação recente encontrada.</p>
+    <p class="text-sm text-gray-500">Nenhuma movimentação recente encontrada.</p>
   </div>
 </div>
