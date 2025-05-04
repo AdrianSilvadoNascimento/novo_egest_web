@@ -73,10 +73,9 @@
       <mat-label>Categoria</mat-label>
       <mat-select formControlName="category" id="category" name="category" required>
         <mat-option value="">Selecione</mat-option>
-        <mat-option value="eletronicos">Eletrônicos</mat-option>
-        <mat-option value="moveis">Móveis</mat-option>
-        <mat-option value="livros">Livros</mat-option>
-        <mat-option value="outros">Outros</mat-option>
+        @for (category of categories; track category.id) {
+        <mat-option [value]=category.id>{{category.name}}</mat-option>
+        }
       </mat-select>
       @if (form.get('category')?.invalid && form.get('category')?.touched) {
       <mat-error>Categoria é obrigatória</mat-error>

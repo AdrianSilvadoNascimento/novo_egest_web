@@ -116,7 +116,7 @@ export class AuthService {
   }
 
   refreshToken(): Observable<string> {
-    const refreshToken = this.storage.getItem('refreshToken');
+    const refreshToken = this.storage.getItem('refresh_token');
 
     return this.http.post<{ token: string }>(this.API_URL + '/refresh-token', {}, {
       headers: { 'Authorization': `Bearer ${refreshToken}` }

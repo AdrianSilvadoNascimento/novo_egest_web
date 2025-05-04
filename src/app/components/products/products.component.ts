@@ -210,8 +210,7 @@ export class ProductsComponent implements OnInit {
   openProductDetails(product: ItemModel): void {
     this.dialog.open(ProductDetailsComponent, {
       data: product,
-      panelClass: 'modern-dialog',
-      width: '600px',
+      panelClass: 'modern-dialog'
     })
   }
 

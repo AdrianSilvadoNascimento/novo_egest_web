@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { ToastService } from '../../../services/toast.service';
 import { ItemCreationModel } from '../../../models/item-creation.model';
 import { ItemsService } from '../../../services/items.service';
 import { MatButtonModule } from '@angular/material/button';
+import { CategoryModel } from '../../../models/category.model';
 
 @Component({
   selector: 'app-product-form',
@@ -26,11 +27,12 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
-export class ProductFormComponent implements OnInit {
+export class ProductFormComponent implements OnInit, AfterViewInit {
   form: FormGroup = new FormGroup({});
   imagePreview: string | ArrayBuffer | null = null;
-  draftKey = 'product_form_draft';
-  hasDraft = false;
+  draftKey: string = 'product_form_draft';
+  hasDraft: boolean = false;
+  categories: CategoryModel[] = [];
 
   constructor(
     private toast: ToastService,
@@ -39,6 +41,12 @@ export class ProductFormComponent implements OnInit {
     private dialogRef: MatDialogRef<ProductFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ItemCreationModel
   ) { }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.getCategories();
+    })
+  }
 
   ngOnInit(): void {
     this.form.valueChanges.subscribe(() => this.saveDraft());
@@ -56,7 +64,21 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
+  getCategories(): void {
+    this.itemService.getCategories().subscribe((categories: CategoryModel[]) => {
+      this.categories = categories;
+    })
+  }
+
+  updatedCategories(): void {
+    this.itemService.$categoryData.subscribe((categories: CategoryModel[]) => {
+      this.categories = categories;
+    })
+  }
+
   createForm(productModel: ItemCreationModel): void {
+    this.updatedCategories();
+
     this.form = this.fb.group({
       name: [productModel.name, Validators.required],
       description: [productModel.description],
