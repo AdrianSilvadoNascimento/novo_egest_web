@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
 import { ItemCreationModel } from '../models/item-creation.model';
 import { ItemModel } from '../models/item.model';
+import { CategoryModel } from '../models/category.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,9 @@ export class ItemsService {
   private itemData = new BehaviorSubject<PaginatedItemsModel>({} as PaginatedItemsModel);
   $itemData = this.itemData.asObservable();
 
+  private categoryData = new BehaviorSubject<CategoryModel[]>([] as CategoryModel[]);
+  $categoryData = this.categoryData.asObservable();
+
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   setItemData(data: PaginatedItemsModel) {
@@ -33,6 +37,11 @@ export class ItemsService {
       const storage = localStorage.getItem('remember_me') === 'true' ? localStorage : sessionStorage;
       storage.setItem('nextCursor', data.nextCursor);
     }
+  }
+
+  setCategoryData(data: CategoryModel[]) {
+    this.categoryData.next(data);
+    sessionStorage.setItem('categoryData', JSON.stringify(data));
   }
 
   getPaginatedItems(page: string, limit: number, isIgnoringLoading: boolean = false): Observable<PaginatedItemsModel> {
@@ -125,6 +134,53 @@ export class ItemsService {
       }
 
       this.setItemData(paginatedItems as PaginatedItemsModel);
+    })))
+  }
+
+  createCategory(category: CategoryModel): Observable<CategoryModel> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const accountId = this.authService.getAccountId();
+    const categories = JSON.parse(sessionStorage.getItem('categoryData')!!);
+
+    return this.http.post<CategoryModel>(`${this.baseUrl}/categories/${accountId}`, category, {
+      headers: this.headers
+    }).pipe((tap((data: CategoryModel) => {
+      const categoryData = [...categories, data]
+      this.setCategoryData(categoryData as unknown as CategoryModel[]);
+    })))
+  }
+
+  updateCategory(id: string, category: CategoryModel): Observable<CategoryModel> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const categories = JSON.parse(sessionStorage.getItem('categoryData')!!);
+
+    return this.http.put<CategoryModel>(`${this.baseUrl}/categories/${id}`, category, {
+      headers: this.headers
+    }).pipe((tap((data: CategoryModel) => {
+      const categoryData = categories.data.map((cat: CategoryModel) => cat.id === id ? data : cat)
+      this.setCategoryData(categoryData as unknown as CategoryModel[]);
+    })))
+  }
+
+  getCategories(): Observable<any> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const accountId = this.authService.getAccountId();
+
+    return this.http.get<any>(`${this.baseUrl}/categories/${accountId}`, {
+      headers: this.headers
+    }).pipe((tap((data: CategoryModel[]) => {
+      this.setCategoryData(data);
+    })))
+  }
+
+  deleteCategory(categoryId: string): Observable<any> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const accountId = this.authService.getAccountId();
+
+    return this.http.delete<any>(`${this.baseUrl}/categories/${accountId}/${categoryId}`, {
+      headers: this.headers
+    }).pipe((tap((data: any) => {
+      return data;
     })))
   }
 }

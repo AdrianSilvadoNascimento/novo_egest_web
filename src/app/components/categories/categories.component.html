@@ -1,0 +1,63 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <div class="max-w-7xl mb-6 space-y-6">
+    <div class="flex items-center space-x-4">
+      <button mat-fab extended matTooltip="Inserir nova categoria" (click)="openDialog()"
+        class="flex items-center shadow gap-1">
+        <mat-icon>
+          <lucide-icon [img]="addIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
+        </mat-icon>
+        <span class="text-gray-700 font-[Lora]">
+          Nova Categoria
+        </span>
+      </button>
+    </div>
+  </div>
+
+  @if (isEmpty) {
+  <app-empty-list [icon]="tagIcon" description="Categorias está vazio"></app-empty-list>
+  }
+
+  @if (!isEmpty) {
+  <div #categoryTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]">
+    <table class="min-w-full text-sm">
+      <thead class="bg-blue-600 h-10 text-white sticky top-0 z-10 border-b">
+        <tr>
+          <th class="text-left px-4 py-2 border-b">Categoria</th>
+          <th class="text-center px-4 py-2 border-b">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of paginatedCategories; track category.id) {
+        <tr class="hover:bg-gray-50 border-b">
+          <td class="px-4 py-3">
+            <a (click)="openCategoryDetails(category)" class="cursor-pointer text-blue-600 hover:underline">
+              {{ category.name }}
+            </a>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #categoryMenu="matMenu">
+              <button mat-menu-item (click)="onEditCategory(category)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button mat-menu-item (click)="onDeleteCategory(category)">
+                <mat-icon>delete</mat-icon>
+                <span>Excluir</span>
+              </button>
+            </mat-menu>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <mat-paginator [length]="paginatedCategories.length" [pageSize]="10" class="rounded-md mt-4 shadow-md"
+    showFirstLastButtons></mat-paginator>
+  }
+
+
+</div>

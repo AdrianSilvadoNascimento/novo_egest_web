@@ -19,6 +19,7 @@ import { ItemCreationModel } from '../../models/item-creation.model';
 import { ToastService } from '../../services/toast.service';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { EmptyListComponent } from "../../shared/empty-list/empty-list.component";
 
 @Component({
   selector: 'app-products',
@@ -36,6 +37,7 @@ import { MatMenuModule } from '@angular/material/menu';
     InfiniteScrollDirective,
     CurrencyPipe,
     MatMenuModule,
+    EmptyListComponent
   ],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
@@ -110,7 +112,7 @@ export class ProductsComponent implements OnInit {
   }
 
   onAddProduct(): void {
-    const dialogRef = this.dialog.open(ProductFormComponent);
+    const dialogRef = this.dialog.open(ProductFormComponent, { width: '600px' });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -198,6 +200,7 @@ export class ProductsComponent implements OnInit {
     this.dialog.open(ProductDetailsComponent, {
       data: product,
       panelClass: 'modern-dialog',
+      width: '600px',
     })
   }
 
@@ -221,6 +224,7 @@ export class ProductsComponent implements OnInit {
 
     this.dialog.open(ProductFormComponent, {
       data: editItem as ItemCreationModel,
+      width: '600px',
     });
   }
 

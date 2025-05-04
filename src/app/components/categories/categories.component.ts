@@ -1,0 +1,116 @@
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
+import { CategoriesFormComponent } from './categories-form/categories-form.component';
+import { CategoryModel } from '../../models/category.model';
+import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule, PlusCircle, Tag } from 'lucide-angular';
+import { MatButtonModule } from '@angular/material/button';
+import { ItemsService } from '../../services/items.service';
+import { MatMenuModule } from '@angular/material/menu';
+import { ToastService } from '../../services/toast.service';
+import { EmptyListComponent } from '../../shared/empty-list/empty-list.component';
+
+@Component({
+  standalone: true,
+  imports: [
+    MatPaginator,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    LucideAngularModule,
+    EmptyListComponent,
+  ],
+  selector: 'app-categories',
+  styleUrls: ['./categories.component.scss'],
+  templateUrl: './categories.component.html',
+})
+export class CategoriesComponent implements OnInit, AfterViewInit {
+  readonly addIcon = PlusCircle;
+  displayedColumns = ['name', 'value', 'actions'];
+
+  tagIcon = Tag
+  categories: CategoryModel[] = [];
+  paginatedCategories: CategoryModel[] = [];
+  isEmpty: boolean = true;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('categoriesTable') categoriesTable!: ElementRef;
+
+  constructor(
+    private dialog: MatDialog,
+    private itemService: ItemsService,
+    private toast: ToastService
+  ) { }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+    })
+  }
+
+  ngOnInit(): void {
+    this.getCategories();
+    this.updatedCategories();
+  }
+
+  getCategories(): void {
+    this.itemService.getCategories().subscribe((categories: CategoryModel[]) => {
+      this.categories = categories;
+      this.paginatedCategories = categories
+      this.isEmpty = categories?.length === 0;
+
+      this.paginator.length = categories?.length;
+    }, (error: any) => {
+      this.toast.error(error.error.message);
+    })
+  }
+
+  onPageChange(event: PageEvent): void {
+    const start = event.pageIndex * event.pageSize;
+    const end = start + event.pageSize;
+    this.paginatedCategories = this.categories.slice(start, end);
+  }
+
+  updatedCategories(): void {
+    if (!this.paginator) return;
+
+    this.itemService.$categoryData.subscribe((categories: CategoryModel[]) => {
+      this.categories = categories;
+      this.isEmpty = categories?.length === 0;
+      this.paginator.length = categories.length;
+    })
+  }
+
+  openDialog(category?: CategoryModel) {
+    const dialogRef = this.dialog.open(CategoriesFormComponent, {
+      width: '600px',
+      data: category ? { ...category } : null,
+    });
+
+    dialogRef.afterClosed().subscribe((result: CategoryModel | undefined) => {
+      if (!result) return;
+
+      this.getCategories();
+    });
+  }
+
+  openCategoryDetails(category: CategoryModel): void {
+
+  }
+
+  onEditCategory(category: CategoryModel): void {
+    this.openDialog(category);
+  }
+
+  onDeleteCategory(category: CategoryModel): void {
+    this.itemService.deleteCategory(category.id).subscribe(() => {
+      this.toast.success('Categoria excluída com sucesso!');
+      this.getCategories();
+    }, (error: any) => {
+      this.toast.error(error.error.message);
+    })
+  }
+}

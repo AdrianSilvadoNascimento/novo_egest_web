@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, from, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { environment } from '../../environments/environment';
@@ -85,6 +85,33 @@ export class AuthService {
         this.setLoginStatus(true, token);
         this.router.navigate(['/home']);
       })
+    );
+  }
+
+  validateOrRefreshToken(): Observable<boolean> {
+    const token = this.getToken();
+    const refreshToken = this.storage.getItem('refresh_token');
+
+    if (!token) {
+      return of(false);
+    }
+
+    return this.http.post<{ valid: boolean }>(`${this.API_URL}/validate-token`, {}, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).pipe(
+      switchMap(response => {
+        if (response.valid) {
+          return of(true);
+        } else if (refreshToken) {
+          return this.refreshToken().pipe(
+            map(() => true),
+            catchError(() => of(false))
+          );
+        } else {
+          return of(false);
+        }
+      }),
+      catchError(() => of(false))
     );
   }
 

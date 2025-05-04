@@ -71,10 +71,7 @@
     </div>
 
     @if (isEmpty) {
-    <div class="flex flex-col items-center rounded-md justify-center h-64 bg-white shadow">
-      <lucide-icon [img]="packageIcon" class="w-16 h-16 text-gray-400"></lucide-icon>
-      <p class="mt-4 text-gray-500 text-lg">Estoque vazio</p>
-    </div>
+    <app-empty-list [icon]="packageIcon" description="Produtos está vazio"></app-empty-list>
     }
 
     @if (!isEmpty) {

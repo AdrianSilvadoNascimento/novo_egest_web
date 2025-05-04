@@ -11,13 +11,11 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) { }
 
   canActivate(): Observable<boolean> {
-    return this.authService.$toggleLogin.pipe(
-      tap(isLogged => {
-        if (!isLogged) {
+    return this.authService.validateOrRefreshToken().pipe(
+      tap(isValid => {
+        if (!isValid) {
           this.router.navigate(['/login']);
-          return false;
         }
-        return true;
       })
     );
   }

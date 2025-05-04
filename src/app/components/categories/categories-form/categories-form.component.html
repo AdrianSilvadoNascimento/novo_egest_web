@@ -1,0 +1,42 @@
+<h2 mat-dialog-title class="text-2xl font-bold mb-8">{{ data ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+<mat-dialog-content>
+  @if (hasDraft) {
+  <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow mb-6 text-sm flex items-center gap-2">
+    <span class="material-icons text-yellow-600">info</span>
+    Você tem alterações salvas como rascunho.
+
+    <span class="flex gap-2">
+      <a class="text-yellow-600 underline cursor-pointer" (click)="newForm()">Começar uma nova</a>
+    </span>
+  </div>
+  }
+
+  <form [formGroup]="form" class="space-y-4">
+    <mat-form-field class="w-full">
+      <mat-label>Nome da categoria</mat-label>
+      <input matInput formControlName="name" required #nameInput cdkFocusInitial>
+      @if (form.get('name')?.invalid && form.get('name')?.touched) {
+      <mat-error>
+        @if (form.get('name')?.hasError('minlength')) {
+        Nome deve ter pelo menos 3 caracteres
+        }
+        @else {
+        Nome é obrigatório
+        }
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-dialog-actions>
+      <div class="flex justify-end gap-2 mt-4">
+        <button mat-button (click)="close()">Cancelar</button>
+        <button mat-raised-button color="primary" type="submit" (click)="save()" [disabled]="form.invalid">
+          {{ data ? 'Salvar e Continuar Criando' : 'Criar e Continuar Criando' }}
+        </button>
+        <button mat-raised-button color="primary" type="submit" (click)="saveAndClose()" [disabled]="form.invalid">
+          {{ data ? 'Salvar Alterações' : 'Criar Categoria' }}
+        </button>
+      </div>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>

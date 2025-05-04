@@ -17,6 +17,11 @@ body {
   .mdc-text-field {
     background-color: white !important;
   }
+
+  #login,
+  #register {
+    height: calc(100vh - 64px) !important;
+  }
 }
 
 .sticky-header {

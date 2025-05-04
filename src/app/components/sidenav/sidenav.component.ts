@@ -13,7 +13,8 @@ import {
   NotebookTabs,
   FileChartColumn,
   LucideIconData,
-  PanelLeft
+  PanelLeft,
+  Tag
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 
@@ -40,6 +41,7 @@ export class SidenavComponent implements OnInit {
   links: { route: string, label: string, icon: LucideIconData }[] = [
     { route: '/home', label: 'Dashboard', icon: Home },
     { route: '/products', label: 'Products', icon: Package },
+    { route: '/categories', label: 'Categories', icon: Tag },
     { route: '/customers', label: 'Customers', icon: NotebookTabs },
     { route: '/reports', label: 'Reports', icon: FileChartColumn },
     { route: '/settings', label: 'Settings', icon: Settings },
