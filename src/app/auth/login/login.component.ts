@@ -76,8 +76,7 @@ export class LoginComponent implements OnInit {
         this.loginForm.reset();
       },
       error: (err: any) => {
-        this.toast.error('Erro ao realizar login!');
-        console.error(err);
+        this.toast.error(err.error.message || 'Erro ao realizar login!');
       }
     };
 

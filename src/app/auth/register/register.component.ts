@@ -63,9 +63,10 @@ export class RegisterComponent implements OnInit {
     const registerObserver = {
       next: () => {
         this.toast.success('Cadastro realizado com sucesso!');
+        this.registerForm.reset();
       },
       error: (error: any) => {
-        this.toast.error(error.message || 'Erro ao realizar o cadastro!');
+        this.toast.error(error.error.message || 'Erro ao realizar o cadastro!');
       },
     };
 
