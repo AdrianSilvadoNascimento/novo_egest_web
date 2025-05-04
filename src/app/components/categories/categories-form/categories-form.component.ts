@@ -80,7 +80,7 @@ export class CategoriesFormComponent implements OnInit {
 
           this.form.reset();
         }, error => {
-          this.toast.error(error.error.message);
+          this.toast.error(error.message);
           this.clearDraft();
         })
       } else {
@@ -94,8 +94,7 @@ export class CategoriesFormComponent implements OnInit {
 
           this.form.reset();
         }, error => {
-          console.error('O QUE ESTÁ ACONTECENDO', error)
-          this.toast.error(error.error.message);
+          this.toast.error(error.message);
           this.clearDraft();
         })
       }

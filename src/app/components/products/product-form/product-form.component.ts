@@ -100,8 +100,7 @@ export class ProductFormComponent implements OnInit {
 
           this.form.reset();
         }, error => {
-          this.toast.error('Erro ao atualizar o produto!');
-          console.error(error.error.message);
+          this.toast.error(error.message || 'Erro ao atualizar o produto!');
         })
       } else {
         this.itemService.createItem(this.form.value).subscribe(() => {
@@ -114,8 +113,7 @@ export class ProductFormComponent implements OnInit {
 
           this.form.reset();
         }, error => {
-          this.toast.error('Erro ao salvar o produto!');
-          console.error(error.error.message);
+          this.toast.error(error.message || 'Erro ao salvar o produto!');
         })
       }
     }

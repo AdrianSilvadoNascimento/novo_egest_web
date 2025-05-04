@@ -84,8 +84,7 @@ export class ProductsComponent implements OnInit {
 
       this.isEmpty = itemData.data?.length === 0;
     }, error => {
-      alert(error.error.message);
-      console.error(error.error.message);
+      this.toast.error(error.message);
     })
   }
 
@@ -105,7 +104,7 @@ export class ProductsComponent implements OnInit {
       this.paginatedItems.data = [...this.paginatedItems.data, ...itemData?.data];
       this.paginatedItems.nextCursor = itemData.nextCursor;
     }, error => {
-      this.toast.error(error.error.message);
+      this.toast.error(error.message);
       this.loading = false;
       this.paginatedItems = JSON.parse(sessionStorage.getItem('itemData')!!)
     })

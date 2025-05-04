@@ -1,12 +1,12 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoriesFormComponent } from './categories-form/categories-form.component';
 import { CategoryModel } from '../../models/category.model';
 import { MatIconModule } from '@angular/material/icon';
-import { LucideAngularModule, PlusCircle, Tag } from 'lucide-angular';
+import { FileUp, LucideAngularModule, PlusCircle, Tag } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemsService } from '../../services/items.service';
 import { MatMenuModule } from '@angular/material/menu';
@@ -30,6 +30,7 @@ import { EmptyListComponent } from '../../shared/empty-list/empty-list.component
 })
 export class CategoriesComponent implements OnInit, AfterViewInit {
   readonly addIcon = PlusCircle;
+  readonly importIcon = FileUp;
   displayedColumns = ['name', 'value', 'actions'];
 
   tagIcon = Tag
@@ -64,7 +65,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
 
       this.paginator.length = categories?.length;
     }, (error: any) => {
-      this.toast.error(error.error.message);
+      this.toast.error(error.message);
     })
   }
 
@@ -101,6 +102,54 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
 
   }
 
+  onFileImport(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.toast.info('Por favor, selecione um arquivo .xls ou .xlsx válido.');
+      return;
+    }
+
+    this.itemService.importCategories(file).subscribe({
+      next: (job) => {
+        this.toast.info(job.message || `Arquivo enviado. A importação de ${job.total} está em processamento...`);
+
+        const intervalId = setInterval(() => {
+          this.itemService.getImportStatus(job.jobId).subscribe({
+            next: (res) => {
+              const status = res.status;
+              if (status === 'completed') {
+                clearInterval(intervalId);
+                this.toast.success('Importação concluída com sucesso!');
+                this.updatedCategories();
+              } else if (status === 'failed') {
+                clearInterval(intervalId);
+                this.toast.error('Erro ao processar a importação.');
+              }
+            },
+            error: () => {
+              clearInterval(intervalId);
+              this.toast.error('Erro ao verificar status da importação.');
+            }
+          });
+        }, 3000);
+      },
+      error: (err: any) => {
+        this.toast.error(err.error.message || 'Erro ao enviar o arquivo.');
+      }
+    });
+
+    input.value = '';
+  }
+
   onEditCategory(category: CategoryModel): void {
     this.openDialog(category);
   }
@@ -110,7 +159,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       this.toast.success('Categoria excluída com sucesso!');
       this.getCategories();
     }, (error: any) => {
-      this.toast.error(error.error.message);
+      this.toast.error(error.message);
     })
   }
 }

@@ -10,8 +10,21 @@
           Nova Categoria
         </span>
       </button>
+
+      <button mat-fab extended matTooltip="Importar produtos" class="flex items-center gap-1"
+        (click)="fileInput.click()">
+        <mat-icon>
+          <lucide-icon [img]="importIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
+        </mat-icon>
+        <span class="text-gray-700 font-[Lora]">
+          Importar Categorias
+        </span>
+      </button>
+      <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;" (change)="onFileImport($event)" />
     </div>
   </div>
+
+  <div class="flex-grow"></div>
 
   @if (isEmpty) {
   <app-empty-list [icon]="tagIcon" description="Categorias está vazio"></app-empty-list>
@@ -55,8 +68,8 @@
     </table>
   </div>
 
-  <mat-paginator [length]="paginatedCategories.length" [pageSize]="10" class="rounded-md mt-4 shadow-md"
-    showFirstLastButtons></mat-paginator>
+  <mat-paginator (page)="onPageChange($event)" [length]="categories.length" [pageSizeOptions]="[5, 10, 25, 100]"
+    [pageSize]=" 10" class="rounded-md mt-4 shadow-md" showFirstLastButtons></mat-paginator>
   }
 
 

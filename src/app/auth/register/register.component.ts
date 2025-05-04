@@ -17,6 +17,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { RegisterModel } from '../../models/register.model';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -33,7 +34,11 @@ export class RegisterComponent implements OnInit {
 
   registerForm: FormGroup = new FormGroup({});
 
-  constructor(private formBuilder: FormBuilder, private authService: AuthService) { }
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private toast: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.createForm(new RegisterModel())
@@ -57,11 +62,10 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
     const registerObserver = {
       next: () => {
-        alert('Cadastro realizado com sucesso!');
+        this.toast.success('Cadastro realizado com sucesso!');
       },
       error: (error: any) => {
-        alert(error.error.message);
-        console.error(error.error.message);
+        this.toast.error(error.message || 'Erro ao realizar o cadastro!');
       },
     };
 

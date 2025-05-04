@@ -113,6 +113,25 @@ export class ItemsService {
     }).pipe(tap(data => data));
   }
 
+  importCategories(file: File): Observable<any> {
+    const formData = new FormData();
+
+    const accountId = this.authService.getAccountId();
+    const accountUserId = this.authService.getAccountUserId();
+
+    formData.append('file', file);
+    if (accountId && accountUserId) {
+      formData.append('account_id', accountId);
+    }
+
+    return this.http.post<any>(`${this.baseUrl}/categories/import`, formData, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.authService.getToken()}`,
+        'X-Skip-Loading': 'true'
+      })
+    }).pipe(tap(data => data));
+  }
+
   getImportStatus(jobId: string): Observable<{ status: string, result: any }> {
     return this.http.get<{ status: string, result: any }>(`${this.baseUrl}/import/status/${jobId}`, {
       headers: {
@@ -157,7 +176,7 @@ export class ItemsService {
     return this.http.put<CategoryModel>(`${this.baseUrl}/categories/${id}`, category, {
       headers: this.headers
     }).pipe((tap((data: CategoryModel) => {
-      const categoryData = categories.data.map((cat: CategoryModel) => cat.id === id ? data : cat)
+      const categoryData = categories.map((cat: CategoryModel) => cat.id === id ? data : cat)
       this.setCategoryData(categoryData as unknown as CategoryModel[]);
     })))
   }
