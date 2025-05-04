@@ -32,11 +32,6 @@ export class ItemsService {
     this.itemData.next(data);
 
     sessionStorage.setItem('itemData', JSON.stringify(data));
-
-    if (data.nextCursor && data.nextCursor !== '') {
-      const storage = localStorage.getItem('remember_me') === 'true' ? localStorage : sessionStorage;
-      storage.setItem('nextCursor', data.nextCursor);
-    }
   }
 
   setCategoryData(data: CategoryModel[]) {
@@ -53,7 +48,7 @@ export class ItemsService {
       headers: this.headers
     }).pipe((tap((data: PaginatedItemsModel) => {
       this.setItemData(data);
-    })))
+    })));
   }
 
   createItem(item: ItemCreationModel): Observable<ItemModel> {

@@ -92,23 +92,35 @@ export class ProductsComponent implements OnInit {
     if (this.loading || !this.hasNext) return;
 
     this.loading = true;
-
     this.toast.info('Carregando mais produtos...');
-    const lastCursor = localStorage.getItem('nextCursor') || sessionStorage.getItem('nextCursor') || '';
 
-    this.itemService.getPaginatedItems(lastCursor, this.pageSize, true).subscribe((itemData: PaginatedItemsModel) => {
-      this.isEmpty = itemData.data?.length === 0;
-      this.loading = false;
-      this.hasNext = !!itemData.nextCursor;
+    const lastCursor = this.paginatedItems.nextCursor || '';
 
-      this.paginatedItems.data = [...this.paginatedItems.data, ...itemData?.data];
-      this.paginatedItems.nextCursor = itemData.nextCursor;
-    }, error => {
-      this.toast.error(error.message);
-      this.loading = false;
-      this.paginatedItems = JSON.parse(sessionStorage.getItem('itemData')!!)
-    })
+    this.itemService.getPaginatedItems(lastCursor, this.pageSize, true).subscribe({
+      next: (itemData: PaginatedItemsModel) => {
+        this.isEmpty = itemData.data?.length === 0;
+        this.loading = false;
+        this.hasNext = !!itemData.nextCursor;
+
+        const newItems = itemData.data.filter(newItem =>
+          !this.paginatedItems.data.some(existing => existing.id === newItem.id)
+        );
+
+        this.paginatedItems.data = [...this.paginatedItems.data, ...newItems];
+        this.paginatedItems.nextCursor = itemData.nextCursor;
+
+        sessionStorage.setItem('itemData', JSON.stringify(this.paginatedItems));
+        sessionStorage.setItem('nextCursor', itemData.nextCursor || '');
+      },
+      error: (error) => {
+        this.toast.error(error.message);
+        this.loading = false;
+        const cached = sessionStorage.getItem('itemData');
+        if (cached) this.paginatedItems = JSON.parse(cached);
+      }
+    });
   }
+
 
   onAddProduct(): void {
     const dialogRef = this.dialog.open(ProductFormComponent, { width: '600px' });
