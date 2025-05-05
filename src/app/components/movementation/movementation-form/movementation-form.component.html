@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Registrar movimentação de produto</h2>
+
+<mat-dialog-content [formGroup]="form" class="space-y-4 py-2">
+  <mat-form-field class="w-full">
+    <mat-label>Tipo de movimentação</mat-label>
+    <mat-select name="move_type" id="move_type" formControlName="move_type" required>
+      <mat-option value="entrada" selected>Entrada</mat-option>
+      <mat-option value="saída">Saída</mat-option>
+    </mat-select>
+    @if (form.controls['move_type'].invalid && form.controls['move_type'].touched) {
+    <mat-error>Tipo é obrigatório</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field class="w-full">
+    <mat-label>Quantidade</mat-label>
+    <input matInput id="quantity" name="quantity" type="number" formControlName="quantity" />
+    @if (form.controls['quantity'].invalid && form.controls['quantity'].touched) {
+    <mat-error>Quantidade é obrigatório</mat-error>
+    }
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
+    Confirmar
+  </button>
+</mat-dialog-actions>

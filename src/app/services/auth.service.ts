@@ -172,7 +172,7 @@ export class AuthService {
   }
 
   getAccountUserId(): string | null {
-    return localStorage.getItem('account_id') || sessionStorage.getItem('account_id');
+    return localStorage.getItem('user_id') || sessionStorage.getItem('user_id');
   }
 
   register(registerModel: RegisterModel): Observable<any> {

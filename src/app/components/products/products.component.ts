@@ -22,6 +22,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { EmptyListComponent } from "../../shared/empty-list/empty-list.component";
 import { CategoryModel } from '../../models/category.model';
 import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
+import { MovementationFormComponent } from '../movementation/movementation-form/movementation-form.component';
+import { MovementationService } from '../../services/movementation.service';
 
 @Component({
   selector: 'app-products',
@@ -68,7 +70,12 @@ export class ProductsComponent implements OnInit {
     modifiedBy: ''
   };
 
-  constructor(private itemService: ItemsService, private dialog: MatDialog, private toast: ToastService) { }
+  constructor(
+    private dialog: MatDialog,
+    private itemService: ItemsService,
+    private moveService: MovementationService,
+    private toast: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.itemService.getPaginatedItems('', this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
@@ -226,7 +233,7 @@ export class ProductsComponent implements OnInit {
         category = categories.find((cat: CategoryModel) => cat.id === categoryId)
         this.openCategoryDetails(category)
       }, error => {
-        this.toast.error(error.error.message || 'Erro ao carregar categorias!')
+        this.toast.error(error.message || error.error.message || 'Erro ao carregar categorias!')
       })
     }
 
@@ -240,8 +247,23 @@ export class ProductsComponent implements OnInit {
     })
   }
 
-  onMoveProduct(product: ItemModel): void {
-
+  onMoveProduct(item: ItemModel): void {
+    this.dialog.open(MovementationFormComponent, {
+      data: {
+        mode: 'entry',
+        item,
+      },
+      width: '600px'
+    }).afterClosed().subscribe(result => {
+      if (result) {
+        this.moveService.moveItem({ ...result, item_id: item.id }).subscribe((data) => {
+          this.toast.success('Produto movido com sucesso!')
+          this.loadProducts();
+        }, error => {
+          this.toast.error(error.message || error.error.message || 'Erro ao mover o produto!')
+        });
+      }
+    });
   }
 
   onEditProduct(product: ItemModel): void {
