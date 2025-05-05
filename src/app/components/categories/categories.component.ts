@@ -12,6 +12,7 @@ import { ItemsService } from '../../services/items.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastService } from '../../services/toast.service';
 import { EmptyListComponent } from '../../shared/empty-list/empty-list.component';
+import { CategoryDetailsComponent } from './category-details/category-details.component';
 
 @Component({
   standalone: true,
@@ -63,9 +64,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       this.paginatedCategories = categories
       this.isEmpty = categories?.length === 0;
 
-      this.paginator.length = categories?.length;
+      if (this.paginator) {
+        this.paginator.length = categories?.length;
+      }
     }, (error: any) => {
-      this.toast.error(error.message);
+      this.toast.error(error.error.message);
     })
   }
 
@@ -99,7 +102,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   openCategoryDetails(category: CategoryModel): void {
-
+    this.dialog.open(CategoryDetailsComponent, {
+      data: category,
+      panelClass: 'modern-dialog'
+    })
   }
 
   onFileImport(event: Event): void {

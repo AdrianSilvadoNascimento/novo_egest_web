@@ -71,7 +71,7 @@
     <!-- Categoria -->
     <mat-form-field class="w-full">
       <mat-label>Categoria</mat-label>
-      <mat-select formControlName="category" id="category" name="category" required>
+      <mat-select formControlName="category_id" id="category_id" name="category_id" required>
         <mat-option value="">Selecione</mat-option>
         @for (category of categories; track category.id) {
         <mat-option [value]=category.id>{{category.name}}</mat-option>

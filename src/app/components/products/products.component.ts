@@ -20,6 +20,8 @@ import { ToastService } from '../../services/toast.service';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { EmptyListComponent } from "../../shared/empty-list/empty-list.component";
+import { CategoryModel } from '../../models/category.model';
+import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
 
 @Component({
   selector: 'app-products',
@@ -75,7 +77,13 @@ export class ProductsComponent implements OnInit {
       this.hasNext = !!itemData.nextCursor;
     })
 
+    this.getAllItems();
+
     this.loadMore();
+  }
+
+  getAllItems(): void {
+    this.itemService.getAllItems().subscribe()
   }
 
   loadProducts(): void {
@@ -121,7 +129,6 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-
   onAddProduct(): void {
     const dialogRef = this.dialog.open(ProductFormComponent, { width: '600px' });
 
@@ -136,16 +143,11 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  onImportExcel(): void {
-    console.log('Importar Excel');
-  }
-
   toggleFilters() {
     this.filterDrawer.toggle();
   }
 
   applyFilters() {
-    console.log('Aplicando filtros:', this.filters);
     this.loadProducts();
     this.filterDrawer.close();
   }
@@ -214,6 +216,30 @@ export class ProductsComponent implements OnInit {
     })
   }
 
+  categoryDetails(categoryId: string): void {
+    let categories = JSON.parse(sessionStorage.getItem('categoryData')!!)
+    let category: CategoryModel
+
+    if (!categories) {
+      this.itemService.getCategories().subscribe((cat: CategoryModel[]) => {
+        categories = cat
+        category = categories.find((cat: CategoryModel) => cat.id === categoryId)
+        this.openCategoryDetails(category)
+      }, error => {
+        this.toast.error(error.error.message || 'Erro ao carregar categorias!')
+      })
+    }
+
+    category = categories.find((cat: CategoryModel) => cat.id === categoryId)
+    this.openCategoryDetails(category)
+  }
+
+  openCategoryDetails(category: CategoryModel): void {
+    this.dialog.open(CategoryDetailsComponent, {
+      data: category
+    })
+  }
+
   onMoveProduct(product: ItemModel): void {
 
   }
@@ -226,20 +252,29 @@ export class ProductsComponent implements OnInit {
     editItem.description = item.description;
     editItem.unit_price = item.unit_price;
     editItem.sale_price = item.sale_price;
-    editItem.category = item.category;
+    editItem.category_id = item.category_id;
     editItem.quantity = item.quantity;
     editItem.barcode = item.barcode;
     editItem.active = item.active;
     editItem.product_image = item.product_image;
 
-    this.dialog.open(ProductFormComponent, {
+    const dialogRef = this.dialog.open(ProductFormComponent, {
       data: editItem as ItemCreationModel,
       width: '600px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadProducts();
+      } else {
+        if (!sessionStorage.getItem('product_form_draft')) {
+          sessionStorage.removeItem('product_form_draft');
+        }
+      }
     });
   }
 
   onDeleteProduct(product: any): void {
-    console.log('Excluir', product);
     this.itemService.deleteItem(product.id).subscribe()
 
     this.loadProducts();

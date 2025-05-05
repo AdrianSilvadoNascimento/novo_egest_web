@@ -11,6 +11,7 @@ import { ItemCreationModel } from '../../../models/item-creation.model';
 import { ItemsService } from '../../../services/items.service';
 import { MatButtonModule } from '@angular/material/button';
 import { CategoryModel } from '../../../models/category.model';
+import { PaginatedItemsModel } from '../../../models/paginated-items.model';
 
 @Component({
   selector: 'app-product-form',
@@ -33,6 +34,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   draftKey: string = 'product_form_draft';
   hasDraft: boolean = false;
   categories: CategoryModel[] = [];
+  paginatedItems!: PaginatedItemsModel
 
   constructor(
     private toast: ToastService,
@@ -84,7 +86,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       description: [productModel.description],
       unit_price: [productModel.unit_price, [Validators.required, Validators.min(0)]],
       sale_price: [productModel.sale_price, [Validators.required, Validators.min(0)]],
-      category: [productModel.category, Validators.required],
+      category_id: [productModel.category_id, Validators.required],
       quantity: [productModel.quantity, [Validators.required, Validators.min(0)]],
       barcode: [productModel.barcode],
       active: [productModel.active],
@@ -117,12 +119,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.clearDraft();
 
           if (isToClose) {
-            this.dialogRef.close();
+            this.dialogRef.close(this.form.value);
           }
 
           this.form.reset();
         }, error => {
-          this.toast.error(error.message || 'Erro ao atualizar o produto!');
+          this.toast.error(error.error.message || 'Erro ao atualizar o produto!');
         })
       } else {
         this.itemService.createItem(this.form.value).subscribe(() => {
@@ -130,12 +132,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.clearDraft();
 
           if (isToClose) {
-            this.dialogRef.close();
+            this.dialogRef.close(this.form.value);
           }
 
           this.form.reset();
         }, error => {
-          this.toast.error(error.message || 'Erro ao salvar o produto!');
+          this.toast.error(error.error.message || 'Erro ao salvar o produto!');
         })
       }
     }
@@ -175,7 +177,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       draftItem.description = parsedDraft.description;
       draftItem.unit_price = parsedDraft.unit_price;
       draftItem.sale_price = parsedDraft.sale_price;
-      draftItem.category = parsedDraft.category;
+      draftItem.category_id = parsedDraft.category_id;
       draftItem.quantity = parsedDraft.quantity;
       draftItem.barcode = parsedDraft.barcode;
       draftItem.active = parsedDraft.active;

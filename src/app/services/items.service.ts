@@ -23,6 +23,9 @@ export class ItemsService {
   private itemData = new BehaviorSubject<PaginatedItemsModel>({} as PaginatedItemsModel);
   $itemData = this.itemData.asObservable();
 
+  private allItemData = new BehaviorSubject<ItemModel[]>([] as ItemModel[]);
+  $allItemData = this.allItemData.asObservable();
+
   private categoryData = new BehaviorSubject<CategoryModel[]>([] as CategoryModel[]);
   $categoryData = this.categoryData.asObservable();
 
@@ -32,6 +35,11 @@ export class ItemsService {
     this.itemData.next(data);
 
     sessionStorage.setItem('itemData', JSON.stringify(data));
+  }
+
+  setAllItemsData(data: ItemModel[]) {
+    this.allItemData.next(data);
+    sessionStorage.setItem('allItemData', JSON.stringify(data));
   }
 
   setCategoryData(data: CategoryModel[]) {
@@ -46,8 +54,19 @@ export class ItemsService {
 
     return this.http.get<PaginatedItemsModel>(`${this.baseUrl}/${accountId}/paginated?offset=${page}&limit=${limit}`, {
       headers: this.headers
-    }).pipe((tap((data: PaginatedItemsModel) => {
+    }).pipe((tap((data: any) => {
       this.setItemData(data);
+    })));
+  }
+
+  getAllItems(): Observable<ItemModel[]> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    const accountId = this.authService.getAccountId();
+
+    return this.http.get<ItemModel[]>(`${this.baseUrl}/${accountId}`, {
+      headers: this.headers
+    }).pipe((tap((data: ItemModel[]) => {
+      this.setAllItemsData(data);
     })));
   }
 
@@ -76,7 +95,12 @@ export class ItemsService {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
 
-    return this.http.put<ItemModel>(`${this.baseUrl}/update-item/${id}`, item, {
+    return this.http.put<ItemModel>(`${this.baseUrl}/update-item/${id}`, {
+      ...item,
+      account_id: this.authService.getAccountId(),
+      account_user_id: this.authService.getAccountUserId(),
+
+    }, {
       headers: this.headers
     }).pipe((tap((data: ItemModel) => {
       const paginatedItems = {

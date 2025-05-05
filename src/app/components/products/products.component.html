@@ -118,7 +118,11 @@
             <td class="px-4 py-3">
               {{ product.sale_price | currency: 'R$' : 'symbol' }}
             </td>
-            <td class="px-4 py-3">{{ product.category }}</td>
+            <td class="px-4 py-3">
+              <a (click)="categoryDetails(product.category_id)" class="cursor-pointer text-blue-600 hover:underline">
+                {{ product.category.name }}
+              </a>
+            </td>
             <td class="px-4 py-3">{{ product.quantity }}</td>
             <td class="px-4 py-3 text-center">
               <button mat-icon-button [matMenuTriggerFor]="productMenu">

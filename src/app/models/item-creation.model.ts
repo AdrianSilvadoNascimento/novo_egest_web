@@ -1,7 +1,7 @@
 export class ItemCreationModel {
   id!: string;
   name!: string;
-  category!: string;
+  category_id!: string;
   unit_price!: number;
   sale_price!: number;
   product_image!: string;

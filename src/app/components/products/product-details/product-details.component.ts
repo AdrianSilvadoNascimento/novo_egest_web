@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LucideAngularModule, PackageOpen } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ItemModel } from '../../../models/item.model';
 
 @Component({
   standalone: true,
@@ -17,6 +18,6 @@ export class ProductDetailsComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ProductDetailsComponent>,
-    @Inject(MAT_DIALOG_DATA) public product: any
+    @Inject(MAT_DIALOG_DATA) public product: ItemModel
   ) { }
 }

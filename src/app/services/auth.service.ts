@@ -105,29 +105,60 @@ export class AuthService {
         } else if (refreshToken) {
           return this.refreshToken().pipe(
             map(() => true),
-            catchError(() => of(false))
+            catchError(() => {
+              this.setLoginStatus(false);
+              return of(false);
+            })
           );
         } else {
+          this.setLoginStatus(false);
           return of(false);
         }
       }),
-      catchError(() => of(false))
+      catchError(() => {
+        if (refreshToken) {
+          return this.refreshToken().pipe(
+            map(() => true),
+            catchError(() => {
+              this.setLoginStatus(false);
+              return of(false);
+            })
+          );
+        }
+        this.setLoginStatus(false);
+        return of(false);
+      })
     );
   }
 
   refreshToken(): Observable<string> {
     const refreshToken = this.storage.getItem('refresh_token');
 
-    return this.http.post<{ token: string }>(this.API_URL + '/refresh-token', {}, {
+    if (!refreshToken) {
+      return of('').pipe(
+        tap(() => {
+          this.setLoginStatus(false);
+          this.router.navigate(['/login']);
+        })
+      );
+    }
+
+    return this.http.post<{ token: string, refreshToken?: string }>(`${this.API_URL}/refresh-token`, {}, {
       headers: { 'Authorization': `Bearer ${refreshToken}` }
     }).pipe(
-      tap((response: any) => {
-        this.setLoginStatus(true, response.token);
-
-        this.storage.setItem('token', response.token);
+      tap(response => {
+        if (response.token) {
+          this.setLoginStatus(true, response.token);
+        } else {
+          this.setLoginStatus(false);
+        }
       }),
-      switchMap((response: any) => {
-        return from([response.token]);
+      map(response => response.token),
+      catchError(error => {
+        console.error('Erro ao atualizar token:', error);
+        this.setLoginStatus(false);
+        this.router.navigate(['/login']);
+        return of('');
       })
     );
   }
@@ -174,7 +205,7 @@ export class AuthService {
   logout(): void {
     this.setLoginStatus(false);
     this.clearCache();
-    this.storage.removeItem('refresh_token');
+    localStorage.removeItem('refresh_token');
     this.setAccountUserName('');
     this.router.navigate(['/login']);
   }

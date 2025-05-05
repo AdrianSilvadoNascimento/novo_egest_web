@@ -20,8 +20,10 @@
       <div><strong>Código de Barras:</strong> {{ product.barcode }}</div>
       <div><strong>Preço Unitário:</strong> {{ product.unit_price | currency:'R$' }}</div>
       <div><strong>Preço de Venda:</strong> {{ product.sale_price | currency:'R$' }}</div>
-      <div><strong>Categoria:</strong> {{ product.category }}</div>
+      <div><strong>Categoria:</strong> {{ product.category.name }}</div>
       <div><strong>Em Estoque:</strong> {{ product.quantity }}</div>
+      <div><strong>Descrição:</strong> {{ product.description }}</div>
+      <div><strong>Situação:</strong> {{ product.active ? 'Ativo' : 'Desativado' }}</div>
     </div>
   </div>
 </div>
