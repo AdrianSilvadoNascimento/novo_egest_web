@@ -1,0 +1,16 @@
+<div class="welcome-dialog">
+  <h2 mat-dialog-title class="font-[Lora]">Bem-vindo à nossa plataforma!</h2>
+  
+  <mat-dialog-content class="font-[Lora]">
+    <p>É um prazer tê-lo conosco. Estamos muito felizes em ter você como parte da nossa comunidade.</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <a
+      [routerLink]="['/settings/account']" routerLinkActive="router-link-active" 
+      matRipple
+      class="bg-blue-600 py-4 px-8 text-white border-white rounded-md shadow-md cursor-pointer hover:bg-blue-800">
+      Registrar Conta
+    </a>
+  </mat-dialog-actions>
+</div> 

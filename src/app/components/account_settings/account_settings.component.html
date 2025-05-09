@@ -1,0 +1,78 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Configurações da Conta</h1>
+
+    <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Nome da Conta -->
+      <mat-form-field class="w-full">
+        <mat-label>Nome da Conta</mat-label>
+        <input matInput formControlName="accountName" placeholder="Digite o nome da conta">
+        <mat-error *ngIf="accountForm.get('accountName')?.hasError('required')">
+          Nome da conta é obrigatório
+        </mat-error>
+        <mat-error *ngIf="accountForm.get('accountName')?.hasError('minlength')">
+          Nome deve ter pelo menos 3 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <!-- CPF/CNPJ -->
+      <mat-form-field class="w-full">
+        <mat-label>CPF/CNPJ</mat-label>
+        <input matInput formControlName="cpfCnpj" placeholder="Digite o CPF ou CNPJ">
+        <mat-error *ngIf="accountForm.get('cpfCnpj')?.hasError('required')">
+          CPF/CNPJ é obrigatório
+        </mat-error>
+        <mat-error *ngIf="accountForm.get('cpfCnpj')?.hasError('minlength')">
+          CPF/CNPJ inválido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Telefone -->
+      <mat-form-field class="w-full">
+        <mat-label>Telefone</mat-label>
+        <input matInput formControlName="phoneNumber" placeholder="(00) 00000-0000">
+        <mat-error *ngIf="accountForm.get('phoneNumber')?.hasError('required')">
+          Telefone é obrigatório
+        </mat-error>
+        <mat-error *ngIf="accountForm.get('phoneNumber')?.hasError('pattern')">
+          Formato inválido. Use (00) 00000-0000
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Email -->
+      <mat-form-field class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" placeholder="Digite seu email">
+        <mat-error *ngIf="accountForm.get('email')?.hasError('required')">
+          Email é obrigatório
+        </mat-error>
+        <mat-error *ngIf="accountForm.get('email')?.hasError('email')">
+          Email inválido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Data de Nascimento -->
+      <mat-form-field class="w-full">
+        <mat-label>Data de Nascimento</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="birthDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="accountForm.get('birthDate')?.hasError('required')">
+          Data de nascimento é obrigatória
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Botão de Submit -->
+      <div class="flex justify-end">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          [disabled]="!accountForm.valid"
+          class="px-6 py-2">
+          Salvar Alterações
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

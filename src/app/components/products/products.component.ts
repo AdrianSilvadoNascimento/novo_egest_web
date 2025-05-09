@@ -19,7 +19,7 @@ import { ItemCreationModel } from '../../models/item-creation.model';
 import { ToastService } from '../../services/toast.service';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 import { MatMenuModule } from '@angular/material/menu';
-import { EmptyListComponent } from "../../shared/empty-list/empty-list.component";
+import { EmptyListComponent } from "../../shared/components/empty-list/empty-list.component";
 import { CategoryModel } from '../../models/category.model';
 import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
 import { MovementationFormComponent } from '../movementation/movementation-form/movementation-form.component';

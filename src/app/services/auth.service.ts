@@ -22,6 +22,9 @@ export class AuthService {
   private userName = new BehaviorSubject<string>(this.accountUserName());
   $userName = this.userName.asObservable();
 
+  private firstAccess = new BehaviorSubject<boolean>(false);
+  $firstAccess = this.firstAccess.asObservable();
+
   private storage: Storage = localStorage;
 
   constructor(private http: HttpClient, private router: Router) { }
@@ -83,6 +86,7 @@ export class AuthService {
         });
         this.setAccountUserName(account_user.name);
         this.setLoginStatus(true, token);
+        this.firstAccess.next(account_user.first_access);
         this.router.navigate(['/home']);
       })
     );

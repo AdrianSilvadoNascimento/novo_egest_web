@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 
 import {
   LucideAngularModule,
@@ -15,6 +15,8 @@ import { DashboardService } from '../../services/dashboard.service';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,7 +25,7 @@ import { Router } from '@angular/router';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
   readonly packageIcon = Package;
   readonly arrowDownIcon = ArrowDown;
   readonly arrowUpIcon = ArrowUp;
@@ -31,7 +33,20 @@ export class DashboardComponent implements OnInit {
 
   dashboardData!: DashboardModel
 
-  constructor(private readonly dashboardService: DashboardService, private dialog: MatDialog, private router: Router) { }
+  constructor(
+    private readonly dashboardService: DashboardService,
+    private readonly authService: AuthService,
+    private dialog: MatDialog,
+    private router: Router
+  ) { }
+
+  ngAfterViewInit(): void {
+    this.authService.$firstAccess.subscribe(data => {
+      if (data) {
+        this.dialog.open(WelcomeDialogComponent)
+      }
+    })
+  }
 
   ngOnInit(): void {
     this.getData();

@@ -3,11 +3,8 @@ export class AccountModel {
   name!: string;
   email!: string;
   phone_number!: string;
-  address!: string;
-  city!: string;
-  state!: string;
-  country!: string;
-  zip_code!: string;
+  cpf_cnpj!: string;
+  birth!: string;
   created_at!: Date;
   updated_at!: Date;
 }

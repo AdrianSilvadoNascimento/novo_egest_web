@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ItemsService } from '../../services/items.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastService } from '../../services/toast.service';
-import { EmptyListComponent } from '../../shared/empty-list/empty-list.component';
+import { EmptyListComponent } from '../../shared/components/empty-list/empty-list.component';
 import { CategoryDetailsComponent } from './category-details/category-details.component';
 
 @Component({
