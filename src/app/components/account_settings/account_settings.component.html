@@ -2,77 +2,180 @@
   <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">Configurações da Conta</h1>
 
-    <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Nome da Conta -->
-      <mat-form-field class="w-full">
-        <mat-label>Nome da Conta</mat-label>
-        <input matInput formControlName="accountName" placeholder="Digite o nome da conta">
-        <mat-error *ngIf="accountForm.get('accountName')?.hasError('required')">
-          Nome da conta é obrigatório
-        </mat-error>
-        <mat-error *ngIf="accountForm.get('accountName')?.hasError('minlength')">
-          Nome deve ter pelo menos 3 caracteres
-        </mat-error>
-      </mat-form-field>
+    <mat-stepper [linear]="true" #stepper>
+      <mat-step [stepControl]="accountForm">
+        <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="mt-4 space-y-6">
+          <ng-template matStepLabel>Dados da Conta</ng-template>
+          <!-- Nome da Conta -->
+          <mat-form-field class="w-full">
+            <mat-label>Nome da Conta</mat-label>
+            <input matInput id="name" name="name" formControlName="name" placeholder="Digite o nome da conta">
+            <mat-error *ngIf="accountForm.get('name')?.hasError('required')">
+              Nome da conta é obrigatório
+            </mat-error>
+            <mat-error *ngIf="accountForm.get('name')?.hasError('minlength')">
+              Nome deve ter pelo menos 3 caracteres
+            </mat-error>
+          </mat-form-field>
 
-      <!-- CPF/CNPJ -->
-      <mat-form-field class="w-full">
-        <mat-label>CPF/CNPJ</mat-label>
-        <input matInput formControlName="cpfCnpj" placeholder="Digite o CPF ou CNPJ">
-        <mat-error *ngIf="accountForm.get('cpfCnpj')?.hasError('required')">
-          CPF/CNPJ é obrigatório
-        </mat-error>
-        <mat-error *ngIf="accountForm.get('cpfCnpj')?.hasError('minlength')">
-          CPF/CNPJ inválido
-        </mat-error>
-      </mat-form-field>
+          <!-- Email -->
+          <mat-form-field class="w-full">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Digite seu email">
+            <mat-error *ngIf="accountForm.get('email')?.hasError('required')">
+              Email é obrigatório
+            </mat-error>
+            <mat-error *ngIf="accountForm.get('email')?.hasError('email')">
+              Email inválido
+            </mat-error>
+          </mat-form-field>
 
-      <!-- Telefone -->
-      <mat-form-field class="w-full">
-        <mat-label>Telefone</mat-label>
-        <input matInput formControlName="phoneNumber" placeholder="(00) 00000-0000">
-        <mat-error *ngIf="accountForm.get('phoneNumber')?.hasError('required')">
-          Telefone é obrigatório
-        </mat-error>
-        <mat-error *ngIf="accountForm.get('phoneNumber')?.hasError('pattern')">
-          Formato inválido. Use (00) 00000-0000
-        </mat-error>
-      </mat-form-field>
+          <!-- CPF/CNPJ -->
+          <mat-form-field class="w-full">
+            <mat-label>CPF/CNPJ</mat-label>
+            <input matInput id="cpf_cnpj" name="cpf_cnpj" formControlName="cpf_cnpj" placeholder="Digite o CPF ou CNPJ">
+            <mat-error *ngIf="accountForm.get('cpf_cnpj')?.hasError('required')">
+              CPF/CNPJ é obrigatório
+            </mat-error>
+            <mat-error *ngIf="accountForm.get('cpf_cnpj')?.hasError('minlength')">
+              CPF/CNPJ inválido
+            </mat-error>
+          </mat-form-field>
 
-      <!-- Email -->
-      <mat-form-field class="w-full">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" placeholder="Digite seu email">
-        <mat-error *ngIf="accountForm.get('email')?.hasError('required')">
-          Email é obrigatório
-        </mat-error>
-        <mat-error *ngIf="accountForm.get('email')?.hasError('email')">
-          Email inválido
-        </mat-error>
-      </mat-form-field>
+          <!-- Telefone -->
+          <mat-form-field class="w-full">
+            <mat-label>Telefone</mat-label>
+            <input matInput
+              id="phone_number"
+              name="phone_number"
+              formControlName="phone_number"
+              placeholder="(00) 00000-0000"
+              mask="(00) 00000-0000"
+              [showMaskTyped]="true">
+            <mat-error *ngIf="accountForm.get('phone_number')?.hasError('required')">
+              Telefone é obrigatório
+            </mat-error>
+            <mat-error *ngIf="accountForm.get('phone_number')?.hasError('pattern')">
+              Formato inválido. Use (00) 00000-0000
+            </mat-error>
+          </mat-form-field>
 
-      <!-- Data de Nascimento -->
-      <mat-form-field class="w-full">
-        <mat-label>Data de Nascimento</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="birthDate">
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="accountForm.get('birthDate')?.hasError('required')">
-          Data de nascimento é obrigatória
-        </mat-error>
-      </mat-form-field>
+          <!-- Data de Nascimento -->
+          <mat-form-field class="w-full">
+            <mat-label>Data de Nascimento Do Responsável</mat-label>
+            <input matInput id="birth" name="birth" [matDatepicker]="picker" formControlName="birth">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="accountForm.get('birth')?.hasError('required')">
+              Data de nascimento é obrigatória
+            </mat-error>
+          </mat-form-field>
 
-      <!-- Botão de Submit -->
-      <div class="flex justify-end">
-        <button 
-          mat-raised-button 
-          color="primary" 
-          type="submit"
-          [disabled]="!accountForm.valid"
-          class="px-6 py-2">
-          Salvar Alterações
-        </button>
-      </div>
-    </form>
+          <!-- Botão de Submit -->
+          <div class="flex justify-end">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="!accountForm.valid"
+              matStepperNext
+              class="px-6 py-2">
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="addressForm">
+        <form [formGroup]="addressForm" (ngSubmit)="onAddressSubmit()" class="mt-4 space-y-6">
+          <ng-template matStepLabel>Endereço</ng-template>
+          
+          <!-- CEP -->
+          <mat-form-field class="w-full">
+            <mat-label>CEP</mat-label>
+            <input matInput 
+                   formControlName="postal_code" 
+                   placeholder="00000-000"
+                   (blur)="buscarCep()"
+                   [attr.disabled]="isLoadingCep ? '' : null"
+                   mask="00000-000"
+                   [showMaskTyped]="true">
+            <mat-icon *ngIf="isLoadingCep" matSuffix class="animate-spin">sync</mat-icon>
+            <mat-error *ngIf="addressForm.get('postal_code')?.hasError('required')">
+              CEP é obrigatório
+            </mat-error>
+            <mat-error *ngIf="addressForm.get('postal_code')?.hasError('pattern')">
+              Formato inválido. Use 00000-000
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Rua -->
+          <mat-form-field class="w-full">
+            <mat-label>Rua</mat-label>
+            <input matInput formControlName="street" placeholder="Digite o nome da rua">
+            <mat-error *ngIf="addressForm.get('street')?.hasError('required')">
+              Rua é obrigatória
+            </mat-error>
+            <mat-error *ngIf="addressForm.get('street')?.hasError('minlength')">
+              Rua deve ter pelo menos 3 caracteres
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Número -->
+          <mat-form-field class="w-full">
+            <mat-label>Número</mat-label>
+            <input matInput formControlName="house_number" placeholder="Digite o número">
+            <mat-error *ngIf="addressForm.get('house_number')?.hasError('required')">
+              Número é obrigatório
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Complemento -->
+          <mat-form-field class="w-full">
+            <mat-label>Complemento</mat-label>
+            <input matInput formControlName="complement" placeholder="Digite o complemento (opcional)">
+          </mat-form-field>
+
+          <!-- Bairro -->
+          <mat-form-field class="w-full">
+            <mat-label>Bairro</mat-label>
+            <input matInput formControlName="neighborhood" placeholder="Digite o bairro">
+            <mat-error *ngIf="addressForm.get('neighborhood')?.hasError('required')">
+              Bairro é obrigatório
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Estado -->
+          <mat-form-field class="w-full">
+            <mat-label>Estado</mat-label>
+            <input matInput formControlName="state" placeholder="Digite o estado">
+            <mat-error *ngIf="addressForm.get('state')?.hasError('required')">
+              Estado é obrigatório
+            </mat-error>
+          </mat-form-field>
+
+          <!-- País -->
+          <mat-form-field class="w-full">
+            <mat-label>País</mat-label>
+            <input matInput formControlName="country" placeholder="Digite o país">
+            <mat-error *ngIf="addressForm.get('country')?.hasError('required')">
+              País é obrigatório
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Botão de Submit -->
+          <div class="flex justify-end">
+            <button mat-button matStepperPrevious class="mr-3">Voltar</button>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="!addressForm.valid"
+              class="px-6 py-2">
+              Salvar Endereço
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
   </div>
 </div> 
