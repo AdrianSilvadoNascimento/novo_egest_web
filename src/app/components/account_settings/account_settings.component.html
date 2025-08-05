@@ -1,27 +1,25 @@
 <div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Configurações da Conta</h1>
-
-    <mat-stepper [linear]="true" #stepper>
+  <mat-card class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+    <mat-stepper [linear]="false" #stepper (selectionChange)="onStepChange($event)">
       <mat-step [stepControl]="accountForm">
         <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="mt-4 space-y-6">
           <ng-template matStepLabel>Dados da Conta</ng-template>
           <!-- Nome da Conta -->
           <mat-form-field class="w-full">
             <mat-label>Nome da Conta</mat-label>
-            <input matInput id="name" name="name" formControlName="name" placeholder="Digite o nome da conta">
+            <input matInput name="name" formControlName="name" placeholder="Digite o nome da conta">
             <mat-error *ngIf="accountForm.get('name')?.hasError('required')">
-              Nome da conta é obrigatório
+              Nome/Razão Social da conta é obrigatório
             </mat-error>
             <mat-error *ngIf="accountForm.get('name')?.hasError('minlength')">
-              Nome deve ter pelo menos 3 caracteres
+              Nome/Razão Social deve ter pelo menos 3 caracteres
             </mat-error>
           </mat-form-field>
 
           <!-- Email -->
           <mat-form-field class="w-full">
             <mat-label>Email</mat-label>
-            <input matInput formControlName="email" placeholder="Digite seu email">
+            <input matInput name="email" formControlName="email" placeholder="Digite seu email">
             <mat-error *ngIf="accountForm.get('email')?.hasError('required')">
               Email é obrigatório
             </mat-error>
@@ -33,7 +31,13 @@
           <!-- CPF/CNPJ -->
           <mat-form-field class="w-full">
             <mat-label>CPF/CNPJ</mat-label>
-            <input matInput id="cpf_cnpj" name="cpf_cnpj" formControlName="cpf_cnpj" placeholder="Digite o CPF ou CNPJ">
+            <input matInput 
+              formControlName="cpf_cnpj" 
+              placeholder="Digite o CPF ou CNPJ"
+              [mask]="cpfCnpjMask"
+              name="cpf_cnpj"
+              (input)="onCpfCnpjInput($event)"
+              [showMaskTyped]="true">
             <mat-error *ngIf="accountForm.get('cpf_cnpj')?.hasError('required')">
               CPF/CNPJ é obrigatório
             </mat-error>
@@ -46,7 +50,6 @@
           <mat-form-field class="w-full">
             <mat-label>Telefone</mat-label>
             <input matInput
-              id="phone_number"
               name="phone_number"
               formControlName="phone_number"
               placeholder="(00) 00000-0000"
@@ -63,7 +66,12 @@
           <!-- Data de Nascimento -->
           <mat-form-field class="w-full">
             <mat-label>Data de Nascimento Do Responsável</mat-label>
-            <input matInput id="birth" name="birth" [matDatepicker]="picker" formControlName="birth">
+            <input matInput
+              [matDatepicker]="picker"
+              name="birth"
+              formControlName="birth"
+              placeholder="DD/MM/AAAA"
+            >
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
             <mat-error *ngIf="accountForm.get('birth')?.hasError('required')">
@@ -92,13 +100,15 @@
           <!-- CEP -->
           <mat-form-field class="w-full">
             <mat-label>CEP</mat-label>
-            <input matInput 
-                   formControlName="postal_code" 
-                   placeholder="00000-000"
-                   (blur)="buscarCep()"
-                   [attr.disabled]="isLoadingCep ? '' : null"
-                   mask="00000-000"
-                   [showMaskTyped]="true">
+            <input 
+              matInput 
+              name="postal_code"
+              formControlName="postal_code" 
+              placeholder="00000-000"
+              (blur)="buscarCep()"
+              [disabled]="isLoadingCep"
+              mask="00000-000"
+              [showMaskTyped]="true">
             <mat-icon *ngIf="isLoadingCep" matSuffix class="animate-spin">sync</mat-icon>
             <mat-error *ngIf="addressForm.get('postal_code')?.hasError('required')">
               CEP é obrigatório
@@ -111,7 +121,7 @@
           <!-- Rua -->
           <mat-form-field class="w-full">
             <mat-label>Rua</mat-label>
-            <input matInput formControlName="street" placeholder="Digite o nome da rua">
+            <input matInput name="street" formControlName="street" placeholder="Digite o nome da rua">
             <mat-error *ngIf="addressForm.get('street')?.hasError('required')">
               Rua é obrigatória
             </mat-error>
@@ -121,24 +131,34 @@
           </mat-form-field>
 
           <!-- Número -->
-          <mat-form-field class="w-full">
-            <mat-label>Número</mat-label>
-            <input matInput formControlName="house_number" placeholder="Digite o número">
-            <mat-error *ngIf="addressForm.get('house_number')?.hasError('required')">
-              Número é obrigatório
-            </mat-error>
-          </mat-form-field>
+          <div class="w-full space-y-2">
+            <mat-form-field class="w-full">
+              <mat-label>Número</mat-label>
+              <input matInput name="house_number" formControlName="house_number" placeholder="Digite o número">
+              <mat-error *ngIf="addressForm.get('house_number')?.hasError('required')">
+                Número é obrigatório
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-checkbox
+              name="hasNoHouseNumber"
+              formControlName="hasNoHouseNumber"
+              (change)="onNoHouseNumberChange()"
+              class="text-sm">
+              Sem número
+            </mat-checkbox>
+          </div>
 
           <!-- Complemento -->
           <mat-form-field class="w-full">
             <mat-label>Complemento</mat-label>
-            <input matInput formControlName="complement" placeholder="Digite o complemento (opcional)">
+            <input matInput name="complement" formControlName="complement" placeholder="Digite o complemento (opcional)">
           </mat-form-field>
 
           <!-- Bairro -->
           <mat-form-field class="w-full">
             <mat-label>Bairro</mat-label>
-            <input matInput formControlName="neighborhood" placeholder="Digite o bairro">
+            <input matInput name="neighborhood" formControlName="neighborhood" placeholder="Digite o bairro">
             <mat-error *ngIf="addressForm.get('neighborhood')?.hasError('required')">
               Bairro é obrigatório
             </mat-error>
@@ -147,7 +167,7 @@
           <!-- Estado -->
           <mat-form-field class="w-full">
             <mat-label>Estado</mat-label>
-            <input matInput formControlName="state" placeholder="Digite o estado">
+            <input matInput name="state" formControlName="state" placeholder="Digite o estado">
             <mat-error *ngIf="addressForm.get('state')?.hasError('required')">
               Estado é obrigatório
             </mat-error>
@@ -156,7 +176,7 @@
           <!-- País -->
           <mat-form-field class="w-full">
             <mat-label>País</mat-label>
-            <input matInput formControlName="country" placeholder="Digite o país">
+            <input matInput name="country" formControlName="country" placeholder="Digite o país">
             <mat-error *ngIf="addressForm.get('country')?.hasError('required')">
               País é obrigatório
             </mat-error>
@@ -177,5 +197,5 @@
         </form>
       </mat-step>
     </mat-stepper>
-  </div>
+  </mat-card>
 </div> 

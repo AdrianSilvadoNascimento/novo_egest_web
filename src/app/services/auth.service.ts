@@ -53,6 +53,10 @@ export class AuthService {
     this.registeredEmail.next(email);
   }
 
+  setFirstAccess(status: boolean): void {
+    this.firstAccess.next(status);
+  }
+
   setLoginStatus(status: boolean, token?: string): void {
     if (status && token) {
       this.storage.setItem('token', token);

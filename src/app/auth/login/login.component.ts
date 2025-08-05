@@ -17,11 +17,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { LoginModel } from '../../models/login.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { MatCard } from "@angular/material/card";
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule],
+  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule, MatCard],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

@@ -22,6 +22,12 @@
       </div>
     </button>
     <mat-menu #userMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/settings/account', authService.getAccountId()]" routerLinkActive="router-link-active">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span>Minha Conta</span>
+      </button>
       <button mat-menu-item (click)="logout()">
         <mat-icon>
           <lucide-icon [img]="logOutIcon" class="w-5 h-5 mr-2"></lucide-icon>

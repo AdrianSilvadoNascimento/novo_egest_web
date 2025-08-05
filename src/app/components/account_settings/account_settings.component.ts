@@ -8,14 +8,19 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AccountModel } from '../../models/account.model';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { AccountAddressModel } from '../../models/account_address.model';
 import { CepService } from '../../services/cep.service';
 import { finalize } from 'rxjs';
-import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ToastService } from '../../services/toast.service';
 import { AccountService } from '../../services/account.service';
+import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-account-settings',
@@ -30,7 +35,9 @@ import { AccountService } from '../../services/account.service';
     MatButtonModule,
     MatStepperModule,
     MatIconModule,
-    NgxMaskDirective,
+    MatCheckboxModule,
+    NgxMaskDirective, 
+    MatCardModule
   ],
   providers: [provideNgxMask()],
   templateUrl: './account_settings.component.html',
@@ -41,33 +48,55 @@ export class AccountSettingsComponent implements OnInit {
   accountForm: FormGroup = new FormGroup({});
   addressForm: FormGroup = new FormGroup({});
   isLoadingCep = false;
+  hasNoHouseNumber: boolean = false;
+  cpfCnpjMask: string = '000.000.000-00';
+  accountId: string = '';
+  addressFormInitialized: boolean = false;
+
+  account!: AccountModel
+  address!: AccountAddressModel
 
   constructor(
     private fb: FormBuilder,
     private cepService: CepService,
     private accountService: AccountService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.createAccountForm(new AccountModel());
-    this.createAddressForm(new AccountAddressModel());
-
-    // Inscrever-se nas mudanças do formulário para debug
-    this.accountForm.statusChanges.subscribe(status => {
-      console.log('Account Form Status:', status);
-      console.log('Account Form Valid:', this.accountForm.valid);
-      console.log('Account Form Errors:', this.accountForm.errors);
+    this.initializeBasicForms();
+    this.createEmptyAddressForm();
+    
+    this.route.params.subscribe(params => {
+      this.accountId = params['id'];
+      if (this.accountId) {
+        this.loadAccountData();
+        this.loadAccountAddress();
+      } else {
+        this.initializeEmptyForms();
+        this.createEmptyAddressForm();
+      }
     });
-
-    this.addressForm.statusChanges.subscribe(status => {
-      console.log('Address Form Status:', status);
-      console.log('Address Form Valid:', this.addressForm.valid);
-      console.log('Address Form Errors:', this.addressForm.errors);
-    });
+    
+    this.checkAccount();
+    this.checkAddress();
   }
 
-  createAccountForm(accountModel: AccountModel) {
+  checkAddress(): void {
+    this.accountService.$accountAddressData.subscribe(res => {
+      this.address = res
+    })
+  }
+
+  checkAccount(): void {
+    this.accountService.$accountData.subscribe(res => {
+      this.account = res
+    })
+  }
+
+  createAccountForm(accountModel: AccountModel): void {
     this.accountForm = this.fb.group({
       name: [accountModel.name, [Validators.required, Validators.minLength(3)]],
       cpf_cnpj: [accountModel.cpf_cnpj, [Validators.required, Validators.minLength(11)]],
@@ -75,26 +104,42 @@ export class AccountSettingsComponent implements OnInit {
       email: [accountModel.email, [Validators.required, Validators.email]],
       birth: [accountModel.birth, Validators.required]
     });
+
+    this.updateCpfCnpjMask(accountModel.cpf_cnpj);
   }
 
-  createAddressForm(addressModel: AccountAddressModel) {
+  createAddressForm(addressModel: AccountAddressModel): void {
+    this.hasNoHouseNumber = addressModel.house_number === 'S/N';
+
     this.addressForm = this.fb.group({
-      street: [addressModel.street, [Validators.required, Validators.minLength(3)]],
-      house_number: [addressModel.house_number, Validators.required],
-      neighborhood: [addressModel.neighborhood, Validators.required],
-      postal_code: [addressModel.postal_code, Validators.required],
-      state: [addressModel.state, Validators.required],
-      complement: [addressModel.complement],
-      country: [addressModel.country, Validators.required]
+      street: [addressModel.street || '', [Validators.required, Validators.minLength(3)]],
+      house_number: [
+        addressModel.house_number || '', 
+        this.hasNoHouseNumber ? [] : [Validators.required]
+      ],
+      neighborhood: [addressModel.neighborhood || '', Validators.required],
+      postal_code: [addressModel.postal_code || '', Validators.required],
+      state: [addressModel.state || '', Validators.required],
+      complement: [addressModel.complement || ''],
+      country: [addressModel.country || '', Validators.required],
+      hasNoHouseNumber: [this.hasNoHouseNumber]
     });
+
+    if (this.hasNoHouseNumber) {
+      this.addressForm.get('house_number')?.setValue('S/N');
+      this.addressForm.get('house_number')?.disable();
+    }
   }
 
   onSubmit(): void {
     if (this.accountForm.valid) {
+      const formData = { ...this.account, ...this.accountForm.value };
+      sessionStorage.setItem('account', JSON.stringify(formData));
+      
       this.accountService.updateAccount(this.accountForm.value).subscribe({
         next: (res) => {
           this.toastService.success("Conta atualizada com sucesso!");
-          // Avançar para o próximo passo após salvar
+          this.authService.setFirstAccess(false);
           this.stepper.next();
         },
         error: (error) => {
@@ -105,15 +150,38 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   onAddressSubmit(): void {
-    if (this.addressForm.valid) {
-      this.accountService.updateAccountAddress(this.addressForm.value).subscribe({
+    if (this.addressForm.valid || this.hasNoHouseNumber) {
+      const formValue = { ...this.addressForm.value };
+      if (this.hasNoHouseNumber) {
+        formValue.house_number = 'S/N';
+      }
+
+      // Criar o objeto AccountAddressModel com os dados necessários
+      const addressData: AccountAddressModel = {
+        id: this.address?.id || undefined,
+        street: formValue.street,
+        house_number: formValue.house_number,
+        neighborhood: formValue.neighborhood,
+        postal_code: formValue.postal_code,
+        state: formValue.state,
+        complement: formValue.complement || '',
+        country: formValue.country,
+        account_id: this.accountId
+      };
+
+      sessionStorage.setItem('account_address', JSON.stringify(addressData));
+
+      this.accountService.updateAccountAddress(addressData).subscribe({
         next: (res) => {
           this.toastService.success("Endereço atualizado com sucesso!");
+          this.address = res;
         },
         error: (error) => {
-          this.toastService.error(error.error.message || "Erro ao atualizar endereço");
+          this.toastService.error(error.error?.message || "Erro ao atualizar endereço");
         }
       });
+    } else {
+      this.toastService.error("Por favor, preencha todos os campos obrigatórios do endereço");
     }
   }
 
@@ -141,4 +209,134 @@ export class AccountSettingsComponent implements OnInit {
         });
     }
   }
-} 
+
+  onNoHouseNumberChange(): void {
+    const houseNumberControl = this.addressForm.get('house_number');
+    this.hasNoHouseNumber = this.addressForm.get('hasNoHouseNumber')?.value;
+    
+    if (this.hasNoHouseNumber) {
+      houseNumberControl?.setValue('S/N');
+      houseNumberControl?.clearValidators();
+      houseNumberControl?.disable();
+    } else {
+      houseNumberControl?.enable();
+      houseNumberControl?.setValue('');
+      houseNumberControl?.setValidators([Validators.required]);
+    }
+    houseNumberControl?.updateValueAndValidity();
+  }
+
+  onCpfCnpjInput(event: any): void {
+    const value = event.target.value.replace(/\D/g, '');
+    this.updateCpfCnpjMask(value);
+  }
+
+  private updateCpfCnpjMask(value: string): void {
+    const cleanValue = value.replace(/\D/g, '');
+    
+    if (cleanValue.length <= 11) {
+      this.cpfCnpjMask = '000.000.000-00';
+    } else {
+      this.cpfCnpjMask = '00.000.000/0000-00';
+    }
+  }
+
+  private loadAccountData(): void {
+    const cachedAccount = sessionStorage.getItem('account');
+    
+    if (cachedAccount) {
+      try {
+        this.account = JSON.parse(cachedAccount);
+        this.createAccountForm(this.account);
+        return;
+      } catch (e) {
+        console.warn('Erro ao carregar dados da sessão:', e);
+      }
+    }
+
+    this.accountService.getAccount().subscribe({
+      next: (account) => {
+        this.account = account;
+        sessionStorage.setItem('account', JSON.stringify(account));
+        this.createAccountForm(account);
+      },
+      error: (error) => {
+        this.toastService.error(error.error?.message || "Erro ao carregar dados da conta");
+        this.initializeEmptyForms();
+      }
+    });
+  }
+
+  private loadAccountAddress(): void {
+    const cachedAddress = sessionStorage.getItem('account_address');
+
+    if (cachedAddress) {
+      try {
+        this.address = JSON.parse(cachedAddress);
+        this.populateAddressForm(this.address);
+        return;
+      } catch (e) {
+        console.warn('Erro ao carregar dados do endereço da sessão, criando formulário vazio:', e);
+        this.createEmptyAddressForm();
+      }
+    }
+
+    this.accountService.getAccountAddress().subscribe({
+      next: (address) => {
+        if (address) {
+          sessionStorage.setItem('account_address', JSON.stringify(address));
+          this.populateAddressForm(address);
+        } else {
+          sessionStorage.removeItem('account_address');
+          this.createEmptyAddressForm();
+        }
+      },
+      error: (error) => {
+        console.warn('Erro ao buscar endereço, criando formulário vazio:', error);
+        sessionStorage.removeItem('account_address');
+        this.createEmptyAddressForm();
+      }
+    });
+  }
+
+  private initializeEmptyForms(): void {
+    this.createAccountForm(new AccountModel());
+  }
+
+  private createEmptyAddressForm(): void {
+    this.createAddressForm(new AccountAddressModel());
+  }
+
+  private initializeBasicForms(): void {
+    this.accountForm = this.fb.group({
+      name: [''],
+      cpf_cnpj: [''],
+      phone_number: [''],
+      birth: [''],
+      email: ['']
+    });
+    
+    this.addressForm = new FormGroup({});
+  }
+
+  private populateAddressForm(address: AccountAddressModel): void {
+    this.addressForm.patchValue({
+      street: address.street,
+      house_number: address.house_number,
+      neighborhood: address.neighborhood,
+      postal_code: address.postal_code,
+      state: address.state,
+      complement: address.complement,
+      country: address.country,
+      hasNoHouseNumber: address.house_number === 'S/N'
+    });
+  }
+
+  onStepChange(event: StepperSelectionEvent): void {
+    if (event.selectedIndex === 1 && !this.addressFormInitialized) {
+      // this.loadAccountAddress();
+      // this.populateAddressForm(this.address);
+      // this.addressFormInitialized = true;
+    }
+  }
+}

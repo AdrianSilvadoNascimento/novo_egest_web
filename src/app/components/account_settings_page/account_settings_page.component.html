@@ -1,0 +1,23 @@
+<div class="min-h-screen rounded-lg shadow-md bg-gray-50 py-8 mb-8">
+  <div class="w-full px-8 mx-auto space-y-6">
+    <!-- Título da Página -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">Configurações da Conta</h1>
+      <p class="text-gray-600 mt-2">Gerencie suas informações pessoais e dados da empresa</p>
+    </div>
+
+    <hr>
+
+    @if (accountId) {
+      <!-- Bloco 1: Dados Pessoais (AccountUser) -->
+      <h3 class="font-semibold text-gray-800 mb-6">Dados Pessoais</h3>
+      <app-account-user-settings [accountId]="accountId"></app-account-user-settings>
+
+      <hr>
+    }
+
+    <!-- Bloco 2: Dados da Empresa (Account) - Stepper -->
+    <h3 class="font-semibold text-gray-800 mb-6">Dados da Empresa</h3>
+    <app-account-settings></app-account-settings>
+  </div>
+</div>

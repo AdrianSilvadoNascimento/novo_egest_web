@@ -18,11 +18,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { RegisterModel } from '../../models/register.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { MatCard } from "@angular/material/card";
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule],
+  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule, MatCard],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })

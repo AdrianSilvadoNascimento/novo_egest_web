@@ -25,7 +25,7 @@ export class HeaderComponent implements OnInit {
   userName!: string;
   isLogged: boolean = false;
 
-  constructor(private readonly authService: AuthService) { }
+  constructor(readonly authService: AuthService) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {

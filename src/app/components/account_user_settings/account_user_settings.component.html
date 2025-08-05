@@ -1,0 +1,65 @@
+<div class="bg-gray-50 py-8">
+  <mat-card class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+    <mat-card-content class="pt-4">
+      <form [formGroup]="accountUserForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Nome -->
+        <mat-form-field class="w-full">
+          <mat-label>Nome</mat-label>
+          <input matInput 
+            formControlName="user_name" 
+            placeholder="Digite seu nome"
+            [disabled]="isLoading">
+          <mat-error *ngIf="accountUserForm.get('user_name')?.hasError('required')">
+            Nome é obrigatório
+          </mat-error>
+          <mat-error *ngIf="accountUserForm.get('user_name')?.hasError('minlength')">
+            Nome deve ter pelo menos 2 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Sobrenome -->
+        <mat-form-field class="w-full">
+          <mat-label>Sobrenome</mat-label>
+          <input matInput 
+            formControlName="user_lastname" 
+            placeholder="Digite seu sobrenome"
+            [disabled]="isLoading">
+          <mat-error *ngIf="accountUserForm.get('user_lastname')?.hasError('required')">
+            Sobrenome é obrigatório
+          </mat-error>
+          <mat-error *ngIf="accountUserForm.get('user_lastname')?.hasError('minlength')">
+            Sobrenome deve ter pelo menos 2 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field class="w-full">
+          <mat-label>Email</mat-label>
+          <input matInput 
+            formControlName="user_email" 
+            placeholder="Digite seu email"
+            [disabled]="isLoading">
+          <mat-error *ngIf="accountUserForm.get('user_email')?.hasError('required')">
+            Email é obrigatório
+          </mat-error>
+          <mat-error *ngIf="accountUserForm.get('user_email')?.hasError('email')">
+            Email inválido
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end" class="p-4">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit"
+        [disabled]="!accountUserForm.valid || isLoading"
+        (click)="onSubmit()"
+        class="px-6 py-2">
+        <span *ngIf="isLoading">Salvando...</span>
+        <span *ngIf="!isLoading">Salvar Dados Pessoais</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

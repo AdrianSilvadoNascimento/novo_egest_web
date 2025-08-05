@@ -1,0 +1,24 @@
+mat-card {
+  background-color: #fff;
+}
+
+mat-card-header {
+  padding: 24px 24px 0 24px;
+}
+
+mat-card-content {
+  padding: 0 24px;
+}
+
+mat-card-actions {
+  padding: 16px 24px 24px 24px;
+  margin: 0;
+}
+
+mat-form-field {
+  margin-bottom: 16px;
+}
+
+button[mat-raised-button] {
+  min-width: 200px;
+}

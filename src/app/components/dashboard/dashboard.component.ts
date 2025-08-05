@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   readonly alertCircleIcon = AlertCircle;
 
   isFirstLogin: boolean = false;
+  private hasShownWelcomeModal: boolean = false;
   dashboardData!: DashboardModel
 
   constructor(
@@ -42,14 +43,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngAfterViewInit(): void {
-    if (this.isFirstLogin) {
-      this.dialog.open(WelcomeDialogComponent)
+    if (this.isFirstLogin && !this.hasShownWelcomeModal) {
+      this.hasShownWelcomeModal = true;
+      const dialogRef = this.dialog.open(WelcomeDialogComponent);
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.isFirstLogin = false;
+      });
     }
   }
 
   ngOnInit(): void {
     this.authService.$firstAccess.subscribe(data => {
-      this.isFirstLogin = data;
+      this.isFirstLogin = data && !this.hasShownWelcomeModal;
     })
     
     this.getData();

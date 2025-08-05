@@ -24,6 +24,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+mat-card, mat-stepper {
+  background-color: #fff;
+}
+
 // Estilos para o botão
 button[mat-raised-button] {
   transition: all 0.3s ease;
