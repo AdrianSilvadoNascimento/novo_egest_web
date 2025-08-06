@@ -2,7 +2,6 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
-  LucideAngularModule,
   AlertCircle,
   Package,
   TrendingUp,
@@ -17,9 +16,6 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-angular';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { DashboardModel } from '../../models/dashboard.model';
 import { DashboardService } from '../../services/dashboard.service';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
@@ -30,8 +26,6 @@ import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatButtonModule, MatCardModule, MatIconModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -52,7 +46,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   isFirstLogin: boolean = false;
   private hasShownWelcomeModal: boolean = false;
-  dashboardData!: DashboardModel
+  dashboardData!: DashboardModel;
+  isLoading: boolean = false;
+  isLoadingRefresh: boolean = false;
 
   constructor(
     private readonly dashboardService: DashboardService,
@@ -76,14 +72,27 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.authService.$firstAccess.subscribe(data => {
       this.isFirstLogin = data && !this.hasShownWelcomeModal;
     })
+
+    // Subscrever aos loading states
+    this.dashboardService.$isLoading.subscribe(loading => {
+      this.isLoading = loading;
+    });
     
     this.getData();
   }
 
   getData(): void {
     this.dashboardService.getDashboardData().subscribe((data) => {
-      this.dashboardData = data
-    })
+      this.dashboardData = data;
+    });
+  }
+
+  refreshData(): void {
+    this.isLoadingRefresh = true;
+    this.dashboardService.refreshDashboard().subscribe((data) => {
+      this.dashboardData = data;
+      this.isLoadingRefresh = false;
+    });
   }
 
   onAddProduct(): void {

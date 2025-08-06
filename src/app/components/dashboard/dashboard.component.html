@@ -1,3 +1,46 @@
+<!-- Loading Skeleton -->
+@if (isLoading) {
+  <div class="dashboard-skeleton">
+    <!-- Skeleton Cards Superiores -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      @for (item of [1,2,3,4]; track item) {
+        <div class="skeleton-card">
+          <div class="skeleton-content">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-value"></div>
+            <div class="skeleton-growth"></div>
+          </div>
+          <div class="skeleton-icon"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Skeleton Seções do Meio -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+      @for (item of [1,2,3]; track item) {
+        <div class="skeleton-section">
+          <div class="skeleton-section-title"></div>
+          <div class="skeleton-section-content"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Skeleton Blocos Finais -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (item of [1,2]; track item) {
+        <div class="skeleton-section">
+          <div class="skeleton-section-title"></div>
+          <div class="skeleton-list">
+            @for (listItem of [1,2,3,4,5]; track listItem) {
+              <div class="skeleton-list-item"></div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+<!-- Dashboard Real -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
   @if (dashboardData) {
   <!-- Card: Produtos em Estoque -->
@@ -306,3 +349,4 @@
     }
   </div>
 </div>
+}
