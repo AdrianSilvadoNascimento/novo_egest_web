@@ -1,11 +1,21 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import {
   LucideAngularModule,
-  ArrowDown,
-  ArrowUp,
   AlertCircle,
-  PackagePlus,
+  Package,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  Search,
+  ShoppingCart,
+  FileText,
+  Plus,
+  Eye,
+  Calendar,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -21,15 +31,24 @@ import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [LucideAngularModule, MatButtonModule, MatCardModule, MatIconModule],
+  imports: [CommonModule, LucideAngularModule, MatButtonModule, MatCardModule, MatIconModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-  readonly packageIcon = PackagePlus;
-  readonly arrowDownIcon = ArrowDown;
-  readonly arrowUpIcon = ArrowUp;
+  readonly packageIcon = Package;
+  readonly arrowDownIcon = TrendingUp;
+  readonly arrowUpIcon = TrendingDown;
   readonly alertCircleIcon = AlertCircle;
+  readonly chartIcon = BarChart3;
+  readonly searchIcon = Search;
+  readonly cartIcon = ShoppingCart;
+  readonly fileIcon = FileText;
+  readonly plusIcon = Plus;
+  readonly eyeIcon = Eye;
+  readonly calendarIcon = Calendar;
+  readonly arrowUpActivityIcon = ArrowUp;
+  readonly arrowDownActivityIcon = ArrowDown;
 
   isFirstLogin: boolean = false;
   private hasShownWelcomeModal: boolean = false;
@@ -81,5 +100,39 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
       }
     });
+  }
+
+  onSearchProduct(): void {
+    this.router.navigate(['/products']);
+  }
+
+  onNewSale(): void {
+    // TODO: Implementar funcionalidade de nova venda
+    console.log('Nova venda clicada');
+  }
+
+  onViewReports(): void {
+    // TODO: Implementar navegação para relatórios
+    console.log('Relatórios clicado');
+  }
+
+  onViewDetails(): void {
+    // TODO: Implementar detalhes da movimentação
+    console.log('Ver detalhes clicado');
+  }
+
+  getMaxValue(movement: any[]): number {
+    if (!movement || movement.length === 0) return 100;
+    return Math.max(...movement.map(item => Math.max(item.entries, item.exits)));
+  }
+
+  onViewAllLowStock(): void {
+    // TODO: Implementar navegação para produtos com baixo estoque
+    console.log('Ver todos os produtos com baixo estoque');
+  }
+
+  onViewHistory(): void {
+    // TODO: Implementar navegação para histórico de atividades
+    console.log('Ver histórico de atividades');
   }
 }
