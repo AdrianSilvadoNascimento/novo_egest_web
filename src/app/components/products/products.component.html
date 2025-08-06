@@ -39,25 +39,25 @@
 
   <div class="max-w-7xl mx-auto p-6 space-y-6">
     <div class="flex items-center space-x-4">
-      <button mat-fab extended matTooltip="Inserir novo produto" (click)="onAddProduct()"
-        class="flex items-center shadow gap-1">
-        <mat-icon>
-          <lucide-icon [img]="addIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
-        </mat-icon>
-        <span class="text-gray-700 font-[Lora]">
-          Novo Produto
-        </span>
+      <button mat-raised-button color="primary" class="user-menu text-gray-700" (click)="onAddProduct()" matTooltip="Inserir novo produto">
+        <div class="flex justify-between items-center">
+          <mat-icon class="mr-3">
+            <lucide-icon [img]="addIcon" class="w-6 h-6"></lucide-icon>
+          </mat-icon>
+          <span class="text-white-500 text-sm font-[Lora]">Novo Produto</span>
+        </div>
+      </button>
+      
+      <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Importar produtos"
+        (click)="fileInput.click()">
+        <div class="flex justify-be tween items-center">
+          <mat-icon class="mr-3">
+            <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
+          </mat-icon>
+          <span class="text-white-500 text-sm font-[Lora]">Importar Produtos</span>
+        </div>
       </button>
 
-      <button mat-fab extended matTooltip="Importar produtos" class="flex items-center gap-1"
-        (click)="fileInput.click()">
-        <mat-icon>
-          <lucide-icon [img]="importIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
-        </mat-icon>
-        <span class="text-gray-700 font-[Lora]">
-          Importar Produtos
-        </span>
-      </button>
       <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;"
         (change)="onFileImportSelected($event)" />
 

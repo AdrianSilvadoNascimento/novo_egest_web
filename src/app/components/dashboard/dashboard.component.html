@@ -27,31 +27,31 @@
 </div>
 
 <div class="flex flex-wrap gap-4 justify-center mt-10">
-  <button mat-fab extended (click)="onAddProduct()" class="flex items-center gap-1">
-    <mat-icon>
-      <lucide-icon [img]="packageIcon" class="w-6 h-6 text-blue-600"></lucide-icon>
-    </mat-icon>
-    <span class="text-gray-700 font-[Lora]">
-      Novo Produto
-    </span>
+  <button mat-raised-button color="primary" class="text-gray-700" (click)="onAddProduct()" matTooltip="Inserir novo produto">
+    <div class="flex justify-between items-center">
+      <mat-icon class="mr-3">
+        <lucide-icon [img]="packageIcon" class="w-6 h-6"></lucide-icon>
+      </mat-icon>
+      <span class="text-white-500 text-sm font-[Lora]">Novo Produto</span>
+    </div>
   </button>
 
-  <button mat-fab extended class="flex items-center gap-1">
-    <mat-icon>
-      <lucide-icon [img]="arrowDownIcon" class="w-6 h-6 text-green-600"></lucide-icon>
-    </mat-icon>
-    <span class="text-gray-700 font-[Lora]">
-      Nova Entrada
-    </span>
+  <button mat-raised-button color="primary" class="text-gray-700" matToolTip="Registrar nova entrada">
+    <div class="flex justify-between items-center">
+      <mat-icon class="mr-3">
+        <lucide-icon [img]="arrowDownIcon" class="w-6 h-6 text-green-600"></lucide-icon>
+      </mat-icon>
+      <span class="text-white-500 text-sm font-[Lora]">Nova Entrada</span>
+    </div>
   </button>
 
-  <button mat-fab extended class="flex items-center gap-1">
-    <mat-icon>
-      <lucide-icon [img]="arrowUpIcon" class="w-6 h-6 text-red-500"></lucide-icon>
-    </mat-icon>
-    <span class="text-gray-700 font-[Lora]">
-      Nova Saída
-    </span>
+  <button mat-raised-button color="primary" class="text-gray-700" matToolTip="Registrar nova saída">
+    <div class="flex justify-between items-center">
+      <mat-icon class="mr-3">
+        <lucide-icon [img]="arrowUpIcon" class="w-6 h-6 text-red-600"></lucide-icon>
+      </mat-icon>
+      <span class="text-white-500 text-sm font-[Lora]">Nova Saída</span>
+    </div>
   </button>
 </div>
 

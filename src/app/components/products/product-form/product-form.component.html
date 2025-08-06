@@ -1,5 +1,12 @@
-<h2 mat-dialog-title class="text-2xl font-bold mb-8">{{ data ? 'Editar Produto' : 'Novo Produto' }}</h2>
-<mat-dialog-content>
+<h3 mat-dialog-title class="flex flex-col">
+  {{ data ? 'Editar Produto' : 'Adicionar Novo Produto' }}
+  <br>
+  <span class="text-sm pl-1 text-gray-500">Preencha as informações do produto</span>
+
+  <hr class="mt-2">
+</h3>
+
+<mat-dialog-content>  
   @if (hasDraft) {
   <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow mb-6 text-sm flex items-center gap-2">
     <span class="material-icons text-yellow-600">info</span>
@@ -12,103 +19,261 @@
   }
 
   <form [formGroup]="form" class="space-y-6">
-    <!-- Nome -->
-    <mat-form-field class="w-full">
-      <mat-label>Nome do Produto</mat-label>
-      <input matInput formControlName="name" required #nameInput cdkFocusInitial>
-      @if (form.get('name')?.invalid && form.get('name')?.touched) {
-      <mat-error>
-        @if (form.get('name')?.hasError('minlength')) {
-        Nome deve ter pelo menos 3 caracteres
-        }
-        @else {
-        Nome é obrigatório
-        }
-      </mat-error>
-      }
-    </mat-form-field>
+    <div class="flex flex-col md:flex-row gap-6">
+      <div class="w-full">
+        <mat-card class="shadow-md p-4 mb-6">
+          <p class="pl-2 text-sm text-gray-500">
+            Informações Básicas
+          </p>
 
-    <!-- Descrição -->
-    <mat-form-field class="w-full">
-      <mat-label>Descrição</mat-label>
-      <textarea matInput id="description" name="description" formControlName="description" rows="3"></textarea>
-    </mat-form-field>
+          <hr class="my-2">
 
-    <!-- Código de barras -->
-    <mat-form-field class="w-full">
-      <mat-label>Código de Barras</mat-label>
-      <input matInput type="text" id="barcode" name="barcode" formControlName="barcode" min="0">
-    </mat-form-field>
+          <!-- Nome -->
+          <mat-form-field class="custom-outline w-full mb-4">
+            <mat-label>Nome do Produto</mat-label>
+            <input matInput formControlName="name" required #nameInput cdkFocusInitial>
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <mat-error>
+              @if (form.get('name')?.hasError('minlength')) {
+              Nome deve ter pelo menos 3 caracteres
+              }
+              @else {
+              Nome é obrigatório
+              }
+            </mat-error>
+            }
+          </mat-form-field>
 
-    <!-- Preço de venda (R$) -->
-    <mat-form-field class="w-full">
-      <mat-label>Preço de Venda (R$)</mat-label>
-      <input matInput type="number" id="sale_price" name="sale_price" formControlName="sale_price" required min="0">
-      @if (form.get('sale_price')?.invalid && form.get('sale_price')?.touched) {
-      <mat-error>Preço é obrigatório</mat-error>
-      }
-    </mat-form-field>
+          <!-- Descrição -->
+          <mat-form-field class="custom-outline w-full mb-4">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput id="description" name="description" formControlName="description" rows="3"></textarea>
+          </mat-form-field>
 
-    <!-- Preço unitário e Estoque (lado a lado em desktop) -->
-    <div class="flex flex-col md:flex-row md:gap-6">
-      <mat-form-field class="w-full">
-        <mat-label>Preço Unitário (R$)</mat-label>
-        <input matInput type="number" id="unit_price" name="unit_price" formControlName="unit_price" required min="0">
-        @if (form.get('unit_price')?.invalid && form.get('unit_price')?.touched) {
-        <mat-error>Preço é obrigatório</mat-error>
-        }
-      </mat-form-field>
+          <!-- Código de barras -->
+          <mat-form-field class="custom-outline w-full mb-4">
+            <mat-label>Código de Barras</mat-label>
+            <input matInput type="text" id="barcode" name="barcode" formControlName="barcode" min="0">
+          </mat-form-field>
 
-      <mat-form-field class="w-full">
-        <mat-label>Estoque</mat-label>
-        <input matInput type="number" id="quantity" name="quantity" formControlName="quantity" required min="0">
-        @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
-        <mat-error>Estoque é obrigatório</mat-error>
-        }
-      </mat-form-field>
-    </div>
+          <!-- Categoria -->
+          <mat-form-field class="custom-outline w-full mb-4">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="category_id" id="category_id" name="category_id" required>
+              <mat-option value="">Selecione</mat-option>
+              @for (category of categories; track category.id) {
+              <mat-option [value]=category.id>{{category.name}}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('category')?.invalid && form.get('category')?.touched) {
+            <mat-error>Categoria é obrigatória</mat-error>
+            }
+          </mat-form-field>
+        </mat-card>
 
-    <!-- Categoria -->
-    <mat-form-field class="w-full">
-      <mat-label>Categoria</mat-label>
-      <mat-select formControlName="category_id" id="category_id" name="category_id" required>
-        <mat-option value="">Selecione</mat-option>
-        @for (category of categories; track category.id) {
-        <mat-option [value]=category.id>{{category.name}}</mat-option>
-        }
-      </mat-select>
-      @if (form.get('category')?.invalid && form.get('category')?.touched) {
-      <mat-error>Categoria é obrigatória</mat-error>
-      }
-    </mat-form-field>
+        <mat-card class="shadow-md p-4">
+          <p class="pl-2 text-sm text-gray-500 mb-4">
+            Imagem do Produto
+          </p>
 
-    <!-- Upload de Imagem -->
-    <div class="w-full">
-      <label
-        class="inline-flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md cursor-pointer text-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v8m0-8l-4 4m4-4l4 4m0-6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v6" />
-        </svg>
-        <span>Selecionar Imagem</span>
-        <input type="file" (change)="onImageSelected($event)" accept="image/*" class="hidden" />
-      </label>
+          <hr class="my-2">
 
-      @if (imagePreview) {
-      <div class="mt-4">
-        <img [src]="imagePreview" alt="Preview" class="w-32 h-32 object-cover rounded-md shadow" />
+          <!-- Área de Upload com Drag & Drop -->
+          <div class="upload-container">
+            @if (!imagePreview) {
+            <!-- Estado: Sem Imagem - Área de Drag & Drop -->
+            <div 
+              class="upload-area"
+              [class.upload-area--dragover]="isDragOver"
+              [class.upload-area--error]="errorMessage"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+              (click)="triggerFileInput()">
+              
+              <div class="upload-area__content">
+                <!-- Ícone de Upload -->
+                <div class="upload-area__icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                
+                <!-- Textos -->
+                <div class="upload-area__text">
+                  @if (isDragOver) {
+                    <p class="text-blue-600 font-medium">Solte a imagem aqui</p>
+                  } @else {
+                    <p class="text-gray-700 font-medium">Clique para selecionar uma imagem</p>
+                    <p class="text-gray-500 text-sm mt-1">ou arraste e solte aqui</p>
+                  }
+                  <p class="text-gray-400 text-xs mt-2">PNG, JPG até 5MB</p>
+                </div>
+              </div>
+              
+              <!-- Input de arquivo oculto -->
+              <input 
+                #fileInput
+                type="file" 
+                (change)="onImageSelected($event)" 
+                accept="image/png,image/jpeg,image/jpg" 
+                class="hidden" />
+            </div>
+            
+            <!-- Botão Selecionar -->
+            <div class="mt-4 text-center">
+              <button 
+                type="button"
+                (click)="triggerFileInput()"
+                class="upload-button">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Selecionar Imagem
+              </button>
+            </div>
+            } @else {
+            <!-- Estado: Com Imagem - Preview -->
+            <div class="image-preview">
+              <div class="image-preview__container">
+                <img [src]="imagePreview" alt="Preview da imagem" class="image-preview__img" />
+                
+                <!-- Overlay com ações -->
+                <div class="image-preview__overlay">
+                  <div class="image-preview__actions">
+                    <button 
+                      type="button"
+                      (click)="changeImage()"
+                      class="action-button action-button--change"
+                      title="Trocar imagem">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                    <button 
+                      type="button"
+                      (click)="removeImage()"
+                      class="action-button action-button--remove"
+                      title="Remover imagem">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Input oculto para trocar imagem -->
+              <input 
+                #fileInputChange
+                type="file" 
+                (change)="onImageSelected($event)" 
+                accept="image/png,image/jpeg,image/jpg" 
+                class="hidden" />
+            </div>
+            }
+            
+            <!-- Mensagem de Erro -->
+            @if (errorMessage) {
+            <div class="error-message">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ errorMessage }}
+            </div>
+            }
+          </div>
+        </mat-card>
       </div>
-      }
-    </div>
+      <div class="w-full">
+        <mat-card class="shadow-md p-4 mb-6">
+          <p class="pl-2 text-sm text-gray-500">
+            Preços e Estoque
+          </p>
 
-    <!-- Produto Ativo -->
-    <mat-checkbox formControlName="active" class="mt-6">
-      Produto Ativo
-    </mat-checkbox>
+          <hr class="my-2">
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- Preço de venda (R$) -->
+            <mat-form-field class="custom-outline w-full">
+              <mat-label>Preço de Venda (R$)</mat-label>
+              <input matInput type="number" id="sale_price" name="sale_price" formControlName="sale_price" required min="0" step="0.01">
+            </mat-form-field>
+            
+            <!-- Preço unitário -->
+            <mat-form-field class="custom-outline w-full">
+              <mat-label>Preço Unitário (R$)</mat-label>
+              <input matInput type="number" id="unit_price" name="unit_price" formControlName="unit_price" required min="0" step="0.01">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field class="custom-outline w-full mb-4">
+            <mat-label>Estoque</mat-label>
+            <input matInput type="number" id="quantity" name="quantity" formControlName="quantity" required min="0">
+            <mat-icon matPrefix>inventory</mat-icon>
+            @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
+            <mat-error>Estoque é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Produto Ativo -->
+          <mat-checkbox formControlName="active">
+            Produto Ativo
+          </mat-checkbox>
+        </mat-card>
+
+        <mat-card class="shadow-md p-4">
+          <p class="pl-2 text-sm text-gray-500">
+            Resumo do Produto
+          </p>
+
+          <hr class="my-2">
+
+          <p class="text-sm text-gray-500">
+            Nome: {{ form.get('name')?.value && form.get('name')?.value.length > 0 ? form.get('name')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Categoria: {{ form.get('category')?.value && form.get('category')?.value > 0 ? form.get('category')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Preço de Venda: 
+            <span [class]="(form.get('sale_price')?.value || 0) < (form.get('unit_price')?.value || 0) ? 'text-red-500' : 'text-green-500'">
+              {{
+                form.get('sale_price')?.value && form.get('sale_price')?.value > 0
+                  ? (form.get('sale_price')?.value | currency:'BRL')
+                  : 'R$ 0,00'
+              }}
+            </span>
+           </p>
+
+          <p class="text-sm text-gray-500">
+            Preço Unitário: 
+            {{
+              form.get('unit_price')?.value && form.get('unit_price')?.value > 0
+                ? (form.get('unit_price')?.value | currency:'BRL')
+                : 'R$ 0,00'
+            }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Estoque: {{ form.get('quantity')?.value && form.get('quantity')?.value > 0 ? form.get('quantity')?.value + ' unidades' : '0 unidades' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Status: <span class="{{ form.get('active')?.value ? 'text-green-500' : 'text-red-500' }}">{{ form.get('active')?.value ? 'Ativo' : 'Inativo' }}</span>
+          </p>
+        </mat-card>
+      </div>
+    </div>
 
     <mat-dialog-actions class="gap-4 pt-8">
       <!-- Botões -->
-      <!-- <div class="flex justify-end gap-4 pt-8"> -->
       <button mat-stroked-button type="button" (click)="close()" class="btn-secondary">
         Cancelar e Fechar
       </button>

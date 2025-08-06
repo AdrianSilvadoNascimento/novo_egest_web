@@ -2,10 +2,10 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 
 import {
   LucideAngularModule,
-  Package,
   ArrowDown,
   ArrowUp,
   AlertCircle,
+  PackagePlus,
 } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -26,7 +26,7 @@ import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-  readonly packageIcon = Package;
+  readonly packageIcon = PackagePlus;
   readonly arrowDownIcon = ArrowDown;
   readonly arrowUpIcon = ArrowUp;
   readonly alertCircleIcon = AlertCircle;
@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   onAddProduct(): void {
-    const dialogRef = this.dialog.open(ProductFormComponent);
+    const dialogRef = this.dialog.open(ProductFormComponent, { minWidth: '900px' });
 
     dialogRef.afterClosed().subscribe(result => {
       this.getData();

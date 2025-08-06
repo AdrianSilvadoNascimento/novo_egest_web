@@ -137,7 +137,7 @@ export class ProductsComponent implements OnInit {
   }
 
   onAddProduct(): void {
-    const dialogRef = this.dialog.open(ProductFormComponent, { width: '600px' });
+    const dialogRef = this.dialog.open(ProductFormComponent, { minWidth: '900px' });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -282,7 +282,7 @@ export class ProductsComponent implements OnInit {
 
     const dialogRef = this.dialog.open(ProductFormComponent, {
       data: editItem as ItemCreationModel,
-      width: '600px',
+      minWidth: '900px'
     });
 
     dialogRef.afterClosed().subscribe(result => {

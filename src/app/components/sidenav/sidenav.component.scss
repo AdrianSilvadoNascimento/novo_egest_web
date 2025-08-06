@@ -5,6 +5,7 @@ mat-sidenav-container {
 
   mat-sidenav {
     #sidenav-content {
+      background-color: white;
       height: $container-height;
 
       #expand-panel-button {
