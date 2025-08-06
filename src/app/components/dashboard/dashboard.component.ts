@@ -1,5 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
 
 import {
   AlertCircle,
@@ -16,11 +15,11 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-angular';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { DashboardModel } from '../../models/dashboard.model';
 import { DashboardService } from '../../services/dashboard.service';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
-import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
 
@@ -29,7 +28,7 @@ import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly packageIcon = Package;
   readonly arrowDownIcon = TrendingUp;
   readonly arrowUpIcon = TrendingDown;
@@ -77,21 +76,64 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.dashboardService.$isLoading.subscribe(loading => {
       this.isLoading = loading;
     });
+
+    // Subscrever ao status da conexão SSE
+    this.dashboardService.$connectionStatus.subscribe(status => {
+      console.log(`📡 Dashboard: Status conexão: ${status}`);
+    });
+
+    // Subscrever aos dados do dashboard
+    this.dashboardService.$dashboardData.subscribe(data => {
+      if (data && Object.keys(data).length > 0) {
+        this.dashboardData = data;
+      }
+    });
     
     this.getData();
+    this.connectToRealTimeUpdates();
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup quando componente é destruído
+    this.dashboardService.cleanup();
   }
 
   getData(): void {
-    this.dashboardService.getDashboardData().subscribe((data) => {
+    // Usar método otimizado com cache Redis
+    this.dashboardService.getDashboardQuick().subscribe((data) => {
       this.dashboardData = data;
     });
   }
 
   refreshData(): void {
     this.isLoadingRefresh = true;
-    this.dashboardService.refreshDashboard().subscribe((data) => {
-      this.dashboardData = data;
+    
+    // Usar método de refresh forçado
+    this.dashboardService.forceRefresh().subscribe((response) => {
+      if (response.success) {
+        console.log(`✅ Refresh iniciado: ${response.message}`);
+        // Dados serão atualizados via SSE quando o job terminar
+      } else {
+        console.error(`❌ Erro no refresh: ${response.message}`);
+      }
       this.isLoadingRefresh = false;
+    });
+  }
+
+  /**
+   * Conecta aos updates em tempo real via SSE
+   */
+  private connectToRealTimeUpdates(): void {
+    this.dashboardService.connectToUpdates().subscribe({
+      next: (event) => {
+        // Eventos SSE são processados automaticamente no service
+        if (event.type === 'dashboard-updated') {
+          console.log('✨ Dashboard atualizado via tempo real!');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Erro na conexão tempo real:', error);
+      }
     });
   }
 
