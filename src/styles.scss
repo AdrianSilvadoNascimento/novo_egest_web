@@ -10,7 +10,11 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 
-  .mdc-fab, .mat-mdc-dialog-surface, .mat-mdc-card {
+  .mdc-fab,
+  .mat-mdc-dialog-surface,
+  .mat-mdc-card,
+  .mat-drawer-container,
+  .mat-drawer {
     background-color: white;
   }
 
@@ -18,7 +22,8 @@ body {
     background-color: white !important;
   }
 
-  .mat-mdc-dialog-surface {
+  .mat-mdc-dialog-surface,
+  .mat-drawer-container {
     border-radius: 8px;
   }
 
@@ -94,7 +99,7 @@ body {
     &.mdc-floating-label--float-above {
       top: 0 !important;
       transform: translateY(-50%) scale(0.75) !important;
-      background-color: white;
+      background-color: transparent !important;
       padding: 0 8px;
       margin-left: -8px;
       z-index: 2;
@@ -221,7 +226,7 @@ body {
 /* ===== ANGULAR MATERIAL GLOBAL THEME OVERRIDES ===== */
 
 /* ===== BOTÕES ===== */
-.mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-outlined-button {
+.mat-mdc-button, .mat-mdc-raised-button {
   &.mat-primary {
     background-color: #3b82f6 !important;
     color: #ffffff !important;
@@ -256,9 +261,15 @@ body {
     border-color: #3b82f6 !important;
     color: #3b82f6 !important;
     background-color: #ffffff !important;
+
+    &.active {
+      color: #fff !important;
+      background-color: #3b82f6 !important;
+    }
     
     &:hover {
-      background-color: rgba(59, 130, 246, 0.05) !important;
+      color: #fff !important;
+      background-color: #3b82f6 !important;
     }
   }
 }

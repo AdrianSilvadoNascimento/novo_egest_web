@@ -37,125 +37,224 @@
 
   </mat-drawer>
 
-  <div class="max-w-7xl mx-auto p-6 space-y-6">
-    <div class="flex items-center space-x-4">
-      <button mat-raised-button color="primary" class="user-menu text-gray-700" (click)="onAddProduct()" matTooltip="Inserir novo produto">
-        <div class="flex justify-between items-center">
-          <mat-icon class="mr-3">
-            <lucide-icon [img]="addIcon" class="w-6 h-6"></lucide-icon>
-          </mat-icon>
-          <span class="text-white-500 text-sm font-[Lora]">Novo Produto</span>
-        </div>
-      </button>
-      
-      <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Importar produtos"
-        (click)="fileInput.click()">
-        <div class="flex justify-be tween items-center">
-          <mat-icon class="mr-3">
-            <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
-          </mat-icon>
-          <span class="text-white-500 text-sm font-[Lora]">Importar Produtos</span>
-        </div>
-      </button>
+  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
+    <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar produtos"
+      (click)="fileInput.click()">
+      <div class="flex justify-be tween items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-white-500 text-sm font-[Lora]">Importar Produtos</span>
+      </div>
+    </button>
 
-      <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;"
-        (change)="onFileImportSelected($event)" />
+    <button mat-raised-button color="primary" class="user-menu text-gray-700" (click)="onAddProduct()" matTooltip="Inserir novo produto">
+      <div class="flex justify-between items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="addIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-white-500 text-sm font-[Lora]">Novo Produto</span>
+      </div>
+    </button>
 
-      <div class="flex-grow"></div>
-
-      @if (!isEmpty) {
-      <button mat-icon-button matTooltip="Filtrar produtos" (click)="toggleFilters()">
-        <mat-icon>filter_list</mat-icon>
-      </button>
-      }
-    </div>
-
-    @if (isEmpty) {
-    <app-empty-list [icon]="packageIcon" description="Produtos está vazio"></app-empty-list>
-    }
-
-    @if (!isEmpty) {
-    <div #productsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll
-      [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsTable"
-      (scrolled)="loadMore()">
-      <table class="min-w-full text-sm">
-        <thead class="bg-blue-600 h-10 text-white sticky top-0 z-10 border-b">
-          <tr>
-            <th class="text-left px-4 py-2 border-b">Foto</th>
-            <th class="text-left px-4 py-2 border-b">Nome</th>
-            <th class="text-left px-4 py-2 border-b">Código de Barras</th>
-            <th class="text-left px-4 py-2 border-b">Preço Unitário</th>
-            <th class="text-left px-4 py-2 border-b">Preço de Venda</th>
-            <th class="text-left px-4 py-2 border-b">Categoria</th>
-            <th class="text-left px-4 py-2 border-b">Em Estoque</th>
-            <th class="text-center px-4 py-2 border-b">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (product of paginatedItems.data; track product.id) {
-          <tr class="hover:bg-gray-50 border-b">
-            <td class="px-4 py-3">
-              <a (click)="openProductDetails(product)" class="cursor-pointer">
-                @if (product.product_image) {
-                <img class="w-16 h-16 object-cover rounded-md" alt="Imagem do produto" src="{{ product.product_image }}"
-                  loading="lazy" />
-                }
-
-                @if (!product.product_image) {
-                <lucide-icon [img]="packageIcon" class="w-8 h-8 text-gray-400"></lucide-icon>
-                }
-              </a>
-            </td>
-            <td class="px-4 py-3">
-              <a (click)="openProductDetails(product)" class="cursor-pointer text-blue-600 hover:underline">
-                {{ product.name }}
-              </a>
-            </td>
-            <td class="px-4 py-3">{{ product.barcode }}</td>
-            <td class="px-4 py-3">
-              {{ product.unit_price | currency: 'R$' : 'symbol' }}
-            </td>
-            <td class="px-4 py-3">
-              {{ product.sale_price | currency: 'R$' : 'symbol' }}
-            </td>
-            <td class="px-4 py-3">
-              <a (click)="categoryDetails(product.category_id)" class="cursor-pointer text-blue-600 hover:underline">
-                {{ product.category.name }}
-              </a>
-            </td>
-            <td class="px-4 py-3">{{ product.quantity }}</td>
-            <td class="px-4 py-3 text-center">
-              <button mat-icon-button [matMenuTriggerFor]="productMenu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #productMenu="matMenu">
-                <button mat-menu-item (click)="onMoveProduct(product)">
-                  <mat-icon>swap_horiz</mat-icon>
-                  <span>Mover</span>
-                </button>
-                <button mat-menu-item (click)="onEditProduct(product)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Editar</span>
-                </button>
-                <button mat-menu-item (click)="onDeleteProduct(product)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Excluir</span>
-                </button>
-              </mat-menu>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-
-      @if (loading) {
-      <div class="text-center py-4 text-gray-500">Carregando...</div>
-      }
-
-      @if (!hasNext && !loading) {
-      <div class="text-center py-4 text-gray-400">Fim da lista</div>
-      }
-    </div>
-    }
+    <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;"
+      (change)="onFileImportSelected($event)" />
   </div>
+
+  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-2">
+    <div class="flex flex-row items-center gap-4">
+      <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
+        <lucide-icon matPrefix [img]="searchIcon" class="w-6 h-6"></lucide-icon>
+        <mat-label>Buscar produto por nome, descrição ou código...</mat-label>
+        <input matInput type="text" id="search_product" name="search_product">
+      </mat-form-field>
+      <div class="flex flex-row items-center gap-4">
+        <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
+          <mat-icon matPrefix>
+            <lucide-icon [img]="filterIcon" class="w-4 h-4"></lucide-icon>
+          </mat-icon>
+          Filtros
+        </button>
+
+        <div class="view-toggle-buttons flex flex-row items-center">
+          <button mat-stroked-button [class.active]="viewMode.card" color="primary" matTooltip="Visualizar em Cards" (click)="toggleViewMode('card')">
+            <lucide-icon [img]="cardIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+          <button mat-stroked-button [class.active]="viewMode.list" color="primary" matTooltip="Visualizar em Lista" (click)="toggleViewMode('list')">
+            <lucide-icon [img]="listIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <div class="products-quantity max-w-7xl mx-auto">
+    <div class="flex flex-row justify-between items-center pl-4">
+      <span class="text-md text-gray-500">
+        Mostrando {{ paginatedItems.data.length }} de {{ totalItems }} produtos
+      </span>
+
+      <mat-form-field class="custom-outline pt-6 pr-4">
+        <mat-label>Ordenar por</mat-label>
+          <mat-select>
+            <mat-option value="none">Nenhum</mat-option>
+            @for (sort of sortBy; track sort.value) {
+              <mat-option [value]="sort.value">Ordenar por {{ sort.html }}</mat-option>
+            }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (isEmpty) {
+    <app-empty-list [icon]="packageIcon" description="Produtos está vazio"></app-empty-list>
+  } @else {
+    @if (viewMode.card) {
+      <div class="max-w-7xl mx-auto space-y-6 mb-10">
+        <div #productsGrid class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto max-h-[600px] pb-6 px-2"
+          infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsGrid"
+          (scrolled)="loadMore()"
+        >
+          @for (product of paginatedItems.data; track product.id) {
+            <div class="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white rounded-2xl cursor-pointer group"
+              (click)="openProductDetails(product)"
+            >
+              <div class="card-content p-0">
+                <div class="relative">
+                  <img class="w-full h-48 object-cover rounded-t-2xl" alt="Imagem do produto" src="{{ product.product_image }}" />
+  
+                  <div class="absolute top-3 right-3 flex gap-2">
+                    @if (product.active) {
+                      <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-xs">Ativo</div>
+                    }
+                    @if (!product.active) {
+                      <div class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs">Inativo</div>
+                    }
+                  </div>
+                </div>
+                
+                <div class="p-4">
+                  <div class="flex items-start justify-between mb-2">
+                    <p class="font-semibold text-gray-900 text-sm group-hover:text-[#3377bc] transition-colors">
+                      {{ product.name }}
+                    </p>
+                    <div class="badge bg-gray-500 text-white px-3 py-1 rounded-full text-xs">
+                      {{ product?.category?.name }}
+                    </div>
+                  </div>
+                  
+                  <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
+                  
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-xs text-gray-500">Preço de Venda</span>
+                      <span class="font-bold text-[#3377bc]">{{ product.sale_price | currency: 'R$' : 'symbol' }}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                      <span class="text-xs text-gray-500">Estoque</span>
+                      <span class="font-medium text-gray-900">{{ product.quantity }}un.</span>
+                    </div>
+  
+                    @if (product.barcode) {
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Código</span>
+                        <span class="text-xs font-mono text-gray-700">{{ product.barcode }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  
+    @if (viewMode.list) {
+      <mat-card class="max-w-7xl mx-auto shadow-md space-y-6 mb-10">  
+        <div #productsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll
+          [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsTable"
+          (scrolled)="loadMore()">
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#3377bc] h-20 text-white sticky top-0 z-10 border-b">
+              <tr>
+                <th class="text-left px-4 py-2 border-b">Foto</th>
+                <th class="text-left px-4 py-2 border-b">Nome</th>
+                <th class="text-left px-4 py-2 border-b">Código de Barras</th>
+                <th class="text-left px-4 py-2 border-b">Preço Unitário</th>
+                <th class="text-left px-4 py-2 border-b">Preço de Venda</th>
+                <th class="text-left px-4 py-2 border-b">Categoria</th>
+                <th class="text-left px-4 py-2 border-b">Em Estoque</th>
+                <th class="text-center px-4 py-2 border-b">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of paginatedItems.data; track product.id) {
+              <tr class="hover:bg-gray-50 border-b">
+                <td class="px-4 py-3">
+                  <a (click)="openProductDetails(product)" class="cursor-pointer">
+                    @if (product.product_image) {
+                    <img class="w-16 h-16 object-cover rounded-md" alt="Imagem do produto" src="{{ product.product_image }}"
+                      loading="lazy" />
+                    }
+    
+                    @if (!product.product_image) {
+                    <lucide-icon [img]="packageIcon" class="w-8 h-8 text-gray-400"></lucide-icon>
+                    }
+                  </a>
+                </td>
+                <td class="px-4 py-3">
+                  <a (click)="openProductDetails(product)" class="cursor-pointer text-blue-600 hover:underline">
+                    {{ product.name }}
+                  </a>
+                </td>
+                <td class="px-4 py-3">{{ product.barcode }}</td>
+                <td class="px-4 py-3">
+                  {{ product.unit_price | currency: 'R$' : 'symbol' }}
+                </td>
+                <td class="px-4 py-3">
+                  {{ product.sale_price | currency: 'R$' : 'symbol' }}
+                </td>
+                <td class="px-4 py-3">
+                  <a (click)="categoryDetails(product.category_id)" class="cursor-pointer text-blue-600 hover:underline">
+                    {{ product.category.name }}
+                  </a>
+                </td>
+                <td class="px-4 py-3">{{ product.quantity }}</td>
+                <td class="px-4 py-3 text-center">
+                  <button mat-icon-button [matMenuTriggerFor]="productMenu">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #productMenu="matMenu">
+                    <button mat-menu-item (click)="onMoveProduct(product)">
+                      <mat-icon>swap_horiz</mat-icon>
+                      <span>Mover</span>
+                    </button>
+                    <button mat-menu-item (click)="onEditProduct(product)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Editar</span>
+                    </button>
+                    <button mat-menu-item (click)="onDeleteProduct(product)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Excluir</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+    
+          @if (loading) {
+          <div class="text-center py-4 text-gray-500">Carregando...</div>
+          }
+    
+          @if (!hasNext && !loading) {
+          <div class="text-center py-4 text-gray-400">Fim da lista</div>
+          }
+        </div>
+      </mat-card>
+    }
+  }
 </mat-drawer-container>

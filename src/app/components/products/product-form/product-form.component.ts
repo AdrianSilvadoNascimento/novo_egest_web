@@ -132,34 +132,43 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   sendData(isToClose: boolean = true): void {
     if (this.form.valid) {
-      if (this.data) {
-        this.itemService.updateItem(this.data.id, this.form.value).subscribe(() => {
-          this.toast.success('Produto atualizado com sucesso!');
-          this.clearDraft();
-
-          if (isToClose) {
-            this.dialogRef.close(this.form.value);
-          }
-
-          this.form.reset();
-        }, error => {
-          this.toast.error(error.error.message || 'Erro ao atualizar o produto!');
-        })
-      } else {
-        this.itemService.createItem(this.form.value).subscribe(() => {
-          this.toast.success('Produto salvo com sucesso!');
-          this.clearDraft();
-
-          if (isToClose) {
-            this.dialogRef.close(this.form.value);
-          }
-
-          this.form.reset();
-        }, error => {
-          this.toast.error(error.error.message || 'Erro ao salvar o produto!');
-        })
+      if (!this.data) {
+        this.createItem(isToClose);
+        return;
       }
+
+      this.updateItem(isToClose);
     }
+  }
+
+  updateItem(isToClose: boolean = true): void {
+    this.itemService.updateItem(this.data.id, this.form.value).subscribe({
+      next: () => {
+        this.toast.success('Produto atualizado com sucesso!');
+        this.clearDraft();
+  
+        if (isToClose) this.dialogRef.close(this.form.value);
+  
+        this.form.reset();
+      }, error: (error) => {
+        this.toast.error(error.error.message || 'Erro ao atualizar o produto!');
+      }
+    })
+  }
+
+  createItem(isToClose: boolean = true): void {
+    this.itemService.createItem(this.form.value).subscribe({
+      next: () => {
+        this.toast.success('Produto salvo com sucesso!');
+        this.clearDraft();
+  
+        if (isToClose) this.dialogRef.close(this.form.value);
+  
+        this.form.reset();
+      }, error: (error) => {
+        this.toast.error(error.error.message || 'Erro ao salvar o produto!');
+      }
+    })
   }
 
   close() {
@@ -218,9 +227,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   // File Processing
   private handleFileSelection(file: File): void {
-    if (this.validateFile(file)) {
-      this.processFile(file);
-    }
+    if (this.validateFile(file)) this.processFile(file);
   }
 
   private validateFile(file: File): boolean {
@@ -294,8 +301,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    if (!this.form.valid) {
-      this.saveDraft();
-    }
+    if (!this.form.valid) this.saveDraft();
   }
 }

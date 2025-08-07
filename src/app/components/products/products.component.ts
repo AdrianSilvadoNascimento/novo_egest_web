@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 
 import { MatIcon } from '@angular/material/icon';
-import { LucideAngularModule, FileUp, PackagePlus, PackageOpen } from 'lucide-angular';
+import { LucideAngularModule, FileUp, PackagePlus, PackageOpen, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ItemsService } from '../../services/items.service';
@@ -24,6 +24,11 @@ import { CategoryModel } from '../../models/category.model';
 import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
 import { MovementationFormComponent } from '../movementation/movementation-form/movementation-form.component';
 import { MovementationService } from '../../services/movementation.service';
+import { MatCard } from "@angular/material/card";
+import { DashboardService } from '../../services/dashboard.service';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from "@angular/material/select";
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-products',
@@ -34,6 +39,7 @@ import { MovementationService } from '../../services/movementation.service';
     MatIcon,
     MatSidenavModule,
     MatFormFieldModule,
+    MatInputModule,
     MatButtonModule,
     MatTooltipModule,
     MatSidenavModule,
@@ -41,8 +47,10 @@ import { MovementationService } from '../../services/movementation.service';
     InfiniteScrollDirective,
     CurrencyPipe,
     MatMenuModule,
-    EmptyListComponent
-  ],
+    EmptyListComponent,
+    MatCard,
+    MatSelectModule
+],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
 })
@@ -50,11 +58,25 @@ export class ProductsComponent implements OnInit {
   readonly addIcon = PackagePlus;
   readonly packageIcon = PackageOpen;
   readonly importIcon = FileUp;
+  readonly searchIcon = Search;
+  readonly filterIcon = Funnel;
+  readonly cardIcon = LayoutGrid;
+  readonly listIcon = List;
 
+  viewMode: { card: boolean, list: boolean } = { card: true, list: false };
+  sortBy: { html: string, value: string }[] = [
+    { html: 'Nome', value: 'name' },
+    { html: 'Preço de Venda', value: 'sale_price' },
+    { html: 'Preço Unitário', value: 'unit_price' },
+    { html: 'Categoria', value: 'category' },
+    { html: 'Status', value: 'active' }
+  ]
+  
   pageSize = 10;
   isEmpty: boolean = true;
 
   paginatedItems: PaginatedItemsModel = new PaginatedItemsModel();
+  totalItems: number = 0;
 
   hasNext: boolean = false;
   loading: boolean = false;
@@ -74,6 +96,7 @@ export class ProductsComponent implements OnInit {
     private dialog: MatDialog,
     private itemService: ItemsService,
     private moveService: MovementationService,
+    private authService: AuthService,
     private toast: ToastService
   ) { }
 
@@ -84,13 +107,23 @@ export class ProductsComponent implements OnInit {
       this.hasNext = !!itemData.nextCursor;
     })
 
-    this.getAllItems();
+    const allItemData = this.authService.rememberMe()
+      ? localStorage.getItem('allItemData')
+      : sessionStorage.getItem('allItemData')
+    this.totalItems = allItemData ? JSON.parse(allItemData).length : 0
 
     this.loadMore();
   }
 
   getAllItems(): void {
     this.itemService.getAllItems().subscribe()
+  }
+
+  toggleViewMode(mode: 'card' | 'list'): void {
+    this.viewMode.card = false;
+    this.viewMode.list = false;
+
+    this.viewMode[mode] = true;
   }
 
   loadProducts(): void {
@@ -219,7 +252,8 @@ export class ProductsComponent implements OnInit {
   openProductDetails(product: ItemModel): void {
     this.dialog.open(ProductDetailsComponent, {
       data: product,
-      panelClass: 'modern-dialog'
+      panelClass: 'modern-dialog',
+      minWidth: '600px'
     })
   }
 
@@ -228,12 +262,14 @@ export class ProductsComponent implements OnInit {
     let category: CategoryModel
 
     if (!categories) {
-      this.itemService.getCategories().subscribe((cat: CategoryModel[]) => {
-        categories = cat
-        category = categories.find((cat: CategoryModel) => cat.id === categoryId)
-        this.openCategoryDetails(category)
-      }, error => {
-        this.toast.error(error.message || error.error.message || 'Erro ao carregar categorias!')
+      this.itemService.getCategories().subscribe({
+        next: (cat: CategoryModel[]) => {
+          categories = cat
+          category = categories.find((cat: CategoryModel) => cat.id === categoryId)
+          this.openCategoryDetails(category)
+        }, error: (error) => {
+          this.toast.error(error.message || error.error.message || 'Erro ao carregar categorias!')
+        }
       })
     }
 
@@ -256,12 +292,14 @@ export class ProductsComponent implements OnInit {
       width: '600px'
     }).afterClosed().subscribe(result => {
       if (result) {
-        this.moveService.moveItem({ ...result, item_id: item.id }).subscribe((data) => {
-          this.toast.success('Produto movido com sucesso!')
-          this.loadProducts();
-        }, error => {
-          this.toast.error(error.message || error.error.message || 'Erro ao mover o produto!')
-        });
+        this.moveService.moveItem({ ...result, item_id: item.id }).subscribe({
+          next: (data) => {
+            this.toast.success('Produto movido com sucesso!')
+            this.loadProducts();
+          }, error: (error) => {
+            this.toast.error(error.message || error.error.message || 'Erro ao mover o produto!')
+          }
+        })
       }
     });
   }

@@ -5,7 +5,6 @@ import {
   Package,
   TrendingUp,
   TrendingDown,
-  BarChart3,
   Search,
   ShoppingCart,
   FileText,
@@ -14,6 +13,7 @@ import {
   Calendar,
   ArrowUp,
   ArrowDown,
+  ChartColumn,
 } from 'lucide-angular';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly arrowDownIcon = TrendingUp;
   readonly arrowUpIcon = TrendingDown;
   readonly alertCircleIcon = AlertCircle;
-  readonly chartIcon = BarChart3;
+  readonly chartIcon = ChartColumn;
   readonly searchIcon = Search;
   readonly cartIcon = ShoppingCart;
   readonly fileIcon = FileText;

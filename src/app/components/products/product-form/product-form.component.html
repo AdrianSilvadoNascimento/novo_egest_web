@@ -26,7 +26,7 @@
             Informações Básicas
           </p>
 
-          <hr class="my-2">
+          <hr class="mb-4">
 
           <!-- Nome -->
           <mat-form-field class="custom-outline w-full mb-4">
@@ -76,7 +76,7 @@
             Imagem do Produto
           </p>
 
-          <hr class="my-2">
+          <hr class="mb-4">
 
           <!-- Área de Upload com Drag & Drop -->
           <div class="upload-container">
@@ -195,7 +195,7 @@
             Preços e Estoque
           </p>
 
-          <hr class="my-2">
+          <hr class="mb-4">
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <!-- Preço de venda (R$) -->
@@ -231,7 +231,7 @@
             Resumo do Produto
           </p>
 
-          <hr class="my-2">
+          <hr class="mb-4">
 
           <p class="text-sm text-gray-500">
             Nome: {{ form.get('name')?.value && form.get('name')?.value.length > 0 ? form.get('name')?.value : 'Não informado' }}
@@ -272,19 +272,17 @@
       </div>
     </div>
 
-    <mat-dialog-actions class="gap-4 pt-8">
+    <div class="flex flex-row justify-end gap-2">
       <!-- Botões -->
-      <button mat-stroked-button type="button" (click)="close()" class="btn-secondary">
+      <button (click)="close()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         Cancelar e Fechar
       </button>
-      <button mat-raised-button color="primary" type="submit" (click)="save()" [disabled]="form.invalid">
+      <button type="submit" (click)="save()" [disabled]="form.invalid" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         Salvar e Adicionar Novo Produto
       </button>
-      <button mat-raised-button color="primary" type="submit" (click)="saveAndClose()" [disabled]="form.invalid">
+      <button type="submit" (click)="saveAndClose()" [disabled]="form.invalid" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         {{ data ? 'Salvar Alterações' : 'Criar Produto' }}
       </button>
-      <!-- </div> -->
-    </mat-dialog-actions>
-
+    </div>
   </form>
 </mat-dialog-content>
