@@ -100,8 +100,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getData(): void {
     // Usar método otimizado com cache Redis
-    this.dashboardService.getDashboardQuick().subscribe((data) => {
-      this.dashboardData = data;
+    this.dashboardService.getDashboardQuick().subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao buscar dados do dashboard:', error);
+      }
     });
   }
 
@@ -112,7 +117,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dashboardService.forceRefresh().subscribe((response) => {
       if (response.success) {
         console.log(`✅ Refresh iniciado: ${response.message}`);
-        // Dados serão atualizados via SSE quando o job terminar
       } else {
         console.error(`❌ Erro no refresh: ${response.message}`);
       }

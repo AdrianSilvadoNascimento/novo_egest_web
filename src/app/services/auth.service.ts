@@ -172,15 +172,21 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    return this.rememberMe() ? localStorage.getItem('refresh_token') : sessionStorage.getItem('token');
   }
 
   getAccountId(): string | null {
-    return localStorage.getItem('account_id') || sessionStorage.getItem('account_id');
+    return this.rememberMe() ? localStorage.getItem('account_id') : sessionStorage.getItem('account_id');
   }
 
   getAccountUserId(): string | null {
-    return localStorage.getItem('user_id') || sessionStorage.getItem('user_id');
+    return this.rememberMe() ? localStorage.getItem('user_id') : sessionStorage.getItem('user_id');
+  }
+
+  rememberMe(): boolean {
+    const rememberMe = localStorage.getItem('remember_me')
+
+    return rememberMe === 'true';
   }
 
   register(registerModel: RegisterModel): Observable<any> {

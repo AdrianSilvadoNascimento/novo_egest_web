@@ -101,14 +101,12 @@ export class DashboardService {
       if (!cached) return null;
 
       const cachedData: CachedDashboardData = JSON.parse(cached);
-      
-      // Verificar se é da mesma conta
+
       if (cachedData.accountId !== this.accountId) {
         this.clearCache();
         return null;
       }
 
-      // Verificar se ainda está fresco (dentro do TTL)
       const isExpired = (Date.now() - cachedData.timestamp) > this.CACHE_TTL;
       if (isExpired) {
         this.clearCache();
@@ -130,21 +128,17 @@ export class DashboardService {
   getDashboardData(forceRefresh: boolean = false): Observable<DashboardModel> {
     this.accountId = this.authService.getAccountId();
     
-    // Verificar cache primeiro (se não for refresh forçado)
     if (!forceRefresh) {
       const cachedData = this.getCachedData();
       if (cachedData) {
-        console.log('🚀 Dashboard: Carregado do cache');
         this.setDashboardData(cachedData);
         return of(cachedData);
       }
     }
 
     // Buscar dados da API
-    console.log('🌐 Dashboard: Carregando da API');
     this.loadingState.next(true);
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    // Skip loading global - dashboard tem seu próprio skeleton loading
     this.headers = this.headers.set('X-Skip-Loading', 'true');
     
     return this.http.get<DashboardModel>(`${this.API_URL}/${this.accountId}`, { headers: this.headers }).pipe(
@@ -183,36 +177,25 @@ export class DashboardService {
     if (!forceRefresh) {
       const cachedData = this.getCachedData();
       if (cachedData) {
-        console.log('🚀 Dashboard: Carregado do cache local');
         this.setDashboardData(cachedData);
         return of(cachedData);
       }
     }
 
     // Buscar do backend otimizado
-    console.log('🌐 Dashboard: Carregando via /quick endpoint');
     this.loadingState.next(true);
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    // Skip loading global - dashboard tem seu próprio skeleton loading
     this.headers = this.headers.set('X-Skip-Loading', 'true');
     
     return this.http.get<QuickDashboardResponse>(`${this.API_URL}/${this.accountId}/quick`, { headers: this.headers }).pipe(
       tap((response: QuickDashboardResponse) => {
         this.setDashboardData(response.data);
         this.loadingState.next(false);
-        
-        // Log informativo
-        if (response.fromCache) {
-          console.log(`📦 Dashboard: Dados do cache Redis (age: ${response.age}s)`);
-        } else {
-          console.log(`⏳ Dashboard: Dados calculados em background (job: ${response.jobId})`);
-        }
       }),
       map((response: QuickDashboardResponse) => response.data),
       catchError((error) => {
-        console.error('❌ Dashboard: Erro no carregamento rápido', error);
         this.loadingState.next(false);
-        // Fallback para método tradicional
+
         return this.getDashboardData(forceRefresh);
       })
     );
@@ -224,10 +207,7 @@ export class DashboardService {
   forceRefresh(): Observable<{ success: boolean; jobId?: string; message: string }> {
     this.accountId = this.authService.getAccountId();
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    // Skip loading global - dashboard tem seu próprio loading state
     this.headers = this.headers.set('X-Skip-Loading', 'true');
-    
-    console.log('🔄 Dashboard: Forçando refresh completo');
     
     return this.http.post<{ success: boolean; jobId?: string; message: string }>(
       `${this.API_URL}/${this.accountId}/refresh`, 
@@ -236,13 +216,10 @@ export class DashboardService {
     ).pipe(
       tap((response) => {
         if (response.success) {
-          console.log(`✅ Dashboard: Refresh iniciado (job: ${response.jobId})`);
-          // Limpar cache local
           this.clearCache();
         }
       }),
       catchError((error) => {
-        console.error('❌ Dashboard: Erro no refresh forçado', error);
         return of({ success: false, message: 'Erro no refresh' });
       })
     );
@@ -254,7 +231,6 @@ export class DashboardService {
   getStatus(): Observable<DashboardStatus> {
     this.accountId = this.authService.getAccountId();
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    // Skip loading global - é uma verificação de status background
     this.headers = this.headers.set('X-Skip-Loading', 'true');
     
     return this.http.get<DashboardStatus>(`${this.API_URL}/${this.accountId}/status`, { headers: this.headers }).pipe(
@@ -286,13 +262,11 @@ export class DashboardService {
 
     const token = this.authService.getToken();
     if (!token) {
-      console.error('❌ Dashboard: Token não encontrado para SSE');
       this.connectionStatus.next('disconnected');
       return NEVER;
     }
 
-    // EventSource não suporta headers, então enviamos token via query string
-    const url = `${this.API_URL}/${this.accountId}/stream?token=${encodeURIComponent(token)}`;
+    const url = `${this.API_URL}/${this.accountId}/stream?api_token=${token}`;
     
     this.eventSource = new EventSource(url);
 
@@ -302,7 +276,6 @@ export class DashboardService {
       this.eventSource.onopen = () => {
         this.connectionStatus.next('connected');
         this.reconnectAttempts = 0;
-        console.log('✅ Dashboard: Conectado ao stream SSE');
       };
 
       this.eventSource.onmessage = (event) => {
@@ -321,15 +294,13 @@ export class DashboardService {
       this.eventSource.onerror = (error) => {
         console.error('❌ Dashboard: Erro na conexão SSE', error);
         this.connectionStatus.next('disconnected');
-        
-        // Se for erro de autorização (401), não tentar reconectar
+
         if (this.eventSource?.readyState === EventSource.CLOSED) {
           console.error('❌ Dashboard: Conexão fechada (possivelmente token inválido)');
           observer.error(new Error('Token de autorização inválido ou expirado'));
           return;
         }
-        
-        // Tentar reconectar apenas se não for erro de autorização
+
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           console.log(`🔄 Dashboard: Tentando reconectar (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
@@ -365,7 +336,6 @@ export class DashboardService {
       this.eventSource.close();
       this.eventSource = null;
       this.connectionStatus.next('disconnected');
-      console.log('📡 Dashboard: Desconectado do stream SSE');
     }
   }
 
@@ -375,11 +345,11 @@ export class DashboardService {
   private handleSSEEvent(event: SSEEvent): void {
     switch (event.type) {
       case 'connected':
-        console.log('📡 Dashboard: Stream conectado', event);
+        console.log('📡 Dashboard: Stream conectado');
         break;
         
       case 'status':
-        console.log('📊 Dashboard: Status atualizado', event.data);
+        console.log('📊 Dashboard: Status atualizado');
         this.dashboardStatus.next(event.data);
         break;
         
@@ -393,7 +363,6 @@ export class DashboardService {
         break;
         
       case 'heartbeat':
-        // Silent heartbeat
         break;
         
       default:
