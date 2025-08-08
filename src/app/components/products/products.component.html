@@ -91,7 +91,9 @@
   <div class="products-quantity max-w-7xl mx-auto">
     <div class="flex flex-row justify-between items-center pl-4">
       <span class="text-md text-gray-500">
-        Mostrando {{ paginatedItems.data.length }} de {{ totalItems }} produtos
+        @if (paginatedItems && paginatedItems.data) {
+          Mostrando {{ paginatedItems.data.length }} de {{ totalItems }} produtos
+        }
       </span>
 
       <mat-form-field class="custom-outline pt-6 pr-4">

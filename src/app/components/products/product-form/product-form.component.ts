@@ -42,6 +42,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   form: FormGroup = new FormGroup({});
   imagePreview: string | ArrayBuffer | null = null;
+  imageBase64: string | null = null;
   draftKey: string = 'product_form_draft';
   hasDraft: boolean = false;
   readonly packageIcon = Package;
@@ -142,7 +143,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   updateItem(isToClose: boolean = true): void {
-    this.itemService.updateItem(this.data.id, this.form.value).subscribe({
+    const productData = this.form.getRawValue();
+
+    if (!this.imageBase64) productData.product_image = '';
+    
+    this.itemService.updateItem(this.data.id, productData).subscribe({
       next: () => {
         this.toast.success('Produto atualizado com sucesso!');
         this.clearDraft();
@@ -157,7 +162,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   createItem(isToClose: boolean = true): void {
-    this.itemService.createItem(this.form.value).subscribe({
+    const productData = this.form.getRawValue();
+
+    if (!this.imageBase64) productData.product_image = '';
+    
+    this.itemService.createItem(productData).subscribe({
       next: () => {
         this.toast.success('Produto salvo com sucesso!');
         this.clearDraft();
@@ -204,9 +213,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   // File Input Handlers
   onImageSelected(event: any): void {
     const file = event.target.files[0];
-    if (file) {
-      this.handleFileSelection(file);
-    }
+    if (file) this.handleFileSelection(file);
+
     // Limpar o input para permitir selecionar o mesmo arquivo novamente
     event.target.value = '';
   }
@@ -221,6 +229,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   removeImage(): void {
     this.imagePreview = null;
+    this.imageBase64 = null;
     this.form.patchValue({ product_image: null });
     this.clearError();
   }
@@ -249,15 +258,22 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   private processFile(file: File): void {
-    // Atualizar o formulário
-    this.form.patchValue({ product_image: file });
-
     // Criar preview da imagem
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.imagePreview = reader.result;
-    };
-    reader.readAsDataURL(file);
+    // const reader = new FileReader();
+    // reader.onload = () => this.imagePreview = reader.result as string;
+    // reader.readAsDataURL(file);
+
+    const base64Reader = new FileReader();
+    base64Reader.onload = () => {
+      const base64String = base64Reader.result as string;
+      
+      const base64Data = base64String.split(',')[1];
+      this.imageBase64 = base64Data;
+      this.imagePreview = base64String;
+
+      this.form.patchValue({ product_image: this.imageBase64 });
+    }
+    base64Reader.readAsDataURL(file);
   }
 
   private setError(message: string): void {
