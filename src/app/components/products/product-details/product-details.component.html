@@ -117,7 +117,7 @@
           </div>
         </div>
   
-        @if (product.updated_at != product.created_at) {
+        @if (product.updated_at != product.created_at && product.updated_at) {
           <div class="flex flex-row items-center gap-2">
             <lucide-icon [img]="calendarIcon" class="w-6 h-6 text-gray-500"></lucide-icon>
     

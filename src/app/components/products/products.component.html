@@ -98,10 +98,9 @@
 
       <mat-form-field class="custom-outline pt-6 pr-4">
         <mat-label>Ordenar por</mat-label>
-          <mat-select>
-            <mat-option value="none">Nenhum</mat-option>
+          <mat-select [(value)]="selectedSortBy" (selectionChange)="onSortChange($event.value)">
             @for (sort of sortBy; track sort.value) {
-              <mat-option [value]="sort.value">Ordenar por {{ sort.html }}</mat-option>
+              <mat-option [value]="sort.value">{{ sort.html }}</mat-option>
             }
         </mat-select>
       </mat-form-field>
