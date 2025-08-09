@@ -11,6 +11,7 @@ interface CachedDashboardData {
   data: DashboardModel;
   timestamp: number;
   accountId: string;
+  totalProducts: number;
 }
 
 interface QuickDashboardResponse {
@@ -64,6 +65,9 @@ export class DashboardService {
   private loadingState = new BehaviorSubject<boolean>(false);
   $isLoading = this.loadingState.asObservable();
 
+  private totalProducts = new BehaviorSubject<number>(0);
+  $totalProducts = this.totalProducts.asObservable();
+
   private connectionStatus = new BehaviorSubject<'disconnected' | 'connecting' | 'connected'>('disconnected');
   $connectionStatus = this.connectionStatus.asObservable();
 
@@ -85,12 +89,15 @@ export class DashboardService {
 
   setDashboardData(data: DashboardModel): void {
     this.dashboardData.next(data);
-    
+
+    this.totalProducts.next(data.totalProducts);
+
     // Salvar no cache com timestamp
     const cachedData: CachedDashboardData = {
       data,
       timestamp: Date.now(),
-      accountId: this.accountId || ''
+      accountId: this.accountId || '',
+      totalProducts: data.totalProducts
     };
     sessionStorage.setItem(this.CACHE_KEY, JSON.stringify(cachedData));
   }

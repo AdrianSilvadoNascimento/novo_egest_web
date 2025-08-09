@@ -3,6 +3,7 @@ export class DashboardModel {
   entereds!: number
   exits!: number
   lowStock!: number
+  totalProducts!: number
   
   // Porcentagens de crescimento
   productsGrowth?: number

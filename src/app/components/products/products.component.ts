@@ -29,6 +29,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from "@angular/material/select";
 import { AuthService } from '../../services/auth.service';
+import { DashboardModel } from '../../models/dashboard.model';
 
 @Component({
   selector: 'app-products',
@@ -92,31 +93,97 @@ export class ProductsComponent implements OnInit {
     modifiedBy: ''
   };
 
+  selectedSortBy: string = 'name';
+  selectedSortOrder: string = 'desc';
+
   constructor(
     private dialog: MatDialog,
     private itemService: ItemsService,
     private moveService: MovementationService,
-    private authService: AuthService,
+    private dashboardService: DashboardService,
     private toast: ToastService
   ) { }
 
   ngOnInit(): void {
-    this.itemService.getPaginatedItems('', this.pageSize).subscribe((itemData: PaginatedItemsModel) => {
-      this.paginatedItems = itemData;
-      this.isEmpty = itemData.data?.length === 0;
-      this.hasNext = !!itemData.nextCursor;
-    })
-
-    const allItemData = this.authService.rememberMe()
-      ? localStorage.getItem('allItemData')
-      : sessionStorage.getItem('allItemData')
-    this.totalItems = allItemData ? JSON.parse(allItemData).length : 0
-
-    this.loadMore();
+    this.loadInitialData();
+    this.getTotalProducts();
   }
 
-  getAllItems(): void {
-    this.itemService.getAllItems().subscribe()
+  loadInitialData(): void {
+    this.itemService.getPaginatedItems('', this.pageSize).subscribe({
+      next: (itemData: PaginatedItemsModel) => {
+        this.paginatedItems = itemData;
+        this.isEmpty = itemData.data?.length === 0;
+        this.hasNext = !!itemData.nextCursor;
+        this.sortCurrentData();
+      },
+      error: (error) => {
+        this.toast.error(error.message);
+      }
+    });
+  }
+
+  onSortChange(sortBy: string): void {
+    this.selectedSortBy = sortBy;
+    this.selectedSortOrder = 'asc';
+
+    this.sortCurrentData();
+  }
+
+  private sortCurrentData(): void {
+    if (!this.paginatedItems.data || this.selectedSortBy === 'none') {
+      return;
+    }
+
+    this.paginatedItems.data.sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.selectedSortBy) {
+        case 'name':
+          valueA = a.name?.toLowerCase() || '';
+          valueB = b.name?.toLowerCase() || '';
+          break;
+        case 'sale_price':
+          valueA = parseFloat(a.sale_price?.toString() || '0');
+          valueB = parseFloat(b.sale_price?.toString() || '0');
+          break;
+        case 'unit_price':
+          valueA = parseFloat(a.unit_price?.toString() || '0');
+          valueB = parseFloat(b.unit_price?.toString() || '0');
+          break;
+        case 'category':
+          valueA = a.category?.name?.toLowerCase() || '';
+          valueB = b.category?.name?.toLowerCase() || '';
+          break;
+        case 'active':
+          valueA = a.active ? 1 : 0;
+          valueB = b.active ? 1 : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      let comparison = 0;
+      if (valueA > valueB) {
+        comparison = 1;
+      } else if (valueA < valueB) {
+        comparison = -1;
+      }
+
+      return this.selectedSortOrder === 'asc' ? comparison : -comparison;
+    });
+  }
+
+  getTotalProducts(): void {
+    this.dashboardService.getDashboardQuick().subscribe({
+      next: (dashboard: DashboardModel) => {
+        this.totalItems = dashboard.totalProducts;
+      },
+      error: (error) => {
+        this.toast.error(error.message);
+      }
+    })
   }
 
   toggleViewMode(mode: 'card' | 'list'): void {
@@ -127,12 +194,15 @@ export class ProductsComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.itemService.$itemData.subscribe((itemData: PaginatedItemsModel) => {
+    this.itemService.$itemData.subscribe({
+      next: (itemData: PaginatedItemsModel) => {
       this.paginatedItems = itemData;
 
       this.isEmpty = itemData.data?.length === 0;
-    }, error => {
-      this.toast.error(error.message);
+      },
+      error: (error) => {
+        this.toast.error(error.message);
+      }
     })
   }
 
@@ -150,12 +220,11 @@ export class ProductsComponent implements OnInit {
         this.loading = false;
         this.hasNext = !!itemData.nextCursor;
 
-        const newItems = itemData.data.filter(newItem =>
-          !this.paginatedItems.data.some(existing => existing.id === newItem.id)
-        );
-
-        this.paginatedItems.data = [...this.paginatedItems.data, ...newItems];
+        this.paginatedItems.data = [...this.paginatedItems.data, ...itemData.data];
         this.paginatedItems.nextCursor = itemData.nextCursor;
+
+        // Aplicar ordenação aos novos dados carregados
+        this.sortCurrentData();
 
         sessionStorage.setItem('itemData', JSON.stringify(this.paginatedItems));
         sessionStorage.setItem('nextCursor', itemData.nextCursor || '');

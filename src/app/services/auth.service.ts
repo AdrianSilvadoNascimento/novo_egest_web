@@ -45,8 +45,9 @@ export class AuthService {
   }
 
   setAccountUserName(userName: string): void {
-    this.userName.next(userName);
+    this.storage = this.rememberMe() ? localStorage : sessionStorage;
     this.storage.setItem('userName', userName);
+    this.userName.next(userName);
   }
 
   setEmail(email: string): void {
@@ -68,13 +69,10 @@ export class AuthService {
   }
 
   login(loginModel: LoginModel): Observable<any> {
-    if (loginModel.remember) {
-      localStorage.setItem('remember_me', 'true');
-      this.storage = localStorage;
-    } else {
-      localStorage.setItem('remember_me', 'false');
-      this.storage = sessionStorage;
-    }
+    const rememberMeValue = loginModel.remember ? 'true' : 'false';
+    this.storage = loginModel.remember ? localStorage : sessionStorage;
+
+    localStorage.setItem('remember_me', rememberMeValue);
 
     return this.http.post(this.API_URL + '/login', loginModel, {
       headers: { 'Content-Type': 'application/json' },
@@ -211,9 +209,14 @@ export class AuthService {
   }
 
   clearCache(): void {
+    this.storage = this.rememberMe() ? localStorage : sessionStorage;
+    
     this.storage.removeItem('token');
     this.storage.removeItem('account_id');
     this.storage.removeItem('user_id');
+    this.storage.removeItem('itemData');
+    this.storage.removeItem('dashboardData');
+    this.storage.removeItem('userName');
   }
 
   logout(): void {

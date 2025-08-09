@@ -1,3 +1,5 @@
+import { AccountSettingsModel } from "./account_settings.model";
+
 export class AccountModel {
   id!: string;
   name!: string;
@@ -7,6 +9,7 @@ export class AccountModel {
   birth!: string;
   created_at!: Date;
   updated_at!: Date;
+  settings!: AccountSettingsModel;
 
   constructor() {
     this.id = '';
@@ -17,5 +20,6 @@ export class AccountModel {
     this.birth = '';
     this.created_at = new Date();
     this.updated_at = new Date();
+    this.settings = new AccountSettingsModel();
   }
 }
