@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
@@ -24,6 +25,7 @@ import { CategoryDetailsComponent } from './category-details/category-details.co
     MatMenuModule,
     LucideAngularModule,
     EmptyListComponent,
+    DatePipe,
   ],
   selector: 'app-categories',
   styleUrls: ['./categories.component.scss'],
@@ -90,7 +92,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
 
   openDialog(category?: CategoryModel) {
     const dialogRef = this.dialog.open(CategoriesFormComponent, {
-      width: '600px',
+      minWidth: '600px',
       data: category ? { ...category } : null,
     });
 
@@ -104,6 +106,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   openCategoryDetails(category: CategoryModel): void {
     this.dialog.open(CategoryDetailsComponent, {
       data: category,
+      minWidth: '400px',
       panelClass: 'modern-dialog'
     })
   }

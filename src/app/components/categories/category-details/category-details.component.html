@@ -1,18 +1,76 @@
-<div class="p-6 max-w-lg mx-auto bg-white rounded-2xl shadow-lg">
-  <div class="flex justify-between items-center mb-4">
-    <h3 class="text-xl font-bold text-gray-800 font-[Lora]">Detalhes da Categoria</h3>
-    <button mat-icon-button (click)="dialogRef.close()"
-      class="hover:bg-gray-200 pl-2 rounded-full transition duration-200">
+<div class="bg-white border-0 shadow-md p-0 overflow-hidden">
+  <!-- Header gradient -->
+  <div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white">
+    <button
+      (click)="dialogRef.close()"
+      class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+      aria-label="Fechar"
+    >
       <mat-icon>close</mat-icon>
     </button>
-  </div>
-
-  <div class="flex p-12 gap-6">
-    <lucide-icon [img]="tagIcon" class="w-16 h-16 text-gray-400"></lucide-icon>
-
-    <div class="flex flex-col gap-2 text-sm text-gray-700">
-      <div><strong>Nome:</strong> {{ category.name }}</div>
-      <div><strong>Produtos Com A Categoria:</strong> {{ productsQuantity }}</div>
+    <div class="text-center">
+      <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Categoria</span>
+      <div class="text-3xl text-white font-semibold font-[Lora]">{{ category.name || "Categoria" }}</div>
+      <p class="text-blue-100 font-[Lora]">Informações detalhadas da categoria</p>
     </div>
   </div>
-</div>
+  
+  <!-- Content -->
+  <div class="p-6 space-y-4">
+    <div class="p-0">
+      <h2 class="sr-only">Detalhes da Categoria</h2>
+      <span class="sr-only">Nome, data de criação e quantidade de produtos</span>
+    </div>
+  
+    <div class="space-y-3">
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div class="text-sm flex items-center gap-2 text-gray-600">
+          <lucide-icon [img]="tagIcon" class="w-4 h-4 text-gray-400"></lucide-icon>
+          <span>Nome</span>
+        </div>
+        <span class="font-medium text-gray-900">{{ category.name }}</span>
+      </div>
+  
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div class="text-sm flex items-center gap-2 text-gray-600">
+          <lucide-icon [img]="calendarIcon" class="w-4 h-4 text-gray-400"></lucide-icon>
+          <span>Data de criação</span>
+        </div>
+        <span class="font-medium text-gray-900">
+          {{ category.created_at | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+
+      @if (category.updated_at) {
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+          <div class="text-sm flex items-center gap-2 text-gray-600">
+            <lucide-icon [img]="calendarIcon" class="w-4 h-4 text-gray-400"></lucide-icon>
+            <span>Última atualização</span>
+          </div>
+          <span class="font-medium text-gray-900">
+            {{ category.updated_at | date:'dd/MM/yyyy' }} às {{ category.updated_at | date:'HH:mm' }}
+          </span>
+        </div>
+      }
+
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div class="text-sm flex items-center gap-2 text-gray-600">
+          <lucide-icon [img]="packageIcon" class="w-4 h-4 text-gray-400"></lucide-icon>
+          <span>Quantidade de produtos</span>
+        </div>
+        <span class="font-bold text-[#3377bc]">{{ productsQuantity }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <div class="px-6 pb-6">
+    <button
+      (click)="dialogRef.close()"
+      variant="outline"
+      class="w-full border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent"
+    >
+      Fechar
+    </button>
+  </div>
+</div>  

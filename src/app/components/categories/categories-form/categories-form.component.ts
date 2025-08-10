@@ -2,12 +2,14 @@ import { Component, Inject, OnInit } from '@angular/core';
 
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CategoryModel } from '../../../models/category.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { Tag } from 'lucide-angular';
+
+import { CategoryModel } from '../../../models/category.model';
 import { ItemsService } from '../../../services/items.service';
 import { ToastService } from '../../../services/toast.service';
-import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   standalone: true,
@@ -17,6 +19,8 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './categories-form.component.html',
 })
 export class CategoriesFormComponent implements OnInit {
+  readonly tagIcon = Tag;
+  
   form: FormGroup = new FormGroup({});
   draftKey: string = 'category_form_draft';
   hasDraft: boolean = false;
@@ -69,36 +73,45 @@ export class CategoriesFormComponent implements OnInit {
 
   sendData(isToClose: boolean = false): void {
     if (this.form.valid) {
-      if (this.data) {
-        this.itemService.updateCategory(this.data.id, this.form.value).subscribe((category: CategoryModel) => {
-          this.toast.success('Categoria atualizada com sucesso!');
-          this.clearDraft();
-
-          if (isToClose) {
-            this.dialogRef.close(category);
-          }
-
-          this.form.reset();
-        }, error => {
-          this.toast.error(error.message);
-          this.clearDraft();
-        })
-      } else {
-        this.itemService.createCategory(this.form.value).subscribe((category: CategoryModel) => {
-          this.toast.success('Categoria criada com sucesso!');
-          this.clearDraft();
-
-          if (isToClose) {
-            this.dialogRef.close(category);
-          }
-
-          this.form.reset();
-        }, error => {
-          this.toast.error(error.message);
-          this.clearDraft();
-        })
+      if (!this.data) {
+        this.createCategory(isToClose);
+        return;
       }
+
+      this.updateCategory(isToClose);
     }
+  }
+
+  updateCategory(isToClose: boolean = true): void {
+    const categoryData = this.form.getRawValue();
+    this.itemService.updateCategory(this.data.id, categoryData).subscribe({
+      next: (updatedCategory: CategoryModel) => {
+        this.toast.success('Categoria atualizada com sucesso!');
+        this.clearDraft();
+  
+        if (isToClose) this.dialogRef.close(updatedCategory);
+  
+        this.form.reset();
+      }, error: (error) => {
+        this.toast.error(error.error.message || 'Erro ao atualizar a categoria!');
+      }
+    })
+  }
+
+  createCategory(isToClose: boolean = true): void {
+    const categoryData = this.form.getRawValue();
+    this.itemService.createCategory(categoryData).subscribe({
+      next: (createdCategory: CategoryModel) => {
+        this.toast.success('Categoria criada com sucesso!');
+        this.clearDraft();
+  
+        if (isToClose) this.dialogRef.close(createdCategory);
+  
+        this.form.reset();
+      }, error: (error) => {
+        this.toast.error(error.error.message || 'Erro ao criar a categoria!');
+      }
+    })
   }
 
   close(): void {
