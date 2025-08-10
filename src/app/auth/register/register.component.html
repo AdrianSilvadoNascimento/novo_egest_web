@@ -1,53 +1,197 @@
-<div id="register" class="flex items-center justify-center p-4">
-  <mat-card class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-    <div class="flex flex-col items-center">
-      <lucide-icon [name]="UserPlusIcon" class="text-4xl text-[#3377bc] mb-4"></lucide-icon>
-      <h3 class="text-2xl font-bold text-gray-800 mb-2">Criação de Conta</h3>
-      <p class="text-gray-500 mb-6">Falta pouco para você acessar</p>
+<div class="min-h-screen mt-10 bg-[#f3f4f6] flex items-center justify-center p-4 pt-0">
+  <div class="w-full max-w-md">
+    <div class="text-center">
+      <div class="inline-flex items-center bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white justify-center w-16 h-16 rounded-2xl mb-4">
+        <lucide-icon [img]="packageIcon" class="w-8 h-8 text-white"></lucide-icon>
+      </div>
+      <p class="text-gray-600 text-lg font-[Lora]">Comece a gerenciar seu estoque com maestria <span class="text-[#3377bc]">hoje</span></p>
     </div>
-    <form class="space-y-5 mb-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div>
-        <label for="name" class="block text-gray-700 font-medium mb-1">Nome</label>
-        <div class="relative">
-          <input id="name" name="name" type="text" required formControlName="name"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-            placeholder="Preencha seu nome">
-          <div class="absolute right-3 top-2.5 text-gray-400">
-            <lucide-icon [name]="UserIcon" size="20"></lucide-icon>
+
+    <div class="flex items-center justify-center">
+      <mat-card class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+      <div class="flex flex-col items-center mb-6 font-[Lora]">
+        <div class="text-2xl font-semibold text-gray-800 mb-2">Criar sua conta</div>
+        <p class="text-sm text-gray-500">Preencha os campos e comece a gerenciar seu estoque</p>
+      </div>
+      <form class="space-y-5 mb-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div>
+          <label for="name" class="text-sm block text-gray-700 font-medium mb-1">Nome Completo</label>
+          <div class="relative">
+            <input id="name" name="name" type="text" required formControlName="name"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Seu nome completo">
+            <div class="absolute right-3 top-2.5 text-gray-400">
+              <lucide-icon [name]="UserIcon" size="20"></lucide-icon>
+            </div>
+          </div>
+          @if (hasFieldError('name')) {
+            <div class="error-message">Nome é obrigatório</div>
+          }
+        </div>
+        <div>
+          <label for="email" class="text-sm block text-gray-700 font-medium mb-1">Email</label>
+          <div class="relative">
+            <input id="email" name="email" type="email" required formControlName="email"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Preencha seu email">
+            <div class="absolute right-3 top-2.5 text-gray-400">
+              <lucide-icon [name]="MailIcon" size="20"></lucide-icon>
+            </div>
+          </div>
+          @if (hasFieldError('email')) {
+            <div class="error-message">Email inválido</div>
+          }
+        </div>
+        <div>
+          <label for="business_name" class="text-sm block text-gray-700 font-medium mb-1">Empresa (Opcional)</label>
+          <div class="relative">
+            <input id="business_name" name="business_name" type="text" formControlName="business_name"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Nome da sua empresa">
+            <div class="absolute right-3 top-2.5 text-gray-400">
+              <lucide-icon [name]="businessIcon" size="20"></lucide-icon>
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
-        <div class="relative">
-          <input id="email" name="email" type="email" required formControlName="email"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-            placeholder="Preencha seu email">
-          <div class="absolute right-3 top-2.5 text-gray-400">
-            <lucide-icon [name]="MailIcon" size="20"></lucide-icon>
+
+        <div class="password-field">
+          <label for="password" class="text-sm block text-gray-700 font-medium mb-1">Senha</label>
+          <div class="relative">
+            <input 
+              id="password" 
+              name="password" 
+              [type]="showPassword ? 'text' : 'password'" 
+              required 
+              formControlName="password"
+              class="w-full px-4 py-2 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Preencha sua senha">
+            <button 
+              type="button"
+              (click)="togglePasswordVisibility()"
+              class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors toggle-password-btn">
+              <lucide-icon [img]="showPassword ? EyeOffIcon : EyeIcon" size="20"></lucide-icon>
+            </button>
           </div>
+          
+          <!-- Indicadores de força da senha -->
+          @if (registerForm.get('password')?.value) {
+            <div class="mt-2 password-indicators">
+              <!-- Barra de força da senha -->
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="h-full transition-all duration-300 rounded-full password-strength-bar"
+                       [class]="passwordStrength === 'weak' ? 'weak' : 
+                                passwordStrength === 'medium' ? 'medium' : 'strong'"
+                       [style.width]="passwordStrength === 'weak' ? '33.33%' : 
+                                     passwordStrength === 'medium' ? '66.66%' : '100%'">
+                  </div>
+                </div>
+                <span class="text-xs font-medium"
+                      [class]="passwordStrength === 'weak' ? 'text-red-500' : 
+                               passwordStrength === 'medium' ? 'text-yellow-600' : 
+                               'text-green-600'">
+                  {{ passwordStrength === 'weak' ? 'Fraca' : 
+                     passwordStrength === 'medium' ? 'Média' : 'Forte' }}
+                </span>
+              </div>
+              
+              <!-- Critérios da senha -->
+              <div class="grid grid-cols-2 gap-1 text-xs password-criteria">
+                <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasLength" [class.invalid]="!passwordCriteria.hasLength">
+                  <lucide-icon [img]="passwordCriteria.hasLength ? CheckIcon : XIcon" size="14"></lucide-icon>
+                  <span>Mínimo 8 caracteres</span>
+                </div>
+                <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasUppercase" [class.invalid]="!passwordCriteria.hasUppercase">
+                  <lucide-icon [img]="passwordCriteria.hasUppercase ? CheckIcon : XIcon" size="14"></lucide-icon>
+                  <span>Letra maiúscula</span>
+                </div>
+                <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasLowercase" [class.invalid]="!passwordCriteria.hasLowercase">
+                  <lucide-icon [img]="passwordCriteria.hasLowercase ? CheckIcon : XIcon" size="14"></lucide-icon>
+                  <span>Letra minúscula</span>
+                </div>
+                <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasNumber" [class.invalid]="!passwordCriteria.hasNumber">
+                  <lucide-icon [img]="passwordCriteria.hasNumber ? CheckIcon : XIcon" size="14"></lucide-icon>
+                  <span>Número</span>
+                </div>
+                <div class="flex items-center space-x-2 col-span-2 criteria-item" [class.valid]="passwordCriteria.hasSpecial" [class.invalid]="!passwordCriteria.hasSpecial">
+                  <lucide-icon [img]="passwordCriteria.hasSpecial ? CheckIcon : XIcon" size="14"></lucide-icon>
+                  <span>Caractere especial</span>
+                </div>
+              </div>
+            </div>
+          }
+          
+          @if (hasFieldError('password')) {
+            <div class="error-message">{{ getPasswordErrorMessage() }}</div>
+          }
         </div>
-      </div>
-      <div>
-        <label for="password" class="block text-gray-700 font-medium mb-1">Senha</label>
-        <div class="relative">
-          <input id="password" name="password" type="password" required formControlName="password"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-            placeholder="Preencha sua senha">
-          <div class="absolute right-3 top-2.5 text-gray-400">
-            <lucide-icon [name]="LockIcon" size="20"></lucide-icon>
+        
+        <div class="password-field">
+          <label for="password_confirmation" class="text-sm block text-gray-700 font-medium mb-1">Confirmar Senha</label>
+          <div class="relative">
+            <input 
+              id="password_confirmation" 
+              name="password_confirmation" 
+              [type]="showPasswordConfirmation ? 'text' : 'password'" 
+              required 
+              formControlName="password_confirmation"
+              class="w-full px-4 py-2 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Confirme sua senha">
+            <button 
+              type="button"
+              (click)="togglePasswordConfirmationVisibility()"
+              class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors toggle-password-btn">
+              <lucide-icon [img]="showPasswordConfirmation ? EyeOffIcon : EyeIcon" size="20"></lucide-icon>
+            </button>
           </div>
+          
+          @if (hasFieldError('password_confirmation')) {
+            <div class="error-message">{{ getPasswordConfirmationErrorMessage() }}</div>
+          }
         </div>
+
+        <div class="flex items-center justify-start">
+          <mat-checkbox formControlName="terms">
+            <span class="text-sm text-gray-700 font-medium">Li e concordo com os <a href="#" class="text-[#2fade3] hover:underline">termos de uso</a></span>
+          </mat-checkbox>
+        </div>
+        
+        @if (hasFieldError('terms')) {
+          <div class="error-message">Você deve aceitar os termos de uso</div>
+        }
+        
+        <button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid"
+          [class]="registerForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
+          class="w-full font-medium py-2 px-4 rounded-lg transition">
+          Cadastrar
+        </button>
+      </form>
+
+      <div class="relative mb-6">
+        <div class="bg-gray-200 h-px w-full"></div>
+        <span class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-sm text-gray-500">
+          ou
+        </span>
       </div>
-      <button type="submit" [disabled]="registerForm.invalid"
-        [class]="registerForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
-        class="w-full font-medium py-2 px-4 rounded-lg transition">
-        Cadastrar
+
+      <button mat-raised-button color="primary" class="text-gray-700 mb-6" matTooltip="Continuar com Google">
+        <div class="flex justify-between items-center">
+          <mat-icon class="mr-3">
+            <lucide-icon [img]="googleIcon" size="20"></lucide-icon>
+          </mat-icon>
+          <span class="text-white-500 text-sm font-[Lora]">Continuar com Google</span>
+        </div>
       </button>
-    </form>
-    <p class="text-center text-gray-500 text-sm mt-6">
-      Já possui uma conta?
-      <a routerLink="/login" class="text-[#2fade3] hover:underline font-medium">Entrar</a>
-    </p>
-  </mat-card>
+      
+      <p class="text-center text-gray-500 text-sm mt-6">
+        Já possui uma conta?
+        <a routerLink="/login" class="text-[#2fade3] hover:underline font-medium">Entrar</a>
+      </p>
+    </mat-card>
+  </div>
+
+    <div class="text-center mt-8 text-sm text-gray-500">
+      <p>© 2025 e-Gest - Estoque. Todos os direitos reservados.</p>
+    </div>
+  </div>
 </div>

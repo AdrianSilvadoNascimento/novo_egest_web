@@ -234,6 +234,11 @@ body {
     &:hover {
       background-color: #1d4ed8 !important;
     }
+
+    &.mat-primary:disabled {
+      background-color: #9ca3af !important;
+      color: #ffffff !important;
+    }
   }
   
   &.mat-accent {

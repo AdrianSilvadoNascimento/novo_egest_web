@@ -1,49 +1,81 @@
-<div id="login" class="flex items-center justify-center p-4">
-  <mat-card class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-    <div class="flex flex-col items-center">
-      <lucide-icon [img]="LockKeyholeIcon" class="text-4xl text-[#3377bc] mb-4"></lucide-icon>
-      <h3 class="text-md font-bold text-gray-800 mb-2">Olá Novamente!</h3>
+<div id="login" class="bg-[#f3f4f6] flex items-center justify-center p-4 pt-0">
+  <div class="w-full max-w-md">
+    <div class="text-center">
+      <div class="inline-flex items-center bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white justify-center w-16 h-16 rounded-2xl mb-4">
+        <lucide-icon [img]="packageIcon" class="w-8 h-8 text-white"></lucide-icon>
+      </div>
+      <p class="text-gray-600 text-lg font-[Lora]">Gerencie seu estoque com maestria</p>
     </div>
-    <form class="space-y-5 mb-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div>
-        <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
-        <div class="relative">
-          <input id="email" name="email" type="email" required formControlName="email"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-            placeholder="Insira seu email">
-          <div class="absolute right-3 top-2.5 text-gray-400">
-            <lucide-icon [img]="MailIcon" size="20"></lucide-icon>
+
+    <div class="flex items-center justify-center">
+      <mat-card class="bg-white rounded-2xl shadow-md p-8 w-full">
+        <div class="text-center mb-6 font-[Lora]">
+          <span class="font-semibold block text-2xl text-gray-800">Entrar na sua conta</span>
+          <span class="text-sm text-gray-500 block">Digite suas credenciais para acessar o sistema</span>
+        </div>
+        <form class="space-y-5 mb-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div>
+            <label for="email" class="text-sm block text-gray-700 font-[Lora] mb-1">Email</label>
+            <div class="relative">
+              <input id="email" name="email" type="email" required formControlName="email"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira seu email">
+              <div class="absolute right-3 top-2.5 text-gray-400">
+                <lucide-icon [img]="MailIcon" size="20"></lucide-icon>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div>
-        <label for="password" class="block text-gray-700 font-medium mb-1">Password</label>
-        <div class="relative">
-          <input id="password" name="password" type="password" required formControlName="password"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-            placeholder="Insira sua senha">
-          <div class="absolute right-3 top-2.5 text-gray-400">
-            <lucide-icon [img]="LockIcon" size="20"></lucide-icon>
+          <div>
+            <label for="password" class="text-sm block text-gray-700 font-[Lora] mb-1">Password</label>
+            <div class="relative">
+              <input id="password" name="password" type="password" required formControlName="password"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira sua senha">
+              <div class="absolute right-3 top-2.5 text-gray-400">
+                <lucide-icon [img]="LockIcon" size="20"></lucide-icon>
+              </div>
+            </div>
           </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input id="remember" name="remember" type="checkbox" formControlName="remember"
+                class="h-4 w-4 text-[#3377bc] focus:ring-[#2fade3] border-gray-300 rounded">
+              <label for="remember" class="textsmd ml-2 block text-sm text-gray-600">Lembrar de mim</label>
+            </div>
+            <a routerLink="/" class="text-sm text-[#2fade3] hover:underline">Esqueceu a senha?</a>
+          </div>
+          <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid"
+            [class]="loginForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
+            class="w-full font-[Lora] py-2 px-4 rounded-lg transition">
+            Entrar
+          </button>
+        </form>
+
+        <div class="relative mb-6">
+          <div class="bg-gray-200 h-px w-full"></div>
+          <span class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-sm text-gray-500">
+            ou
+          </span>
         </div>
-      </div>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <input id="remember" name="remember" type="checkbox" formControlName="remember"
-            class="h-4 w-4 text-[#3377bc] focus:ring-[#2fade3] border-gray-300 rounded">
-          <label for="remember" class="ml-2 block text-sm text-gray-600">Lembrar de mim</label>
-        </div>
-        <a routerLink="/" class="text-sm text-[#2fade3] hover:underline">Esqueceu a senha?</a>
-      </div>
-      <button type="submit" [disabled]="loginForm.invalid"
-        [class]="loginForm.invalid ? 'text-gray-400 bg-gray-200' : 'bg-[#3377bc] hover:bg-[#2fade3] text-white'"
-        class="w-full font-medium py-2 px-4 rounded-lg transition">
-        Entrar
-      </button>
-    </form>
-    <p class="text-center text-gray-500 text-sm">
-      Ainda não tem uma conta?
-      <a routerLink="/register" class="text-[#2fade3] hover:underline font-medium">Registre-se</a>
-    </p>
-  </mat-card>
+
+        <button mat-raised-button color="primary" class="text-gray-700 mb-6" matTooltip="Continuar com Google">
+          <div class="flex justify-between items-center">
+            <mat-icon class="mr-3">
+              <lucide-icon [img]="googleIcon" size="20"></lucide-icon>
+            </mat-icon>
+            <span class="text-white-500 text-sm font-[Lora]">Continuar com Google</span>
+          </div>
+        </button>
+        
+        <p class="text-center text-gray-500 text-sm">
+          Ainda não tem uma conta?
+          <a routerLink="/register" class="text-[#2fade3] hover:underline font-[Lora]">Criar conta</a>
+        </p>
+      </mat-card>
+    </div>
+
+    <div class="text-center mt-8 text-sm text-gray-500">
+      <p>© 2025 e-Gest - Estoque. Todos os direitos reservados.</p>
+    </div>
+  </div>
 </div>

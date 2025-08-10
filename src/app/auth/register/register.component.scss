@@ -1,3 +1,104 @@
-mat-card {
-  background-color: #fff;
+// Estilos para validação de senha
+.password-strength-bar {
+  transition: all 0.3s ease;
+  
+  &.weak {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  }
+  
+  &.medium {
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+  }
+  
+  &.strong {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  }
+}
+
+.password-criteria {
+  .criteria-item {
+    transition: all 0.2s ease;
+    
+    &.valid {
+      color: #059669;
+      transform: scale(1.02);
+    }
+    
+    &.invalid {
+      color: #6b7280;
+    }
+  }
+}
+
+// Estilos para os campos de senha
+.password-field {
+  position: relative;
+  
+  .toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: #374151;
+    }
+    
+    &:focus {
+      outline: 2px solid #2fade3;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Animações para os indicadores
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.password-indicators {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+// Estilos para mensagens de erro
+.error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  animation: fadeInUp 0.2s ease-out;
+}
+
+// Estilos para o botão de submit quando inválido
+button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  
+  &:hover {
+    transform: none;
+  }
+}
+
+// Responsividade para os critérios de senha
+@media (max-width: 480px) {
+  .password-criteria {
+    grid-template-columns: 1fr;
+    
+    .criteria-item {
+      font-size: 0.7rem;
+    }
+  }
 }

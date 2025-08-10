@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -12,17 +12,21 @@ import {
   LockKeyhole,
   Mail,
   Lock,
+  Chrome,
+  Package
 } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCard } from "@angular/material/card";
+import { MatIcon } from "@angular/material/icon";
+
 import { LoginModel } from '../../models/login.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
-import { MatCard } from "@angular/material/card";
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule, MatCard],
+  imports: [LucideAngularModule, RouterLink, MatButtonModule, ReactiveFormsModule, MatCard, MatIcon],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -30,6 +34,8 @@ export class LoginComponent implements OnInit {
   readonly LockKeyholeIcon = LockKeyhole;
   readonly MailIcon = Mail;
   readonly LockIcon = Lock;
+  readonly googleIcon = Chrome;
+  readonly packageIcon = Package;
 
   private emailRegistered!: string
 
