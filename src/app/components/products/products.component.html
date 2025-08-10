@@ -66,15 +66,29 @@
       <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
         <lucide-icon matPrefix [img]="searchIcon" class="w-6 h-6"></lucide-icon>
         <mat-label>Buscar produto por nome, descrição ou código...</mat-label>
-        <input matInput type="text" id="search_product" name="search_product">
+        <input
+          matInput 
+          type="text" 
+          id="search_product" 
+          name="search_product"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+        >
+        @if (searchTerm.trim()) {
+          <button matSuffix mat-icon-button (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </mat-form-field>
+
       <div class="flex flex-row items-center gap-4">
-        <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
+        <!-- WIP: Filtros -->
+        <!-- <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
           <mat-icon matPrefix>
             <lucide-icon [img]="filterIcon" class="w-4 h-4"></lucide-icon>
           </mat-icon>
           Filtros
-        </button>
+        </button> -->
 
         <div class="view-toggle-buttons flex flex-row items-center">
           <button mat-stroked-button [class.active]="viewMode.card" color="primary" matTooltip="Visualizar em Cards" (click)="toggleViewMode('card')">
@@ -91,8 +105,12 @@
   <div class="products-quantity max-w-7xl mx-auto">
     <div class="flex flex-row justify-between items-center pl-4">
       <span class="text-md text-gray-500">
-        @if (paginatedItems && paginatedItems.data) {
-          Mostrando {{ paginatedItems.data.length }} de {{ totalItems }} produtos
+        @if (searchTerm.trim()) {
+          Mostrando {{ filteredProducts.length }} de {{ totalItems }} produtos
+        } @else {
+          @if (paginatedItems && paginatedItems.data) {
+            Mostrando {{ paginatedItems.data.length }} de {{ totalItems }} produtos
+          }
         }
       </span>
 
@@ -107,16 +125,27 @@
     </div>
   </div>
 
-  @if (isEmpty) {
-    <app-empty-list [icon]="packageIcon" description="Produtos está vazio"></app-empty-list>
+  @if (isEmpty || (searchTerm.trim() && filteredProducts.length === 0)) {
+    <div class="max-w-7xl mx-auto py-2">
+      <app-empty-list
+        [icon]="packageIcon"
+        description="Nenhum produto encontrado">
+      </app-empty-list>
+    </div>
   } @else {
+    @if (isSearching) {
+      <div class="max-w-7xl mx-auto py-2">
+        <mat-progress-bar mode="indeterminate" class="mr-2"></mat-progress-bar>
+      </div>
+    }
+    
     @if (viewMode.card) {
-      <div class="max-w-7xl mx-auto space-y-6 mb-10">
+      <div class="max-w-7xl mx-auto space-y-6 mb-10">        
         <div #productsGrid class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto max-h-[600px] pb-6 px-2"
           infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsGrid"
           (scrolled)="loadMore()"
         >
-          @for (product of paginatedItems.data; track product.id) {
+          @for (product of filteredProducts; track product.id) {
             <div class="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white rounded-2xl cursor-pointer group"
               (click)="openProductDetails(product)"
             >
@@ -175,9 +204,9 @@
         </div>
       </div>
     }
-  
+
     @if (viewMode.list) {
-      <mat-card class="max-w-7xl mx-auto shadow-md space-y-6 mb-10">  
+      <mat-card class="max-w-7xl mx-auto shadow-md space-y-6 mb-10"> 
         <div #productsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll
           [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsTable"
           (scrolled)="loadMore()">
@@ -195,7 +224,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (product of paginatedItems.data; track product.id) {
+              @for (product of filteredProducts; track product.id) {
               <tr class="hover:bg-gray-50 border-b">
                 <td class="px-4 py-3">
                   <a (click)="openProductDetails(product)" class="cursor-pointer">
@@ -252,11 +281,11 @@
           </table>
     
           @if (loading) {
-          <div class="text-center py-4 text-gray-500">Carregando...</div>
+            <div class="text-center py-4 text-gray-500">Carregando...</div>
           }
     
           @if (!hasNext && !loading) {
-          <div class="text-center py-4 text-gray-400">Fim da lista</div>
+            <div class="text-center py-4 text-gray-400">Fim da lista</div>
           }
         </div>
       </mat-card>

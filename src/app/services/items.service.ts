@@ -59,6 +59,16 @@ export class ItemsService {
     })));
   }
 
+  searchItems(searchTerm: string, limit: number = 50): Observable<ItemModel[]> {
+    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    this.headers = this.headers.set('X-Skip-Loading', 'true'); // Skip global loading for search
+    const accountId = this.authService.getAccountId();
+
+    return this.http.get<ItemModel[]>(`${this.baseUrl}/${accountId}/search?term=${encodeURIComponent(searchTerm)}&limit=${limit}`, {
+      headers: this.headers
+    });
+  }
+
   getAllItems(): Observable<ItemModel[]> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();

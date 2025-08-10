@@ -211,9 +211,10 @@
             </mat-form-field>
           </div>
 
+          <!-- Estoque -->           
           <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>Estoque</mat-label>
-            <input matInput type="number" id="quantity" [disabled]="data.isEdit" name="quantity" formControlName="quantity" required min="0">
+            <mat-label>{{ data.isEdit ? 'O estoque não pode ser alterado' : 'Estoque' }}</mat-label>
+            <input matInput type="number" id="quantity" name="quantity" formControlName="quantity" required min="0">
             <mat-icon matPrefix>inventory</mat-icon>
             @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
               <mat-error>Estoque é obrigatório</mat-error>

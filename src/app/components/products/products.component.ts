@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from "@angular/material/select";
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { PaginatedItemsModel } from '../../models/paginated-items.model';
 import { ItemsService } from '../../services/items.service';
@@ -50,7 +51,8 @@ import { DashboardModel } from '../../models/dashboard.model';
     MatMenuModule,
     EmptyListComponent,
     MatCard,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressBarModule
 ],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
@@ -98,6 +100,10 @@ export class ProductsComponent implements OnInit {
   selectedSortBy: string = 'name';
   selectedSortOrder: string = 'desc';
 
+  searchTerm: string = '';
+  filteredProducts: ItemModel[] = [];
+  isSearching: boolean = false;
+
   constructor(
     private dialog: MatDialog,
     private itemService: ItemsService,
@@ -118,6 +124,7 @@ export class ProductsComponent implements OnInit {
         this.isEmpty = itemData.data?.length === 0;
         this.hasNext = !!itemData.nextCursor;
         this.sortCurrentData();
+        this.filteredProducts = [...this.paginatedItems.data];
       },
       error: (error) => {
         this.toast.error(error.message);
@@ -130,18 +137,107 @@ export class ProductsComponent implements OnInit {
     this.selectedSortOrder = 'asc';
 
     this.sortCurrentData();
+
+    if (this.filteredProducts.length > 0) {
+      this.sortFilteredProducts();
+    }
   }
 
-  private sortCurrentData(): void {
-    if (!this.paginatedItems.data || this.selectedSortBy === 'none') {
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    
+    if (!term.trim()) {
+      this.filteredProducts = [...this.paginatedItems.data];
+      this.isSearching = false;
       return;
     }
 
-    this.paginatedItems.data.sort((a, b) => {
+    this.filterProducts();
+    this.performBackendSearch(term);
+  }
+
+  private performBackendSearch(term: string): void {
+    this.isSearching = true;
+    
+    this.itemService.searchItems(term, 100).subscribe({
+      next: (searchResults) => {
+        const allProducts = [...this.paginatedItems.data];
+
+        searchResults.forEach(searchItem => {
+          if (!allProducts.some(existing => existing.id === searchItem.id)) {
+            allProducts.push(searchItem);
+          }
+        });
+
+        this.filteredProducts = allProducts.filter(product => 
+          product.name.toLowerCase().includes(term.toLowerCase()) ||
+          product.description?.toLowerCase().includes(term.toLowerCase()) ||
+          product.barcode?.toLowerCase().includes(term.toLowerCase())
+        );
+
+        this.sortFilteredProducts();
+        this.isSearching = false;
+      },
+      error: (error) => {
+        console.error('Erro na busca:', error);
+        this.isSearching = false;
+      }
+    });
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredProducts = [...this.paginatedItems.data];
+  }
+
+  private filterProducts(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredProducts = [...this.paginatedItems.data];
+      return;
+    }
+    
+    const searchTerm = this.searchTerm.toLowerCase();
+    this.filteredProducts = this.paginatedItems.data.filter(product => 
+      product.name.toLowerCase().includes(searchTerm) ||
+      product.description?.toLowerCase().includes(searchTerm) ||
+      product.barcode?.toLowerCase().includes(searchTerm)
+    );
+
+    this.sortFilteredProducts();
+  }
+
+  private sortFilteredProducts(): void {
+    this.filteredProducts = this.sortArray(
+      this.filteredProducts,
+      this.selectedSortBy,
+      this.selectedSortOrder
+    );
+  }
+  
+  private sortCurrentData(): void {
+    this.paginatedItems.data = this.sortArray(
+      this.paginatedItems.data,
+      this.selectedSortBy,
+      this.selectedSortOrder
+    );
+  
+    if (this.searchTerm.trim()) {
+      this.filterProducts();
+    } else {
+      this.filteredProducts = [...this.paginatedItems.data];
+    }
+  }  
+
+  private sortArray<T>(array: T[], sortBy: string, sortOrder: string): T[] {
+    if (!array.length || sortBy === 'none') {
+      return array;
+    }
+  
+    return [...array].sort((a: any, b: any) => {
       let valueA: any;
       let valueB: any;
-
-      switch (this.selectedSortBy) {
+  
+      switch (sortBy) {
         case 'name':
           valueA = a.name?.toLowerCase() || '';
           valueB = b.name?.toLowerCase() || '';
@@ -165,15 +261,12 @@ export class ProductsComponent implements OnInit {
         default:
           return 0;
       }
-
+  
       let comparison = 0;
-      if (valueA > valueB) {
-        comparison = 1;
-      } else if (valueA < valueB) {
-        comparison = -1;
-      }
-
-      return this.selectedSortOrder === 'asc' ? comparison : -comparison;
+      if (valueA > valueB) comparison = 1;
+      else if (valueA < valueB) comparison = -1;
+  
+      return sortOrder === 'asc' ? comparison : -comparison;
     });
   }
 
@@ -181,6 +274,10 @@ export class ProductsComponent implements OnInit {
     this.dashboardService.getDashboardQuick().subscribe({
       next: (dashboard: DashboardModel) => {
         this.totalItems = dashboard.totalProducts;
+
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        }
       },
       error: (error) => {
         this.toast.error(error.message);
@@ -191,16 +288,24 @@ export class ProductsComponent implements OnInit {
   toggleViewMode(mode: 'card' | 'list'): void {
     this.viewMode.card = false;
     this.viewMode.list = false;
-
     this.viewMode[mode] = true;
+
+    if (this.searchTerm.trim()) {
+      this.filterProducts();
+    }
   }
 
   loadProducts(): void {
     this.itemService.$itemData.subscribe({
       next: (itemData: PaginatedItemsModel) => {
-      this.paginatedItems = itemData;
+        this.paginatedItems = itemData;
+        this.isEmpty = itemData.data?.length === 0;
 
-      this.isEmpty = itemData.data?.length === 0;
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        } else {
+          this.filteredProducts = [...this.paginatedItems.data];
+        }
       },
       error: (error) => {
         this.toast.error(error.message);
@@ -225,8 +330,13 @@ export class ProductsComponent implements OnInit {
         this.paginatedItems.data = [...this.paginatedItems.data, ...itemData.data];
         this.paginatedItems.nextCursor = itemData.nextCursor;
 
-        // Aplicar ordenação aos novos dados carregados
         this.sortCurrentData();
+
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        } else {
+          this.filteredProducts = [...this.paginatedItems.data];
+        }
 
         sessionStorage.setItem('itemData', JSON.stringify(this.paginatedItems));
         sessionStorage.setItem('nextCursor', itemData.nextCursor || '');
@@ -245,6 +355,7 @@ export class ProductsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.clearSearch();
         this.loadProducts();
       } else {
         if (!sessionStorage.getItem('product_form_draft')) {
@@ -270,14 +381,25 @@ export class ProductsComponent implements OnInit {
         .map((item: ItemModel) => item.id === itemDetails.id ? itemDetails : item);
 
       this.sortCurrentData();
+
+      if (this.searchTerm.trim()) {
+        this.filterProducts();
+      } else {
+        this.filteredProducts = [...this.paginatedItems.data];
+      }
     });
   }
 
   toggleFilters() {
     this.filterDrawer.toggle();
+
+    if (this.searchTerm.trim()) {
+      this.filterProducts();
+    }
   }
 
   applyFilters() {
+    this.clearSearch();
     this.loadProducts();
     this.filterDrawer.close();
   }
@@ -289,6 +411,8 @@ export class ProductsComponent implements OnInit {
       sortOrder: '',
       modifiedBy: ''
     };
+
+    this.clearSearch();
   }
 
   onFileImportSelected(event: Event): void {
@@ -311,6 +435,10 @@ export class ProductsComponent implements OnInit {
       next: (job) => {
         this.toast.info(job.message || `Arquivo enviado. A importação de ${job.total} está em processamento...`);
 
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        }
+
         const intervalId = setInterval(() => {
           this.itemService.getImportStatus(job.jobId).subscribe({
             next: (res) => {
@@ -318,6 +446,7 @@ export class ProductsComponent implements OnInit {
               if (status === 'completed') {
                 clearInterval(intervalId);
                 this.toast.success('Importação concluída com sucesso!');
+                this.clearSearch();
                 this.loadProducts();
               } else if (status === 'failed') {
                 clearInterval(intervalId);
@@ -349,6 +478,10 @@ export class ProductsComponent implements OnInit {
           categories = cat
           category = categories.find((cat: CategoryModel) => cat.id === categoryId)
           this.openCategoryDetails(category)
+
+          if (this.searchTerm.trim()) {
+            this.filterProducts();
+          }
         }, error: (error) => {
           this.toast.error(error.message || error.error.message || 'Erro ao carregar categorias!')
         }
@@ -362,7 +495,13 @@ export class ProductsComponent implements OnInit {
   openCategoryDetails(category: CategoryModel): void {    
     this.dialog.open(CategoryDetailsComponent, {
       data: category
-    })
+    }).afterClosed().subscribe(result => {
+      if (result) {
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        }
+      }
+    });
   }
 
   onMoveProduct(item: ItemModel): void {
@@ -373,11 +512,16 @@ export class ProductsComponent implements OnInit {
       },
       width: '600px'
     }).afterClosed().subscribe(result => {
-      if (result) {
+    if (result) {
         this.moveService.moveItem({ ...result, item_id: item.id }).subscribe({
           next: (data) => {
             this.toast.success('Produto movido com sucesso!')
+            this.clearSearch();
             this.loadProducts();
+
+            if (this.searchTerm.trim()) {
+              this.filterProducts();
+            }
           }, error: (error) => {
             this.toast.error(error.message || error.error.message || 'Erro ao mover o produto!')
           }
@@ -408,6 +552,7 @@ export class ProductsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.editedProduct = result;
+        this.clearSearch();
         this.loadProducts();
       } else {
         if (!sessionStorage.getItem('product_form_draft')) {
@@ -420,6 +565,7 @@ export class ProductsComponent implements OnInit {
   onDeleteProduct(product: any): void {
     this.itemService.deleteItem(product.id).subscribe()
 
+    this.clearSearch();
     this.loadProducts();
   }
 }

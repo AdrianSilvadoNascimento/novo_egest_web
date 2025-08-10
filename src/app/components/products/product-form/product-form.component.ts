@@ -113,6 +113,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       active: [productModel.active],
       product_image: [productModel.product_image],
     });
+
+    if (this.data.isEdit) {
+      this.form.get('quantity')?.disable();
+    }
   }
 
   newForm(): void {
