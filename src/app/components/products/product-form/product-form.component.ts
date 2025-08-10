@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CategoryModel } from '../../../models/category.model';
 import { PaginatedItemsModel } from '../../../models/paginated-items.model';
+import { ItemModel } from '../../../models/item.model';
 
 @Component({
   selector: 'app-product-form',
@@ -61,7 +62,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     private itemService: ItemsService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ProductFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ItemCreationModel
+    @Inject(MAT_DIALOG_DATA) public data: { item: ItemCreationModel, isEdit: boolean }
   ) { }
 
   ngAfterViewInit(): void {
@@ -76,12 +77,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const draft = sessionStorage.getItem(this.draftKey);
     this.hasDraft = !!draft;
 
-    if (this.data) {
-      this.createForm(this.data);
-      this.imagePreview = this.data.product_image;
+    if (this.data.item) {
+      this.createForm(this.data.item);
+      this.imagePreview = this.data.item.product_image;
     } else if (this.hasDraft) {
       this.loadDraft();
-    } else if (!this.data && !this.hasDraft) {
+    } else if (!this.data.item && !this.hasDraft) {
       this.createForm(new ItemCreationModel());
     }
   }
@@ -133,7 +134,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   sendData(isToClose: boolean = true): void {
     if (this.form.valid) {
-      if (!this.data) {
+      if (!this.data.item) {
         this.createItem(isToClose);
         return;
       }
@@ -147,12 +148,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
     if (!this.imageBase64) productData.product_image = '';
     
-    this.itemService.updateItem(this.data.id, productData).subscribe({
-      next: () => {
+    this.itemService.updateItem(this.data.item.id, productData).subscribe({
+      next: (updatedItem: ItemModel) => {
         this.toast.success('Produto atualizado com sucesso!');
         this.clearDraft();
   
-        if (isToClose) this.dialogRef.close(this.form.value);
+        if (isToClose) this.dialogRef.close(updatedItem);
   
         this.form.reset();
       }, error: (error) => {
@@ -165,13 +166,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const productData = this.form.getRawValue();
 
     if (!this.imageBase64) productData.product_image = '';
-    
+
     this.itemService.createItem(productData).subscribe({
-      next: () => {
+      next: (createdItem: ItemModel) => {
         this.toast.success('Produto salvo com sucesso!');
         this.clearDraft();
   
-        if (isToClose) this.dialogRef.close(this.form.value);
+        if (isToClose) this.dialogRef.close(createdItem);
   
         this.form.reset();
       }, error: (error) => {

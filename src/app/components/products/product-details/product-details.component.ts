@@ -31,11 +31,17 @@ export class ProductDetailsComponent {
   readonly chartIcon = ChartColumn;
   readonly closeIcon = X;
 
+  productDetails!: ItemModel;
+
   constructor(
     public dialogRef: MatDialogRef<ProductDetailsComponent>,
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public product: ItemModel
   ) { }
+
+  ngOnInit(): void {
+    this.productDetails = this.product;
+  }
 
   onEditProduct(product: ItemModel): void {
     const item = product;
@@ -52,7 +58,7 @@ export class ProductDetailsComponent {
     editItem.product_image = item.product_image;
 
     const dialogRef = this.dialog.open(ProductFormComponent, {
-      data: editItem as ItemCreationModel,
+      data: { item: editItem as ItemCreationModel, isEdit: true },
       minWidth: '900px'
     });
 
@@ -61,7 +67,11 @@ export class ProductDetailsComponent {
         if (!sessionStorage.getItem('product_form_draft')) {
           sessionStorage.removeItem('product_form_draft');
         }
+
+        return;
       }
+
+      this.productDetails = result;
     });
   }
 

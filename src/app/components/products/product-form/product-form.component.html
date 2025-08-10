@@ -1,5 +1,5 @@
 <h3 mat-dialog-title class="flex flex-col">
-  {{ data ? 'Editar Produto' : 'Adicionar Novo Produto' }}
+  {{ data.isEdit ? 'Editar Produto' : 'Adicionar Novo Produto' }}
   <br>
   <span class="text-sm pl-1 text-gray-500">Preencha as informações do produto</span>
 
@@ -213,10 +213,10 @@
 
           <mat-form-field class="custom-outline w-full mb-4">
             <mat-label>Estoque</mat-label>
-            <input matInput type="number" id="quantity" name="quantity" formControlName="quantity" required min="0">
+            <input matInput type="number" id="quantity" [disabled]="data.isEdit" name="quantity" formControlName="quantity" required min="0">
             <mat-icon matPrefix>inventory</mat-icon>
             @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
-            <mat-error>Estoque é obrigatório</mat-error>
+              <mat-error>Estoque é obrigatório</mat-error>
             }
           </mat-form-field>
 
@@ -281,7 +281,7 @@
         Salvar e Adicionar Novo Produto
       </button>
       <button type="submit" (click)="saveAndClose()" [disabled]="form.invalid" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-        {{ data ? 'Salvar Alterações' : 'Criar Produto' }}
+        {{ data.isEdit ? 'Salvar Alterações' : 'Criar Produto' }}
       </button>
     </div>
   </form>

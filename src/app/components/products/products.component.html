@@ -122,7 +122,11 @@
             >
               <div class="card-content p-0">
                 <div class="relative">
-                  <img class="w-full h-48 object-cover rounded-t-2xl" alt="Imagem do produto" src="{{ product.product_image }}" />
+                  @if (product.product_image) {
+                    <img class="w-full h-48 object-cover rounded-t-2xl" alt="Imagem do produto" src="{{ product.product_image }}" />
+                  } @else {
+                    <lucide-icon [img]="packageIcon" class="w-full h-48 object-cover rounded-t-2xl text-gray-400"></lucide-icon>
+                  }
   
                   <div class="absolute top-3 right-3 flex gap-2">
                     @if (product.active) {

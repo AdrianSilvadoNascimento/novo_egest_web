@@ -3,32 +3,32 @@ import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { LucideAngularModule, FileUp, PackagePlus, PackageOpen, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
 
 import { MatIcon } from '@angular/material/icon';
-import { LucideAngularModule, FileUp, PackagePlus, PackageOpen, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
+import { MatCard } from "@angular/material/card";
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ItemsService } from '../../services/items.service';
-import { PaginatedItemsModel } from '../../models/paginated-items.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
-import { ProductFormComponent } from './product-form/product-form.component';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from "@angular/material/select";
+
+import { PaginatedItemsModel } from '../../models/paginated-items.model';
+import { ItemsService } from '../../services/items.service';
+import { ProductFormComponent } from './product-form/product-form.component';
 import { ItemModel } from '../../models/item.model';
 import { ItemCreationModel } from '../../models/item-creation.model';
 import { ToastService } from '../../services/toast.service';
 import { ProductDetailsComponent } from './product-details/product-details.component';
-import { MatMenuModule } from '@angular/material/menu';
 import { EmptyListComponent } from "../../shared/components/empty-list/empty-list.component";
 import { CategoryModel } from '../../models/category.model';
 import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
 import { MovementationFormComponent } from '../movementation/movementation-form/movementation-form.component';
 import { MovementationService } from '../../services/movementation.service';
-import { MatCard } from "@angular/material/card";
 import { DashboardService } from '../../services/dashboard.service';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from "@angular/material/select";
-import { AuthService } from '../../services/auth.service';
 import { DashboardModel } from '../../models/dashboard.model';
 
 @Component({
@@ -82,6 +82,8 @@ export class ProductsComponent implements OnInit {
   hasNext: boolean = false;
   loading: boolean = false;
   nextCursor!: string;
+
+  editedProduct!: ItemModel;
 
   @ViewChild('productsTable', { static: true }) productsTable!: ElementRef;
   @ViewChild(MatDrawer) filterDrawer!: MatDrawer;
@@ -252,6 +254,25 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  openProductDetails(product: ItemModel): void {
+    this.editedProduct = product;
+    
+    const dialogRef = this.dialog.open(ProductDetailsComponent, {
+      data: this.editedProduct,
+      panelClass: 'modern-dialog',
+      minWidth: '600px'
+    })
+
+    dialogRef.afterClosed().subscribe(itemDetails => {
+      if (!itemDetails) return;
+
+      this.paginatedItems.data = this.paginatedItems.data
+        .map((item: ItemModel) => item.id === itemDetails.id ? itemDetails : item);
+
+      this.sortCurrentData();
+    });
+  }
+
   toggleFilters() {
     this.filterDrawer.toggle();
   }
@@ -318,14 +339,6 @@ export class ProductsComponent implements OnInit {
     input.value = '';
   }
 
-  openProductDetails(product: ItemModel): void {
-    this.dialog.open(ProductDetailsComponent, {
-      data: product,
-      panelClass: 'modern-dialog',
-      minWidth: '600px'
-    })
-  }
-
   categoryDetails(categoryId: string): void {
     let categories = JSON.parse(sessionStorage.getItem('categoryData')!!)
     let category: CategoryModel
@@ -346,7 +359,7 @@ export class ProductsComponent implements OnInit {
     this.openCategoryDetails(category)
   }
 
-  openCategoryDetails(category: CategoryModel): void {
+  openCategoryDetails(category: CategoryModel): void {    
     this.dialog.open(CategoryDetailsComponent, {
       data: category
     })
@@ -388,12 +401,13 @@ export class ProductsComponent implements OnInit {
     editItem.product_image = item.product_image;
 
     const dialogRef = this.dialog.open(ProductFormComponent, {
-      data: editItem as ItemCreationModel,
+      data: { item: editItem as ItemCreationModel, isEdit: true },
       minWidth: '900px'
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.editedProduct = result;
         this.loadProducts();
       } else {
         if (!sessionStorage.getItem('product_form_draft')) {
