@@ -58,7 +58,13 @@
           </span>
         </div>
 
-        <button mat-raised-button color="primary" class="text-gray-700 mb-6" matTooltip="Continuar com Google">
+        <button
+          type="button"
+          mat-raised-button
+          color="primary"
+          class="text-gray-700 mb-6"
+          matTooltip="Continuar com Google"
+          (click)="signInWithGoogle()">
           <div class="flex justify-between items-center">
             <mat-icon class="mr-3">
               <lucide-icon [img]="googleIcon" size="20"></lucide-icon>

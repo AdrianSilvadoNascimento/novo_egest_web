@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -31,6 +31,7 @@ import { RegisterModel } from '../../models/register.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { MatCheckbox } from "@angular/material/checkbox";
+import { GoogleAuthService, GoogleUserData } from '../../services/google-auth.service';
 
 @Component({
   selector: 'app-register',
@@ -54,6 +55,8 @@ export class RegisterComponent implements OnInit {
 
   registerForm: FormGroup = new FormGroup({});
   
+  authToken: string | null = null;
+  
   // Propriedades para validação de senha
   passwordStrength: 'weak' | 'medium' | 'strong' = 'weak';
   passwordCriteria = {
@@ -69,7 +72,9 @@ export class RegisterComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private router: Router,
+    private googleAuthService: GoogleAuthService
   ) { }
 
   ngOnInit(): void {
@@ -315,6 +320,93 @@ export class RegisterComponent implements OnInit {
     Object.keys(this.registerForm.controls).forEach(key => {
       const control = this.registerForm.get(key);
       control?.markAsTouched();
+    });
+  }
+
+  /**
+   * Realiza cadastro com Google
+   */
+  async signUpWithGoogle(): Promise<void> {
+    try {      
+      this.googleAuthService.signInWithGoogle().subscribe({
+        next: async (googleUser: any) => {          
+          if (googleUser.isNewUser) {
+            await new Promise(resolve => setTimeout(resolve, 1000));            
+            await this.fetchAuthToken();
+
+            if (this.authToken) {
+              await this.registerWithGoogle(googleUser);
+            } else {
+              this.toast.error('Erro ao obter token de autenticação Google');
+            }
+          } else {
+            this.toast.error('Usuário já cadastrado');
+            this.router.navigate(['/login']);
+          }
+        },
+        error: (error) => {
+          this.toast.error('Erro ao fazer login com Google. Tente novamente.');
+        }
+      });
+    } catch (error) {
+      this.toast.error('Erro ao iniciar login com Google. Tente novamente.');
+    }
+  }
+
+  /**
+   * Registra usuário com Google
+   * @param googleUser - Dados do usuário Google
+   */
+  async registerWithGoogle(googleUser: GoogleUserData): Promise<void> {
+    if (!this.authToken) {
+      this.toast.error('Token de autenticação não encontrado');
+      return;
+    }
+
+    const registerData = {
+      uid: googleUser.uid,
+      email: googleUser.email,
+      displayName: googleUser.displayName,
+      idToken: this.authToken
+    };
+
+    this.authService.registerWithGoogle(registerData).subscribe({
+      next: (response) => {
+        this.toast.success('Usuário registrado com sucesso!');
+        this.router.navigate(['/auth/password-setup']);
+      },
+      error: (error: any) => {
+        if (error.status === 409 || error.status === 406) {
+          this.toast.error('Usuário já cadastrado');
+        } else {
+          this.toast.error('Erro ao registrar usuário com Google. Tente novamente.');
+        }
+      }
+    })
+  }
+
+  /**
+   * Obtém o token de autenticação do Google
+   */
+  async fetchAuthToken(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.googleAuthService.isAuthenticated().subscribe(isAuth => {        
+        if (!isAuth) {
+          reject(new Error('Usuário não está autenticado'));
+          return;
+        }
+
+        this.googleAuthService.getAuthToken().subscribe({
+          next: (token) => {
+            this.authToken = token;
+            resolve();
+          },
+          error: (error) => {
+            this.toast.error('Erro ao obter token de autenticação Google');
+            reject(error);
+          }
+        });
+      });
     });
   }
 }

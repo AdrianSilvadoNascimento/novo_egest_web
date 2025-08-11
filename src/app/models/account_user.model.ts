@@ -4,6 +4,7 @@ export class AccountUserModel {
   lastname!: string;
   email!: string;
   phone_number!: string;
+  confirm_password!: string;
   address!: string;
   city!: string;
   state!: string;

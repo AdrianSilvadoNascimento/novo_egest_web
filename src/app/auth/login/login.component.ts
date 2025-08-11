@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -22,6 +22,7 @@ import { MatIcon } from "@angular/material/icon";
 import { LoginModel } from '../../models/login.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { GoogleAuthService, GoogleUserData } from '../../services/google-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -44,7 +45,9 @@ export class LoginComponent implements OnInit {
   constructor(
     private toast: ToastService,
     private formBuilder: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private googleAuthService: GoogleAuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -88,5 +91,26 @@ export class LoginComponent implements OnInit {
     };
 
     this.authService.login(this.loginForm.value).subscribe(loginObserver);
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    try {
+      this.googleAuthService.signInWithGoogle().subscribe({
+        next: (googleUser: GoogleUserData) => {
+          if (googleUser.isNewUser) {
+            this.router.navigate(['/auth/password-setup']);
+          } else {
+            this.authService.loginWithGoogle(googleUser).subscribe()
+          }
+        },
+        error: (error) => {
+          console.error('Erro no login Google:', error);
+          this.toast.error('Erro ao fazer login com Google. Tente novamente.');
+        }
+      })
+    } catch (error) {
+      console.error('Erro ao iniciar login Google:', error);
+      this.toast.error('Erro ao iniciar login com Google. Tente novamente.');
+    }
   }
 }

@@ -25,6 +25,9 @@ export class AuthService {
   private firstAccess = new BehaviorSubject<boolean>(false);
   $firstAccess = this.firstAccess.asObservable();
 
+  private passwordConfirmed = new BehaviorSubject<boolean>(true);
+  $passwordConfirmed = this.passwordConfirmed.asObservable();
+
   private storage: Storage = localStorage;
 
   constructor(private http: HttpClient, private router: Router) { }
@@ -58,6 +61,35 @@ export class AuthService {
     this.firstAccess.next(status);
   }
 
+  setPasswordConfirmed(status: boolean): void {
+    this.passwordConfirmed.next(status);
+  }
+
+  isPasswordConfirmed(): boolean {
+    return this.passwordConfirmed.value;
+  }
+
+  /**
+   * Redireciona o usuário para a rota correta baseado nas flags
+   */
+  redirectBasedOnFlags(): void {
+    const firstAccess = this.firstAccess.value;
+    const passwordConfirmed = this.passwordConfirmed.value;
+
+    console.log('Redirecionando baseado nas flags:', { firstAccess, passwordConfirmed });
+
+    if (firstAccess && !passwordConfirmed) {
+      this.router.navigate(['/auth/password-setup']);
+    } else {
+      this.router.navigate(['/home']);
+    }
+  }
+
+  /**
+   * Define o status de login e o token
+   * @param status - true se o usuário está logado, false caso contrário
+   * @param token - token de autenticação (opcional)
+   */
   setLoginStatus(status: boolean, token?: string): void {
     if (status && token) {
       this.storage.setItem('token', token);
@@ -69,29 +101,23 @@ export class AuthService {
   }
 
   login(loginModel: LoginModel): Observable<any> {
-    const rememberMeValue = loginModel.remember ? 'true' : 'false';
-    this.storage = loginModel.remember ? localStorage : sessionStorage;
-
-    localStorage.setItem('remember_me', rememberMeValue);
-
-    return this.http.post(this.API_URL + '/login', loginModel, {
+    return this.http.post(`${this.API_URL}/login`, loginModel, {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
       tap((res: any) => {
-        const token = res.token;
-        const account_user = res.account_user;
         this.setCache({
-          token: token,
+          token: res.token,
           refresh_token: res.refresh_token,
           account_id: res.account_id,
-          user_id: account_user.id,
+          user_id: res.account_user.id,
         });
-        this.setAccountUserName(account_user.name);
-        this.setLoginStatus(true, token);
-        this.firstAccess.next(account_user.first_access);
-        this.router.navigate(['/home']);
+        this.setAccountUserName(res.account_user.name);
+        this.setLoginStatus(true, res.token);
+        this.firstAccess.next(res.account_user.first_access);
+        this.setPasswordConfirmed(res.account_user.password_confirmed || true);
+        this.redirectBasedOnFlags();
       })
-    );
+    )
   }
 
   validateOrRefreshToken(): Observable<boolean> {
@@ -196,6 +222,64 @@ export class AuthService {
     })))
   }
 
+  registerWithGoogle(googleRegisterData: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/register/google`, googleRegisterData, {
+      headers: { 'Content-Type': 'application/json' },
+    }).pipe(
+      tap((res: any) => {
+        this.setCache({
+          token: res.token,
+          refresh_token: res.refresh_token,
+          account_id: res.account_id,
+          user_id: res.account_user.id,
+        });
+        this.setAccountUserName(res.account_user.name);
+        this.setLoginStatus(true, res.token);
+        this.firstAccess.next(res.account_user.first_access);
+        this.setPasswordConfirmed(false);
+        this.redirectBasedOnFlags();
+      })
+    );
+  }
+
+  loginWithGoogle(googleLoginData: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/login/google`, googleLoginData, {
+      headers: { 'Content-Type': 'application/json' },
+    }).pipe(
+      tap((res: any) => {
+        this.setCache({
+          token: res.token,
+          refresh_token: res.refresh_token,
+          account_id: res.account_id,
+          user_id: res.account_user.id,
+        });
+        this.setAccountUserName(res.account_user.name);
+        this.setLoginStatus(true, res.token);
+        this.firstAccess.next(res.account_user.first_access);
+        this.setPasswordConfirmed(res.account_user.password_confirmed || false);
+        this.redirectBasedOnFlags();
+      })
+    )
+  }
+
+  updateAccountUserPassword(password: string): Observable<any> {
+    const accountUserId = this.getAccountUserId();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.getToken()}`
+    }
+    
+    return this.http.post(`${this.API_URL}/update-password`, { accountUserId, password }, { headers })
+      .pipe(
+        tap((res: any) => {
+          // Marcar senha como confirmada
+          this.setPasswordConfirmed(true);
+          // Marcar first_access como false (usuário configurou a conta)
+          this.setFirstAccess(false);
+        })
+      );
+  }
+
   setCache(res: {
     token: string,
     refresh_token: string,
@@ -206,6 +290,12 @@ export class AuthService {
     this.storage.setItem('token', res.token);
     this.storage.setItem('account_id', res.account_id);
     this.storage.setItem('user_id', res.user_id);
+    
+    // Verificar se há dados de password_confirmed no cache
+    const passwordConfirmed = this.storage.getItem('password_confirmed');
+    if (passwordConfirmed !== null) {
+      this.setPasswordConfirmed(passwordConfirmed === 'true');
+    }
   }
 
   clearCache(): void {
@@ -214,6 +304,7 @@ export class AuthService {
     this.storage.removeItem('token');
     this.storage.removeItem('account_id');
     this.storage.removeItem('user_id');
+    this.storage.removeItem('password_confirmed');
     this.storage.removeItem('itemData');
     this.storage.removeItem('dashboardData');
     this.storage.removeItem('userName');
@@ -221,6 +312,8 @@ export class AuthService {
 
   logout(): void {
     this.setLoginStatus(false);
+    this.setFirstAccess(false);
+    this.setPasswordConfirmed(true);
     this.clearCache();
     localStorage.removeItem('refresh_token');
     this.setAccountUserName('');
