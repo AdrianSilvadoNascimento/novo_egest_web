@@ -97,19 +97,48 @@ export class LoginComponent implements OnInit {
     try {
       this.googleAuthService.signInWithGoogle().subscribe({
         next: (googleUser: GoogleUserData) => {
-          if (googleUser.isNewUser) {
-            this.router.navigate(['/auth/password-setup']);
-          } else {
-            this.authService.loginWithGoogle(googleUser).subscribe()
-          }
+          // Obter o ID Token do usuário autenticado no Firebase
+          this.googleAuthService.getAuthToken().subscribe({
+            next: (idToken) => {
+              if (!idToken) {
+                this.toast.error('Não foi possível obter o token do Google. Tente novamente.');
+                return;
+              }
+
+              // Sempre tentar login no backend. Se não existir, vamos redirecionar para registro
+              this.authService.loginWithGoogle({
+                uid: googleUser.uid,
+                email: googleUser.email,
+                displayName: googleUser.displayName,
+                idToken
+              }).subscribe({
+                next: () => {
+                  this.toast.success('Login realizado com sucesso!');
+                },
+                error: (error) => {
+                  const status = error?.status;
+                  if (status === 404 || status === 406) {
+                    // Usuário não existe no nosso backend: enviar para registro
+                    this.toast.error('Conta não encontrada. Cadastre-se para continuar.');
+                    this.router.navigate(['/register']);
+                  } else if (status === 401) {
+                    this.toast.error('Token do Google inválido. Tente novamente.');
+                  } else {
+                    this.toast.error(error?.error?.message || 'Erro ao fazer login com Google.');
+                  }
+                }
+              });
+            },
+            error: () => {
+              this.toast.error('Erro ao obter token do Google. Tente novamente.');
+            }
+          });
         },
-        error: (error) => {
-          console.error('Erro no login Google:', error);
+        error: () => {
           this.toast.error('Erro ao fazer login com Google. Tente novamente.');
         }
       })
     } catch (error) {
-      console.error('Erro ao iniciar login Google:', error);
       this.toast.error('Erro ao iniciar login com Google. Tente novamente.');
     }
   }
