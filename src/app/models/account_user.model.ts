@@ -3,6 +3,7 @@ export class AccountUserModel {
   name!: string;
   lastname!: string;
   email!: string;
+  user_image!: string;
   phone_number!: string;
   confirm_password!: string;
   address!: string;
@@ -18,6 +19,7 @@ export class AccountUserModel {
     this.name = '';
     this.lastname = '';
     this.email = '';
+    this.user_image = '';
     this.phone_number = '';
     this.address = '';
     this.city = '';

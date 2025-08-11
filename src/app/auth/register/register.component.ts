@@ -324,89 +324,84 @@ export class RegisterComponent implements OnInit {
   }
 
   /**
-   * Realiza cadastro com Google
+   * Realiza cadastro com Google sem depender de isNewUser do Firebase
    */
   async signUpWithGoogle(): Promise<void> {
-    try {      
-      this.googleAuthService.signInWithGoogle().subscribe({
-        next: async (googleUser: any) => {          
-          if (googleUser.isNewUser) {
-            await new Promise(resolve => setTimeout(resolve, 1000));            
-            await this.fetchAuthToken();
-
-            if (this.authToken) {
-              await this.registerWithGoogle(googleUser);
-            } else {
-              this.toast.error('Erro ao obter token de autenticação Google');
+    try {
+      this.googleAuthService.isAuthenticated().subscribe(isAuth => {
+        if (isAuth) {
+          this.googleAuthService.getCurrentUser().subscribe(user => {
+            if (!user) {
+              this.toast.error('Não foi possível recuperar os dados do Google.');
+              return;
             }
-          } else {
-            this.toast.error('Usuário já cadastrado');
-            this.router.navigate(['/login']);
-          }
-        },
-        error: (error) => {
-          this.toast.error('Erro ao fazer login com Google. Tente novamente.');
+
+            this.googleAuthService.getAuthToken().subscribe({
+              next: (idToken) => {
+                if (!idToken) {
+                  this.toast.error('Não foi possível obter o token do Google.');
+                  return;
+                }
+
+                const googleUser = {
+                  uid: user.uid,
+                  email: user.email!,
+                  displayName: user.displayName || '',
+                } as GoogleUserData;
+
+                this.registerWithGoogleInternal(googleUser, idToken);
+              },
+              error: () => this.toast.error('Erro ao obter token de autenticação Google')
+            });
+          });
+        } else {
+          this.googleAuthService.signInWithGoogle().subscribe({
+            next: (googleUser: GoogleUserData) => {
+              this.googleAuthService.getAuthToken().subscribe({
+                next: (idToken) => {
+                  if (!idToken) {
+                    this.toast.error('Não foi possível obter o token do Google.');
+                    return;
+                  }
+                  this.registerWithGoogleInternal(googleUser, idToken);
+                },
+                error: () => this.toast.error('Erro ao obter token de autenticação Google')
+              });
+            },
+            error: () => this.toast.error('Erro ao autenticar com Google. Tente novamente.')
+          });
         }
       });
-    } catch (error) {
-      this.toast.error('Erro ao iniciar login com Google. Tente novamente.');
+    } catch {
+      this.toast.error('Erro ao iniciar cadastro com Google. Tente novamente.');
     }
   }
 
   /**
-   * Registra usuário com Google
-   * @param googleUser - Dados do usuário Google
+   * Realiza o POST de registro com Google no backend
+   * @param googleUser - Dados do usuário do Google
+   * @param idToken - Token de autenticação do Google
    */
-  async registerWithGoogle(googleUser: GoogleUserData): Promise<void> {
-    if (!this.authToken) {
-      this.toast.error('Token de autenticação não encontrado');
-      return;
-    }
-
-    const registerData = {
+  private registerWithGoogleInternal(googleUser: GoogleUserData, idToken: string): void {
+    this.authService.registerWithGoogle({
       uid: googleUser.uid,
       email: googleUser.email,
       displayName: googleUser.displayName,
-      idToken: this.authToken
-    };
-
-    this.authService.registerWithGoogle(registerData).subscribe({
-      next: (response) => {
+      idToken
+    }).subscribe({
+      next: () => {
         this.toast.success('Usuário registrado com sucesso!');
-        this.router.navigate(['/auth/password-setup']);
       },
       error: (error: any) => {
         if (error.status === 409 || error.status === 406) {
           this.toast.error('Usuário já cadastrado');
+          this.router.navigate(['/login']);
+        } else if (error.status === 401) {
+          this.toast.error('Token do Google inválido. Tente novamente.');
         } else {
           this.toast.error('Erro ao registrar usuário com Google. Tente novamente.');
         }
       }
-    })
-  }
-
-  /**
-   * Obtém o token de autenticação do Google
-   */
-  async fetchAuthToken(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.googleAuthService.isAuthenticated().subscribe(isAuth => {        
-        if (!isAuth) {
-          reject(new Error('Usuário não está autenticado'));
-          return;
-        }
-
-        this.googleAuthService.getAuthToken().subscribe({
-          next: (token) => {
-            this.authToken = token;
-            resolve();
-          },
-          error: (error) => {
-            this.toast.error('Erro ao obter token de autenticação Google');
-            reject(error);
-          }
-        });
-      });
     });
   }
 }

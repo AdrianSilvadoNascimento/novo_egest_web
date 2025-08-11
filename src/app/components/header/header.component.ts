@@ -23,6 +23,7 @@ export class HeaderComponent implements OnInit {
   @Output() toggleSidenav = new EventEmitter<void>()
 
   userName!: string;
+  userImage!: string;
   isLogged: boolean = false;
 
   constructor(readonly authService: AuthService) { }
@@ -30,6 +31,7 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {
       this.isLogged = isLogged
+      this.getUserImage()
 
       if (isLogged) {
         this.toggleSidenav.emit()
@@ -39,6 +41,12 @@ export class HeaderComponent implements OnInit {
     this.authService.$userName.subscribe((userName) => {
       this.userName = userName || 'Fulano'
     })
+  }
+
+  getUserImage(): void {
+    const remeberMe = this.authService.rememberMe();
+
+    this.userImage = remeberMe ? localStorage.getItem('user_image') || '' : sessionStorage.getItem('user_image') || '';
   }
 
   logout(): void {

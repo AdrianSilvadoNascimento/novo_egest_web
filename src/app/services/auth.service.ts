@@ -110,6 +110,7 @@ export class AuthService {
           refresh_token: res.refresh_token,
           account_id: res.account_id,
           user_id: res.account_user.id,
+          user_image: res.account_user.user_image,
         });
         this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
@@ -232,6 +233,7 @@ export class AuthService {
           refresh_token: res.refresh_token,
           account_id: res.account_id,
           user_id: res.account_user.id,
+          user_image: res.account_user.user_image,
         });
         this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
@@ -252,6 +254,7 @@ export class AuthService {
           refresh_token: res.refresh_token,
           account_id: res.account_id,
           user_id: res.account_user.id,
+          user_image: res.account_user.user_image,
         });
         this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
@@ -285,12 +288,14 @@ export class AuthService {
     refresh_token: string,
     account_id: string,
     user_id: string,
+    user_image: string,
   }): void {
     localStorage.setItem('refresh_token', res.refresh_token);
     this.storage.setItem('token', res.token);
     this.storage.setItem('account_id', res.account_id);
     this.storage.setItem('user_id', res.user_id);
-    
+    this.storage.setItem('user_image', res.user_image);
+
     // Verificar se há dados de password_confirmed no cache
     const passwordConfirmed = this.storage.getItem('password_confirmed');
     if (passwordConfirmed !== null) {
@@ -304,6 +309,7 @@ export class AuthService {
     this.storage.removeItem('token');
     this.storage.removeItem('account_id');
     this.storage.removeItem('user_id');
+    this.storage.removeItem('user_image');
     this.storage.removeItem('password_confirmed');
     this.storage.removeItem('itemData');
     this.storage.removeItem('dashboardData');
