@@ -67,7 +67,7 @@
 
     @if (currentStep === 2) {
       <div class="mt-6 transition-all duration-500 ease-out">
-        <div class="space-y-6">
+        <div class="space-y-6 overflow-y-scroll h-[500px]">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="border-2 border-blue-100 bg-blue-50 rounded-xl">
               <div class="p-4 text-center">
@@ -169,19 +169,18 @@
       </div>
     }
 
-    <hr class="my-10">
+    <hr class="mt-10 mb-4">
 
     <!-- Footer -->
-    <div class="flex justify-between items-center gap-4">
-      <div class="flex gap-2">
-        @for (step of welcomeSteps; track step.title; let i = $index) {
-          <div
-            [class]="'h-2 rounded-full transition-all duration-300 ' + 
-              (i === currentStep - 1 ? 'bg-[#3377bc] w-6' : i < currentStep - 1 ? 'w-2 bg-green-500' : 'w-2 bg-gray-300')"
-          ></div>
-        }
-      </div>
-      
+    <div class="flex gap-2 mb-6">
+      @for (step of welcomeSteps; track step.title; let i = $index) {
+        <div
+          [class]="'h-2 rounded-full transition-all duration-300 ' + 
+            (i === currentStep - 1 ? 'bg-[#3377bc] w-6' : i < currentStep - 1 ? 'w-2 bg-green-500' : 'w-2 bg-gray-300')"
+        ></div>
+      }
+    </div>
+    <div class="flex justify-end items-center gap-4">
       <div class="flex items-center justify-between gap-2">
         @if (currentStep > 1) {
           <button
@@ -194,19 +193,14 @@
         }
 
         @if (currentStep === 3) {
-          <div class="flex items-center gap-2">
-            <button (click)="this.dialogRef.close()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-              Depois
-            </button>
-            <button
-              (click)="navigateToSettings()"
-              matRipple
-              class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <lucide-icon [img]="settingsIcon" class="w-4 h-4"></lucide-icon>
-              Configurar Conta
-            </button>
-          </div>
+          <button
+            (click)="navigateToSettings()"
+            matRipple
+            class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+            <lucide-icon [img]="settingsIcon" class="w-4 h-4"></lucide-icon>
+            Configurar Conta
+          </button>
         }
   
         @if (currentStep < 3) {
