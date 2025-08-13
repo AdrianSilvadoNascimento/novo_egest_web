@@ -200,6 +200,7 @@ export class AccountSettingsComponent implements OnInit {
               neighborhood: endereco.bairro,
               state: endereco.uf,
               complement: endereco.complemento,
+              city: endereco.localidade,
               country: 'Brasil'
             });
           },

@@ -8,6 +8,7 @@ import { PasswordConfirmationGuard } from './auth/password-confirmation.guard';
 import { ProductsComponent } from './components/products/products.component';
 import { CategoriesComponent } from './components/categories/categories.component';
 import { AccountSettingsPageComponent } from './components/account_settings_page/account_settings_page.component';
+import { CustomerComponent } from './components/customer/customer.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { 

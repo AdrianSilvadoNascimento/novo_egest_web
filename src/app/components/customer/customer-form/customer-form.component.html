@@ -1,0 +1,311 @@
+<!-- Header gradient -->
+<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white">
+  <div class="text-center">
+    <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Cliente</span>
+    <div class="text-3xl text-white font-semibold font-[Lora]">{{ data.isEdit ? 'Editar Cliente' : 'Novo Cliente' }}</div>
+  </div>
+</div>
+
+<mat-dialog-content>  
+  @if (hasDraft) {
+  <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow mb-6 text-sm flex items-center gap-2">
+    <span class="material-icons text-yellow-600">info</span>
+    Você tem alterações salvas como rascunho.
+
+    <span class="flex gap-2">
+      <a class="text-yellow-600 underline cursor-pointer" (click)="newForm()">Começar um novo</a>
+    </span>
+  </div>
+  }
+
+  <form [formGroup]="form" class="space-y-6">
+    <div class="flex flex-col md:flex-row gap-6">
+      <div class="w-full">
+        <mat-card class="shadow-md p-4 mb-6">
+          <p class="pl-2 text-sm text-gray-500">
+            Informações Gerais
+          </p>
+
+          <hr class="mb-4">
+
+          <!-- Nome -->
+          <div class="mb-4">
+            <label for="name" class="text-sm block text-gray-700 font-[Lora] mb-1">Nome do Cliente</label>
+            <div class="relative">
+              <input id="name" name="name" type="text" formControlName="name"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o nome do cliente">
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                  <mat-error>
+                  @if (form.get('name')?.hasError('minlength')) {
+                    Nome deve ter pelo menos 3 caracteres
+                  } @else {
+                    Nome é obrigatório
+                  }
+                  </mat-error>
+                }
+            </div>
+          </div>
+
+          <!-- Documento -->
+          <div class="mb-4">
+            <label for="document" class="text-sm block text-gray-700 font-[Lora] mb-1">CPF/CNPJ</label>
+            <div class="relative">
+              <input id="document" name="document" type="text" formControlName="document"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Digite o CPF ou CNPJ"
+                (input)="onCpfCnpjInput($event)"
+                (blur)="formatDocument()"
+                maxlength="18">
+              <div class="absolute right-3 top-2.5 text-gray-400">
+                <lucide-icon [img]="mailIcon" size="20"></lucide-icon>
+              </div>
+            </div>
+            @if (form.get('document')?.invalid && form.get('document')?.touched) {
+              <mat-error>
+                @if (form.get('document')?.hasError('document')) {
+                  {{ form.get('document')?.errors?.['document']?.message || 'Documento inválido' }}
+                } @else if (form.get('document')?.hasError('required')) {
+                  Documento é obrigatório
+                }
+              </mat-error>
+            }
+          </div>
+
+          <!-- Idade -->
+          <div class="mb-4">
+            <label for="age" class="text-sm block text-gray-700 font-[Lora] mb-1">Idade</label>
+            <input id="age" name="age" type="number" formControlName="age"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira a idade do cliente">
+            @if (form.get('age')?.invalid && form.get('age')?.touched) {
+              <mat-error>
+                @if (form.get('age')?.hasError('min')) {
+                  Idade deve ser maior que 0
+                }
+              </mat-error>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="shadow-md p-4">
+          <p class="pl-2 text-sm text-gray-500">
+            Informações de Endereço
+          </p>
+
+          <hr class="mb-4">
+          
+          <!-- Endereço -->
+          <div class="mb-4">
+            <label for="postal_code" class="text-sm block text-gray-700 font-[Lora] mb-1">CEP</label>
+            <input id="postal_code" name="postal_code" type="text" formControlName="postal_code"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o CEP do endereço"
+              placeholder="00000-000"
+              (blur)="buscarCep()"
+              [disabled]="isLoadingCep"
+              mask="00000-000"
+              [showMaskTyped]="true">
+            @if (isLoadingCep) {
+              <mat-icon matSuffix class="animate-spin">sync</mat-icon>
+            }
+            @if (form.get('postal_code')?.invalid && form.get('postal_code')?.touched) {
+              <mat-error>
+                @if (form.get('postal_code')?.hasError('required')) {
+                  CEP é obrigatório
+                }
+                @if (form.get('postal_code')?.hasError('pattern')) {
+                  Formato inválido. Use 00000-000
+                }
+              </mat-error>
+            }
+          </div>
+
+          <!-- Rua -->
+          <div class="mb-4">
+            <label for="street" class="text-sm block text-gray-700 font-[Lora] mb-1">Rua</label>
+            <input id="street" name="street" type="text" formControlName="street"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira a rua do endereço">
+            @if (form.get('street')?.invalid && form.get('street')?.touched) {
+              <mat-error>
+                @if (form.get('street')?.hasError('minlength')) {
+                  Rua deve ter pelo menos 3 caracteres
+                }
+              </mat-error>
+            }
+          </div>
+
+          <!-- Número -->
+          <div class="mb-4">
+            <label for="house_number" class="text-sm block text-gray-700 font-[Lora] mb-1">Número</label>
+            
+            <div class="space-y-2">
+              <!-- Checkbox para "Sem número" -->
+              <div class="flex items-center">
+                <mat-checkbox formControlName="hasNoHouseNumber" (change)="onNoHouseNumberChange()">
+                  Sem número
+                </mat-checkbox>
+              </div>
+              
+              <!-- Campo de número -->
+              <input id="house_number" name="house_number" type="text" formControlName="house_number"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o número do endereço"
+                [disabled]="form.get('hasNoHouseNumber')?.value">
+            </div>
+          </div>
+
+          <!-- Complemento -->
+          <div class="mb-4">
+            <label for="complement" class="text-sm block text-gray-700 font-[Lora] mb-1">Complemento</label>
+            <input id="complement" name="complement" type="text" formControlName="complement"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o complemento do endereço">
+          </div>
+
+          <!-- Bairro -->
+          <div class="mb-4">
+            <label for="neighborhood" class="text-sm block text-gray-700 font-[Lora] mb-1">Bairro</label>
+            <input id="neighborhood" name="neighborhood" type="text" formControlName="neighborhood"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o bairro do endereço">
+          </div>
+
+          <!-- Cidade -->
+          <div class="mb-4">
+            <label for="city" class="text-sm block text-gray-700 font-[Lora] mb-1">Cidade</label>
+            <input id="city" name="city" type="text" formControlName="city"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira a cidade do endereço">
+          </div>
+
+          <!-- Estado -->
+          <div class="mb-4">
+            <label for="state" class="text-sm block text-gray-700 font-[Lora] mb-1">Estado</label>
+            <input id="state" name="state" type="text" formControlName="state"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o estado do endereço">
+          </div>
+        </mat-card>
+      </div>
+
+      <div class="w-full">
+        <mat-card class="shadow-md p-4 mb-6">
+          <p class="pl-2 text-sm text-gray-500">
+            Informações de Contato
+          </p>
+
+          <hr class="mb-4">
+
+          <!-- Telefone -->
+          <div class="mb-4">
+            <label for="phone" class="text-sm block text-gray-700 font-[Lora] mb-1">Telefone</label>
+            <input id="phone" name="phone" type="text" formControlName="phone"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o telefone do cliente"
+              [mask]="phoneMask"
+              (input)="onPhoneInput($event)"
+              (blur)="formatPhone()"
+              [showMaskTyped]="true"
+              maxlength="15">
+            @if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+              <mat-error>
+                @if (form.get('phone')?.hasError('phone')) {
+                  {{ form.get('phone')?.errors?.['phone']?.message || 'Telefone inválido' }}
+                }
+              </mat-error>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="mb-4">
+            <label for="email" class="text-sm block text-gray-700 font-[Lora] mb-1">Email</label>
+            <input id="email" name="email" type="email" formControlName="email"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              placeholder="Insira o email do cliente">
+          </div>
+
+          <!-- Status do Cliente -->
+          <div class="mb-4">
+            <label for="active" class="text-sm block text-gray-700 font-[Lora] mb-1">Status do Cliente</label>
+            <mat-checkbox formControlName="active">
+              Ativo
+            </mat-checkbox>
+          </div>
+        </mat-card>
+
+        <mat-card class="shadow-md p-4">
+          <p class="pl-2 text-sm text-gray-500">
+            Resumo do Cliente
+          </p>
+
+          <hr class="mb-4">
+
+          <p class="text-sm text-gray-500">
+            Status: <span class="{{ form.get('active')?.value ? 'text-green-500' : 'text-red-500' }}">{{ form.get('active')?.value ? 'Ativo' : 'Inativo' }}</span>
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Nome: {{ form.get('name')?.value && form.get('name')?.value.length > 0 ? form.get('name')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Email: {{ form.get('email')?.value && form.get('email')?.value.length > 0 ? form.get('email')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Telefone: {{ form.get('phone')?.value && form.get('phone')?.value.length > 0 ? form.get('phone')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Documento: {{ form.get('document')?.value && form.get('document')?.value.length > 0 ? form.get('document')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            CEP: {{ form.get('postal_code')?.value && form.get('postal_code')?.value.length > 0 ? form.get('postal_code')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Endereço: {{ form.get('street')?.value && form.get('street')?.value.length > 0 ? form.get('street')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Número: {{ getDisplayHouseNumber() }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Complemento: {{ form.get('complement')?.value && form.get('complement')?.value.length > 0 ? form.get('complement')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Bairro: {{ form.get('neighborhood')?.value && form.get('neighborhood')?.value.length > 0 ? form.get('neighborhood')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Cidade: {{ form.get('city')?.value && form.get('city')?.value.length > 0 ? form.get('city')?.value : 'Não informado' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Estado: {{ form.get('state')?.value && form.get('state')?.value.length > 0 ? form.get('state')?.value : 'Não informado' }}
+          </p>
+        </mat-card>
+      </div>
+    </div>
+
+    <hr class="mb-4">
+
+    <div class="flex flex-row justify-end gap-2">
+      <!-- Botões -->
+      <button (click)="close()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        Cancelar e Fechar
+      </button>
+      <button type="submit" (click)="save()" [disabled]="form.invalid" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        Salvar e Adicionar Novo Cliente
+      </button>
+      <button type="submit" (click)="save(true)" [disabled]="form.invalid" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        {{ data.isEdit ? 'Salvar Alterações' : 'Criar Cliente' }}
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

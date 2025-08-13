@@ -6,6 +6,7 @@ export class AccountAddressModel {
   postal_code?: string
   state?: string
   complement?: string
+  city?: string
   country?: string
   account_id?: string
 }

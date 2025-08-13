@@ -22,6 +22,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
 import { AuthService } from '../../services/auth.service';
 import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
+import { ItemCreationModel } from '../../models/item-creation.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -142,7 +143,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onAddProduct(): void {
-    const dialogRef = this.dialog.open(ProductFormComponent, { minWidth: '900px' });
+    const dialogRef = this.dialog.open(ProductFormComponent, {
+      minWidth: '900px',
+      data: {
+        item: new ItemCreationModel(),
+        isEdit: false
+      }
+    });
 
     dialogRef.afterClosed().subscribe(result => {
       this.getData();

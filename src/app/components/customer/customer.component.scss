@@ -1,0 +1,45 @@
+.mat-drawer-container {
+  background: transparent;
+}
+
+.actions-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button {
+    margin-right: 8px;
+  }
+}
+
+.view-toggle-buttons {
+  button {
+    border-radius: 0;
+  }
+
+  :first-child {
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+  }
+
+  :last-child {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+  }
+}
+
+.mat-drawer-container {
+  table.mat-elevation-z8 {
+    border-radius: 8px !important;
+    overflow-y: scroll;
+    max-height: 50px;
+  }
+}
+
+mat-paginator {
+  margin-top: 16px;
+}

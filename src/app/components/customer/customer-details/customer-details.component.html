@@ -1,0 +1,267 @@
+<mat-dialog-content class="p-6"> 
+  <div class="relative w-full mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="p-3" [class]="customerDetails.type === 'PERSON' ? 'rounded-xl bg-blue-100 text-blue-600' : 'rounded-xl bg-purple-100 text-purple-600'">
+        <lucide-icon [img]="customerDetails.type === 'BUSINESS' ? businessIcon : userIcon" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div class="text-2xl font-bold text-gray-800 font-[Lora]">
+        {{ customerDetails.name }}
+        <p class="text-sm text-gray-500 font-[Lora]">{{ customerDetails.document }}</p>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-500 font-[Lora]">Informações detalhadas do cliente</p>
+
+    <div class="absolute top-[-5px] right-0">
+      <button mat-icon-button (click)="dialogRef.close(customerDetails)"
+        class="hover:bg-gray-200 pl-2 rounded-full transition duration-200">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="absolute top-1 right-16">
+      <div class="flex items-center gap-2">
+        <div class="text-center badge px-3 py-1 rounded-full text-xs" [class]="customerDetails.type === 'PERSON' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'">
+          {{ customerDetails.type === 'BUSINESS' ? 'Pessoa Jurídica' : 'Pessoa Física' }}
+        </div>
+        @if (customer.active) {
+          <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-xs">Ativo</div>
+        } @else {
+          <div class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs">Inativo</div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <hr class="mb-4">
+
+  <div class="mx-auto w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 py-4">
+    <div class="flex flex-col gap-2 text-sm text-gray-700 w-full">
+      <mat-card class="p-4">
+        <p class="text-sm text-gray-800 font-semibold font-[Lora]">
+          Informações gerais
+        </p>
+        <hr class="mb-4">
+
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Nome:
+          </span>
+          <span class="text-end">
+            {{ customerDetails.name }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Documento:
+          </span>
+          <span class="text-end">
+            {{ customerDetails.document }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Email:
+          </span>
+          <span class="text-end">
+            {{ customerDetails.email }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Telefone:
+          </span>
+          <span class="text-end">
+            @if (customerDetails.phone) {
+              {{ customerDetails.phone }}
+            } @else {
+              Não informado
+            }
+          </span>
+        </p>
+      </mat-card>
+
+      <mat-card class="p-4">
+        <p class="text-sm text-gray-800 font-semibold font-[Lora]">
+          Status do Produto
+        </p>
+        <hr class="mb-4">
+
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Situação:
+          </span>
+          <span [class.bg-green-500]="customerDetails.active" [class.bg-red-500]="!customerDetails.active" class="badge text-white px-3 py-1 rounded-full text-xs">
+            {{ customerDetails.active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>Tipo:</span>
+          <span class="text-center badge px-3 py-1 rounded-full text-xs" [class]="customerDetails.type === 'PERSON' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'">
+            {{ customerDetails.type === 'BUSINESS' ? 'Pessoa Jurídica' : 'Pessoa Física' }}
+          </span>
+        </p>
+      </mat-card>
+    </div>
+
+    <div class="flex flex-col gap-2 text-sm text-gray-700 w-full">
+      <mat-card class="p-4">
+        <p class="text-sm text-gray-800 font-semibold font-[Lora]">
+          Endereço
+        </p>
+        <hr class="mb-4">
+  
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Rua:
+          </span>
+          <span>
+            @if (customerDetails.address?.street) {
+              {{ customerDetails.address?.street }}
+            } @else {
+              Não informado
+            }
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Número:
+          </span>
+          <span>
+            @if (customerDetails.address?.house_number) {
+              {{ customerDetails.address?.house_number }}
+            } @else {
+              Não informado
+            }
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Bairro:
+          </span>
+          <span>
+            @if (customerDetails.address?.neighborhood) {
+              {{ customerDetails.address?.neighborhood }}
+            } @else {
+              Não informado
+            }
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            CEP:
+          </span>
+          <span>
+            @if (customerDetails.address?.postal_code) {
+              {{ customerDetails.address?.postal_code }}
+            } @else {
+              Não informado
+            }
+          </span>
+        </p>
+      </mat-card>
+      <mat-card class="p-4">
+        <p class="text-sm text-gray-800 font-semibold font-[Lora]">
+          Estatísticas
+        </p>
+        <hr class="mb-4">
+  
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Total de pedidos:
+          </span>
+          <span>
+            {{ customerDetails.summary?.total_orders || 0 }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Total gasto:
+          </span>
+          <span>
+            {{ customerDetails.summary?.total_spent || 0 | currency:'BRL' }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Total de itens comprados:
+          </span>
+          <span>
+            {{ customerDetails.summary?.total_items_purchased || 0 }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Ticket médio:
+          </span>
+          <span>
+            {{ ticketAverage || 0 | currency:'BRL' }}
+          </span>
+        </p>
+        <p class="text-sm text-gray-500 flex flex-row justify-between font-[Lora]">
+          <span>
+            Último pedido:
+          </span>
+          <span>
+            {{ customerDetails.summary?.last_order?.created_at || 'Não informado' | date:'dd/MM/yyyy' }}
+          </span>
+        </p>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="mx-auto flex flex-col gap-4 w-full py-4">
+    <mat-card class="p-4">
+      <p class="text-sm text-gray-800 font-semibold font-[Lora]">
+        Histórico
+      </p>
+      <hr class="mb-4">
+
+      <div class="flex flex-row items-center justify-between p-4">
+        <div class="flex flex-row items-center gap-2">
+          <lucide-icon [img]="calendarIcon" class="w-6 h-6 text-gray-500"></lucide-icon>
+  
+          <div class="flex flex-col">
+            <span class="text-xs text-gray-500 font-[Lora]">Criado em:</span>
+            <span class="text-md text-gray-800 font-medium">
+              {{ customerDetails.created_at | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+  
+        @if (customerDetails.updated_at != customerDetails.created_at && customerDetails.updated_at) {
+          <div class="flex flex-row items-center gap-2">
+            <lucide-icon [img]="calendarIcon" class="w-6 h-6 text-gray-500"></lucide-icon>
+    
+            <div class="flex flex-col">
+              <span class="text-xs text-gray-500 font-[Lora]">Última atualização:</span>
+              <span class="text-md text-gray-800 font-medium">
+                {{ customerDetails.updated_at | date:'dd/MM/yyyy' }} às {{ customerDetails.updated_at | date:'HH:mm' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+  <hr class="mb-4">
+
+  <div class="flex flex-row justify-end gap-2">
+    <button
+      class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      (click)="onEditCustomer(customerDetails)">
+      <lucide-icon [img]="editIcon" class="w-4 h-4 mr-2"></lucide-icon>
+      Editar Cliente
+    </button>
+    <button
+      class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+      <lucide-icon [img]="bagIcon" class="w-4 h-4 mr-2"></lucide-icon>
+      Ver pedidos
+    </button>
+    <button class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" (click)="onViewReport(customerDetails)">
+      <lucide-icon [img]="cardIcon" class="w-4 h-4"></lucide-icon>
+      Nova venda
+    </button>
+  </div>
+</mat-dialog-content>

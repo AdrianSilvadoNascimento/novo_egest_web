@@ -18,6 +18,13 @@ body {
     background-color: white;
   }
 
+  // Estilos para dialog de confirmação
+  .confirmation-dialog .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+  }
+
   .mdc-text-field {
     background-color: white !important;
   }

@@ -351,7 +351,13 @@ export class ProductsComponent implements OnInit {
   }
 
   onAddProduct(): void {
-    const dialogRef = this.dialog.open(ProductFormComponent, { minWidth: '900px' });
+    const dialogRef = this.dialog.open(ProductFormComponent, {
+      minWidth: '900px',
+      data: {
+        item: new ItemCreationModel(),
+        isEdit: false
+      }
+    });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {

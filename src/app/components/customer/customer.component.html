@@ -1,0 +1,332 @@
+<mat-drawer-container>
+  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
+    <!-- WIP: Importar clientes -->
+    <!-- <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar clientes"
+      (click)="fileInput.click()">
+      <div class="flex justify-be tween items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-white-500 text-sm font-[Lora]">Importar Clientes</span>
+      </div>
+    </button> -->
+
+    <button (click)="onAddCustomer()" mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Inserir novo cliente">
+      <div class="flex justify-between items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="addIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-white-500 text-sm font-[Lora]">Novo Cliente</span>
+      </div>
+    </button>
+
+    <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;"
+      (change)="onFileImportSelected($event)" />
+  </div>
+
+  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-2">
+    <div class="flex flex-row items-center gap-4">
+      <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
+        <lucide-icon matPrefix [img]="searchIcon" class="w-6 h-6"></lucide-icon>
+        <mat-label>Buscar cliente por nome, email ou documento...</mat-label>
+        <input
+          matInput 
+          type="text" 
+          id="search_customer" 
+          name="search_customer"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+        >
+        @if (searchTerm.trim()) {
+          <button matSuffix mat-icon-button (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <div class="flex flex-row items-center gap-4">
+        <!-- WIP: Filtros -->
+        <!-- <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
+          <mat-icon matPrefix>
+            <lucide-icon [img]="filterIcon" class="w-4 h-4"></lucide-icon>
+          </mat-icon>
+          Filtros
+        </button> -->
+
+        <div class="view-toggle-buttons flex flex-row items-center">
+          <button mat-stroked-button [class.active]="viewMode.card" color="primary" matTooltip="Visualizar em Cards" (click)="toggleViewMode('card')">
+            <lucide-icon [img]="cardIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+          <button mat-stroked-button [class.active]="viewMode.list" color="primary" matTooltip="Visualizar em Lista" (click)="toggleViewMode('list')">
+            <lucide-icon [img]="listIcon" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <div class="customers-quantity max-w-7xl mx-auto">
+    <div class="flex flex-row justify-between items-center pl-4">
+      <span class="text-md text-gray-500">
+        @if (searchTerm.trim()) {
+          Mostrando {{ filteredCustomers.length }} de {{ totalCustomers }} clientes
+        } @else {
+          @if (paginatedItems && paginatedItems.data) {
+            Mostrando {{ paginatedItems.data.length }} de {{ totalCustomers }} clientes
+          }
+        }
+      </span>
+
+      <mat-form-field class="custom-outline pt-6 pr-4">
+        <mat-label>Ordenar por</mat-label>
+          <mat-select [(value)]="selectedSortBy" (selectionChange)="onSortChange($event.value)">
+            @for (sort of sortBy; track sort.value) {
+              <mat-option [value]="sort.value">{{ sort.html }}</mat-option>
+            }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (isEmpty || (searchTerm.trim() && filteredCustomers.length === 0)) {
+    <div class="max-w-7xl mx-auto py-2">
+      <app-empty-list
+        [icon]="userIcon"
+        description="Nenhum cliente encontrado">
+      </app-empty-list>
+    </div>
+  } @else {
+    @if (isSearching) {
+      <div class="max-w-7xl mx-auto py-2">
+        <mat-progress-bar mode="indeterminate" class="mr-2"></mat-progress-bar>
+      </div>
+    }
+
+    @if (viewMode.card) {
+      <div class="max-w-7xl mx-auto space-y-6 mb-10">
+        <div #productsGrid class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 overflow-y-auto min-h-[400px] max-h-[600px] pb-6 px-2"
+          infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsGrid"
+          (scrolled)="loadMore()"
+        >
+          @for (customer of filteredCustomers; track customer.id) {
+            <div class="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white rounded-2xl cursor-pointer group"
+              (click)="openCustomerDetails(customer)"
+            >
+              <div class="card-content p-0">
+                <div class="relative">
+                  <div class="flex justify-between items-center p-4">
+                    <div class="flex items-center gap-3 flex-wrap justify-start">
+                      <div class="p-3" [class]="customer.type === 'PERSON' ? 'rounded-xl bg-blue-100 text-blue-600' : 'rounded-xl bg-purple-100 text-purple-600'">
+                        <lucide-icon [img]="customer.type === 'BUSINESS' ? businessIcon : userIcon" class="w-6 h-6"></lucide-icon>
+                      </div>
+                      <div>
+                        <div class="font-[Lora] text-lg font-semibold text-gray-900 group-hover:text-[#3377bc] transition-colors">
+                          {{ customer.name }}
+                        </div>
+                        <p class="text-sm text-gray-600">{{ customer.document }}</p>
+                      </div>
+                    </div>
+    
+                    <div class="flex gap-2 flex-wrap justify-end items-center">
+                      <div class="badge px-3 py-1 rounded-full text-xs" [class]="customer.type === 'PERSON' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'">
+                        {{ customer.type === 'BUSINESS' ? 'Pessoa Jurídica' : 'Pessoa Física' }}
+                      </div>
+                      
+                      <div class="flex items-center gap-1">
+                        @if (customer.active) {
+                          <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-xs">Ativo</div>
+                        } @else {
+                          <div class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs">Inativo</div>
+                        }
+                        
+                        <!-- Toggle de status -->
+                        <button 
+                          mat-icon-button 
+                          (click)="toggleCustomerStatus(customer, $event)"
+                          [title]="customer.active ? 'Desativar cliente' : 'Ativar cliente'"
+                          class="scale-75">
+                          @if (customer.active) {
+                            <mat-icon class="text-orange-600">toggle_on</mat-icon>
+                          } @else {
+                            <mat-icon class="text-gray-400">toggle_off</mat-icon>
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="p-4">
+                    <div class="space-y-3">
+                      <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <lucide-icon [img]="mailIcon" class="w-4 h-4"></lucide-icon>
+                        <span>{{ customer.email }}</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <lucide-icon [img]="phoneIcon" class="w-4 h-4"></lucide-icon>
+                        <span>{{ customer.phone || 'Não informado' }}</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <lucide-icon [img]="mapPinIcon" class="w-4 h-4"></lucide-icon>
+                        @if (customer.address && customer.address.street && customer.address.state) {
+                          <span>{{ customer.address.street }}, {{ customer.address.state }}</span>
+                        } @else {
+                          <span>Não informado</span>
+                        }
+                      </div>
+                    </div>
+  
+                    <hr class="my-4">
+  
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p class="text-gray-500">Total de Pedidos</p>
+                        <p class="font-semibold text-gray-900">{{ customer.summary?.total_orders || 0 }}</p>
+                      </div>
+                      <div>
+                        <p class="text-gray-500">Total Gasto</p>
+                        <p class="font-semibold text-[#3377bc]">{{ customer.summary?.total_spent || 0 | currency:'BRL' }}</p>
+                      </div>
+                    </div>
+  
+                    @if (customer.summary?.last_order) {
+                      <div class="mt-3 text-sm">
+                        <p class="text-gray-500">Último Pedido</p>
+                        <p class="font-medium text-gray-900">{{ customer.summary?.last_order?.created_at | date:'dd/MM/yyyy' }}</p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (viewMode.list) {
+      <mat-card class="max-w-7xl mx-auto shadow-md space-y-6 mb-10"> 
+        <div #productsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]" infiniteScroll
+          [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="productsTable"
+          (scrolled)="loadMore()">
+          <table class="min-w-full text-sm">
+            <thead class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white h-20 text-white sticky top-0 z-10 border-b">
+              <tr>
+                <th class="text-left px-4 py-2 border-b">Cliente</th>
+                <th class="text-left px-4 py-2 border-b">Tipo</th>
+                <th class="text-left px-4 py-2 border-b">Contato</th>
+                <th class="text-left px-4 py-2 border-b">Localização</th>
+                <th class="text-center px-4 py-2 border-b">Pedidos</th>
+                <th class="text-center px-4 py-2 border-b">Total Gasto</th>
+                <th class="text-left px-4 py-2 border-b">Status</th>
+                <th class="text-center px-4 py-2 border-b">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (customer of filteredCustomers; track customer.id) {
+              <tr class="hover:bg-gray-50 border-b">
+                <td class="px-4 py-3 cursor-pointer" (click)="openCustomerDetails(customer)">
+                  <div class="flex items-center gap-3">
+                    <div class="p-3" [class]="customer.type === 'PERSON' ? 'rounded-xl bg-blue-100 text-blue-600' : 'rounded-xl bg-purple-100 text-purple-600'">
+                      <lucide-icon [img]="customer.type === 'BUSINESS' ? businessIcon : userIcon" class="w-6 h-6"></lucide-icon>
+                    </div>
+                    <div>
+                      <div class="font-[Lora] text-md font-semibold text-gray-700 hover:text-[#3377bc] transition-colors">
+                        {{ customer.name }}
+                      </div>
+                      <p class="text-sm text-gray-600">{{ customer.document }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 cursor-pointer text-center" (click)="openCustomerDetails(customer)">
+                  <div class="text-center badge px-3 py-1 rounded-full text-xs" [class]="customer.type === 'PERSON' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'">
+                    {{ customer.type === 'BUSINESS' ? 'Pessoa Jurídica' : 'Pessoa Física' }}
+                  </div>
+                </td>
+                <td class="px-4 py-3 cursor-pointer" (click)="openCustomerDetails(customer)">
+                  <div class="text-md text-gray-700 font-[Lora]">
+                    {{ customer.email }}
+                  </div>
+                  <p class="text-gray-400 text-sm">{{ customer.phone || 'Não informado' }}</p>
+                </td>
+                <td class="px-4 py-3 cursor-pointer" (click)="openCustomerDetails(customer)">
+                  <div class="text-md text-gray-700 font-[Lora]">
+                    @if (customer.address && customer.address.street && customer.address.state) {
+                      {{ customer.address.street }}, {{ customer.address.state }}
+                    } @else {
+                      Não informado
+                    }
+                  </div>
+                </td>
+                <td class="px-4 py-3 cursor-pointer text-center" (click)="openCustomerDetails(customer)">
+                  <div class="text-md text-gray-700 font-[Lora]">
+                    @if (customer.summary?.total_orders) {
+                      {{ customer.summary?.total_orders }}
+                    } @else {
+                      0
+                    }
+                  </div>
+                </td>
+                <td class="px-4 py-3 cursor-pointer text-center" (click)="openCustomerDetails(customer)">
+                  <div class="text-md text-gray-700 font-[Lora]">
+                    @if (customer.summary?.total_spent) {
+                      {{ customer.summary?.total_spent | currency:'BRL' }}
+                    } @else {
+                      0
+                    }
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <!-- Badge de status -->
+                    @if (customer.active) {
+                      <div class="badge bg-green-500 text-white px-3 py-1 rounded-full text-xs">Ativo</div>
+                    } @else {
+                      <div class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs">Inativo</div>
+                    }
+                    
+                    <!-- Toggle de status -->
+                    <button 
+                      mat-icon-button 
+                      (click)="toggleCustomerStatus(customer, $event)"
+                      [title]="customer.active ? 'Desativar cliente' : 'Ativar cliente'"
+                      class="ml-1">
+                      @if (customer.active) {
+                        <mat-icon class="text-orange-600">toggle_on</mat-icon>
+                      } @else {
+                        <mat-icon class="text-gray-400">toggle_off</mat-icon>
+                      }
+                    </button>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button mat-icon-button [matMenuTriggerFor]="customerMenu">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #customerMenu="matMenu">
+                    <button mat-menu-item (click)="onEditCustomer(customer)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Editar</span>
+                    </button>
+                    <button mat-menu-item (click)="onDeleteCustomer(customer.id)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Excluir</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+    
+          @if (loading) {
+            <div class="text-center py-4 text-gray-500">Carregando...</div>
+          }
+    
+          @if (!hasNext && !loading) {
+            <div class="text-center py-4 text-gray-400">Fim da lista</div>
+          }
+        </div>
+      </mat-card>
+    }
+  }
+</mat-drawer-container>
