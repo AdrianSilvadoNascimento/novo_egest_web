@@ -21,57 +21,8 @@
   <form [formGroup]="form" class="space-y-6">
     <div class="flex flex-col md:flex-row gap-6">
       <div class="w-full">
+        <!-- Imagem do Produto -->
         <mat-card class="shadow-md p-4 mb-6">
-          <p class="pl-2 text-sm text-gray-500">
-            Informações Básicas
-          </p>
-
-          <hr class="mb-4">
-
-          <!-- Nome -->
-          <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>Nome do Produto</mat-label>
-            <input matInput formControlName="name" required #nameInput cdkFocusInitial>
-            @if (form.get('name')?.invalid && form.get('name')?.touched) {
-            <mat-error>
-              @if (form.get('name')?.hasError('minlength')) {
-              Nome deve ter pelo menos 3 caracteres
-              }
-              @else {
-              Nome é obrigatório
-              }
-            </mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Descrição -->
-          <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>Descrição</mat-label>
-            <textarea matInput id="description" name="description" formControlName="description" rows="3"></textarea>
-          </mat-form-field>
-
-          <!-- Código de barras -->
-          <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>Código de Barras</mat-label>
-            <input matInput type="text" id="barcode" name="barcode" formControlName="barcode" min="0">
-          </mat-form-field>
-
-          <!-- Categoria -->
-          <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>Categoria</mat-label>
-            <mat-select formControlName="category_id" id="category_id" name="category_id" required>
-              <mat-option value="">Selecione</mat-option>
-              @for (category of categories; track category.id) {
-              <mat-option [value]=category.id>{{category.name}}</mat-option>
-              }
-            </mat-select>
-            @if (form.get('category')?.invalid && form.get('category')?.touched) {
-            <mat-error>Categoria é obrigatória</mat-error>
-            }
-          </mat-form-field>
-        </mat-card>
-
-        <mat-card class="shadow-md p-4">
           <p class="pl-2 text-sm text-gray-500 mb-4">
             Imagem do Produto
           </p>
@@ -188,7 +139,72 @@
             }
           </div>
         </mat-card>
+        
+        <mat-card class="shadow-md p-4 mb-6">
+          <p class="pl-2 text-sm text-gray-500">
+            Informações Básicas
+          </p>
+
+          <hr class="mb-4">
+
+          <!-- Nome -->
+          <div class="mb-4">
+            <label for="name" class="text-sm block text-gray-700 font-[Lora] mb-1">Nome do Produto</label>
+            <div class="relative">
+              <input id="name" name="name" type="text" formControlName="name"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o nome do produto">
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                  <mat-error>
+                  @if (form.get('name')?.hasError('minlength')) {
+                    Nome deve ter pelo menos 3 caracteres
+                  } @else {
+                    Nome é obrigatório
+                  }
+                  </mat-error>
+                }
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="mb-4">
+            <label for="description" class="text-sm block text-gray-700 font-[Lora] mb-1">Descrição</label>
+            <div class="relative">
+              <textarea id="description" name="description" formControlName="description"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira a descrição do produto"></textarea>
+            </div>
+          </div>
+
+          <!-- Código de barras -->
+          <div class="mb-4">
+            <label for="barcode" class="text-sm block text-gray-700 font-[Lora] mb-1">Código de Barras</label>
+            <div class="relative">
+              <input id="barcode" name="barcode" type="text" formControlName="barcode"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o código de barras do produto">
+            </div>
+          </div>
+
+          <!-- Categoria -->
+          <div class="mb-4">
+            <label for="category_id" class="text-sm block text-gray-700 font-[Lora] mb-1">Categoria</label>
+            <div class="relative">
+              <select id="category_id" name="category_id" formControlName="category_id"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]">
+                <option value="">Selecione</option>
+                @for (category of categories; track category.id) {
+                <option [value]=category.id>{{category.name}}</option>
+                }
+              </select>
+            </div>
+            @if (form.get('category')?.invalid && form.get('category')?.touched) {
+            <mat-error>Categoria é obrigatória</mat-error>
+            }
+          </div>
+        </mat-card>
       </div>
+
       <div class="w-full">
         <mat-card class="shadow-md p-4 mb-6">
           <p class="pl-2 text-sm text-gray-500">
@@ -199,32 +215,46 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <!-- Preço de venda (R$) -->
-            <mat-form-field class="custom-outline w-full">
-              <mat-label>Preço de Venda (R$)</mat-label>
-              <input matInput type="number" id="sale_price" name="sale_price" formControlName="sale_price" required min="0" step="0.01">
-            </mat-form-field>
+            <div>
+              <label for="sale_price" class="text-sm block text-gray-700 font-[Lora] mb-1">Preço de Venda (R$)</label>
+              <div class="relative">
+                <input id="sale_price" name="sale_price" type="number" formControlName="sale_price"
+                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                  required min="0" step="0.01">
+              </div>
+            </div>
             
             <!-- Preço unitário -->
-            <mat-form-field class="custom-outline w-full">
-              <mat-label>Preço Unitário (R$)</mat-label>
-              <input matInput type="number" id="unit_price" name="unit_price" formControlName="unit_price" required min="0" step="0.01">
-            </mat-form-field>
+            <div>
+              <label for="unit_price" class="text-sm block text-gray-700 font-[Lora] mb-1">Preço Unitário (R$)</label>
+              <div class="relative">
+                <input id="unit_price" name="unit_price" type="number" formControlName="unit_price"
+                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                  required min="0" step="0.01">
+              </div>
+            </div>
           </div>
 
           <!-- Estoque -->           
-          <mat-form-field class="custom-outline w-full mb-4">
-            <mat-label>{{ data.isEdit ? 'O estoque não pode ser alterado' : 'Estoque' }}</mat-label>
-            <input matInput type="number" id="quantity" name="quantity" formControlName="quantity" required min="0">
-            <mat-icon matPrefix>inventory</mat-icon>
+          <div class="mb-4">
+            <label for="quantity" class="text-sm block text-gray-700 font-[Lora] mb-1">{{ data.isEdit ? 'O estoque não pode ser alterado' : 'Estoque Inicial' }}</label>
+            <div class="relative">
+              <input id="quantity" name="quantity" type="number" formControlName="quantity"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                required min="0">
+            </div>
             @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
               <mat-error>Estoque é obrigatório</mat-error>
             }
-          </mat-form-field>
+          </div>
 
           <!-- Produto Ativo -->
-          <mat-checkbox formControlName="active">
-            Produto Ativo
-          </mat-checkbox>
+          <div class="mb-4">
+            <label for="active" class="text-sm block text-gray-700 font-[Lora] mb-1">Status do Produto</label>
+            <mat-checkbox formControlName="active">
+              Ativo
+            </mat-checkbox>
+          </div>
         </mat-card>
 
         <mat-card class="shadow-md p-4">
@@ -272,6 +302,8 @@
         </mat-card>
       </div>
     </div>
+
+    <hr class="mb-4">
 
     <div class="flex flex-row justify-end gap-2">
       <!-- Botões -->
