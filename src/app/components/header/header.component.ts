@@ -1,13 +1,14 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown } from 'lucide-angular';
+import { MatIconModule } from '@angular/material/icon';
+import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown, PanelLeft } from 'lucide-angular';
 
 import { AuthService } from '../../services/auth.service';
-import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { SidenavService } from '../../services/sidenav.service';
 
 @Component({
   selector: 'app-header',
@@ -20,13 +21,18 @@ export class HeaderComponent implements OnInit {
   readonly logOutIcon = LogOut;
   readonly userIcon = CircleUserRound
   readonly chevronDownIcon = ChevronDown;
+  readonly menuIcon = PanelLeft;
+
   @Output() toggleSidenav = new EventEmitter<void>()
 
   userName!: string;
   userImage!: string;
   isLogged: boolean = false;
 
-  constructor(readonly authService: AuthService) { }
+  constructor(
+    readonly authService: AuthService,
+    readonly sidenavService: SidenavService
+  ) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {
@@ -43,12 +49,18 @@ export class HeaderComponent implements OnInit {
     })
   }
 
+  /**
+   * Obtém a imagem do usuário
+   */
   getUserImage(): void {
     const remeberMe = this.authService.rememberMe();
 
     this.userImage = remeberMe ? localStorage.getItem('user_image') || '' : sessionStorage.getItem('user_image') || '';
   }
 
+  /**
+   * Realiza o logout do usuário
+   */
   logout(): void {
     this.authService.logout()
     this.toggleSidenav.emit();

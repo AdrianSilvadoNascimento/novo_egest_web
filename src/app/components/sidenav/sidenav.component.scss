@@ -3,16 +3,16 @@ $container-height: calc(100vh - 64px);
 mat-sidenav-container {
   height: $container-height;
 
-  mat-sidenav {
-    #sidenav-content {
-      background-color: white;
-      height: $container-height;
+  // mat-sidenav {
+  //   #sidenav-content {
+  //     background-color: white;
+  //     height: $container-height;
 
-      #expand-panel-button {
-        position: relative;
-        top: 55%;
-        cursor: pointer;
-      }
-    }
-  }
+  //     #expand-panel-button {
+  //       position: relative;
+  //       top: 55%;
+  //       cursor: pointer;
+  //     }
+  //   }
+  // }
 }
