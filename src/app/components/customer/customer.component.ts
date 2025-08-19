@@ -25,6 +25,7 @@ import { EmptyListComponent } from "../../shared/components/empty-list/empty-lis
 import { CustomerDetailsComponent } from './customer-details/customer-details.component';
 import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-customer',
@@ -95,7 +96,8 @@ export class CustomerComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private customerService: CustomerService,
-    private toast: ToastService
+    private toast: ToastService,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
@@ -291,10 +293,14 @@ export class CustomerComponent implements OnInit {
   openCustomerDetails(customer: CustomerModel): void {
     this.editedCustomer = customer;
 
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(CustomerDetailsComponent, {
       data: this.editedCustomer,
-      panelClass: 'modern-dialog',
-      minWidth: '800px'
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '800px',
+      maxWidth: isMobile ? '95vw' : '800px',
+      height: isMobile ? '95vh' : 'auto',
+      maxHeight: '95vh'
     })
 
     dialogRef.afterClosed().subscribe(customerDetails => {
@@ -339,8 +345,12 @@ export class CustomerComponent implements OnInit {
    * Abre modal para adicionar novo cliente
    */
   onAddCustomer(): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(CustomerFormComponent, {
-      minWidth: '900px',
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '800px',
+      maxWidth: isMobile ? '95vw' : '800px',
+      height: 'auto',
       data: {
         customer: new CustomerModel(),
         isEdit: false,

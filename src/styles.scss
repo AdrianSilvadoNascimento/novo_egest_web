@@ -486,3 +486,88 @@ body {
     border-color: #3b82f6 !important;
   }
 }
+
+// ===== RESPONSIVIDADE PARA MODAIS MÓVEIS =====
+.mobile-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden;
+  height: 100vh !important;
+  width: 100vw !important;
+  max-height: 100vh !important;
+  max-width: 100vw !important;
+}
+
+.mobile-dialog .mat-mdc-dialog-content {
+  padding: 0 !important;
+  overflow-y: auto;
+  height: calc(100vh - 80px); // Reserva espaço para header
+  max-height: calc(100vh - 80px);
+}
+
+// Responsividade específica para formulários em modais
+@media (max-width: 768px) {
+  // Ajustes para CustomerFormComponent
+  .mobile-dialog {    
+    // Ajustes de grid para mobile
+    .md\\:flex-row {
+      flex-direction: column !important;
+    }
+
+    .md\\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+
+    .grid-cols-2 {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+
+    // Ajustes de padding e spacing
+    .p-6 {
+      padding: 1rem !important;
+    }
+
+    .px-6 {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+
+    .gap-6 {
+      gap: 1rem !important;
+    }
+
+    // Ajustes para campos de formulário
+    .mat-mdc-form-field {
+      width: 100% !important;
+    }
+
+    // Botões responsivos
+    .flex-row {
+      flex-direction: column !important;
+      
+      button {
+        width: 100% !important;
+        margin-bottom: 8px !important;
+      }
+    }
+
+    // Header gradient ajustado
+    .bg-gradient-to-r {
+      padding: 1rem !important;
+      
+      .text-3xl {
+        font-size: 1.5rem !important;
+        line-height: 2rem !important;
+      }
+    }
+
+    // Ajuste para summary no formulário de cliente
+    .summary-section {
+      .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  }
+}
