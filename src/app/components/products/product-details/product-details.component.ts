@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialog } from '@angular/material/dialog';
-import { LucideAngularModule, PackageOpen, Calendar, Pencil, ChartColumn, X } from 'lucide-angular';
+import { LucideAngularModule, Package, Calendar, Pencil, ChartColumn, X } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCard } from "@angular/material/card";
@@ -25,7 +25,7 @@ import { ProductFormComponent } from '../product-form/product-form.component';
   templateUrl: './product-details.component.html',
 })
 export class ProductDetailsComponent {
-  readonly packageIcon = PackageOpen;
+  readonly packageIcon = Package;
   readonly calendarIcon = Calendar;
   readonly editIcon = Pencil;
   readonly chartIcon = ChartColumn;

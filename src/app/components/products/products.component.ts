@@ -3,7 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { LucideAngularModule, FileUp, PackagePlus, PackageOpen, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
+import { LucideAngularModule, FileUp, PackagePlus, Package, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatCard } from "@angular/material/card";
@@ -59,7 +59,7 @@ import { DashboardModel } from '../../models/dashboard.model';
 })
 export class ProductsComponent implements OnInit {
   readonly addIcon = PackagePlus;
-  readonly packageIcon = PackageOpen;
+  readonly packageIcon = Package;
   readonly importIcon = FileUp;
   readonly searchIcon = Search;
   readonly filterIcon = Funnel;
@@ -512,26 +512,19 @@ export class ProductsComponent implements OnInit {
 
   onMoveProduct(item: ItemModel): void {
     this.dialog.open(MovementationFormComponent, {
-      data: {
-        mode: 'entry',
-        item,
-      },
-      width: '600px'
+      data: { item },
+      width: '800px',
+      maxWidth: '90vw',
+      disableClose: false,
+      panelClass: 'movement-dialog'
     }).afterClosed().subscribe(result => {
-    if (result) {
-        this.moveService.moveItem({ ...result, item_id: item.id }).subscribe({
-          next: (data) => {
-            this.toast.success('Produto movido com sucesso!')
-            this.clearSearch();
-            this.loadProducts();
-
-            if (this.searchTerm.trim()) {
-              this.filterProducts();
-            }
-          }, error: (error) => {
-            this.toast.error(error.message || error.error.message || 'Erro ao mover o produto!')
-          }
-        })
+      if (result) {
+        this.toast.success('Movimentação registrada com sucesso!');
+        this.loadProducts(); // Recarrega a lista para atualizar quantidades
+        
+        if (this.searchTerm.trim()) {
+          this.filterProducts();
+        }
       }
     });
   }

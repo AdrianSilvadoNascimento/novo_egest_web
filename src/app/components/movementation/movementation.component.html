@@ -1,1 +1,286 @@
-<p>movementation works!</p>
+<mat-drawer-container>
+  <!-- Header com ações -->
+  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
+    <!-- Botão de filtros -->
+    <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
+      <mat-icon matPrefix>
+        <lucide-icon [img]="filterIcon" class="w-4 h-4"></lucide-icon>
+      </mat-icon>
+      Filtros
+    </button>
+  </div>
+
+  <!-- Card de busca e filtros -->
+  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-4 md:mb-2">
+    <div class="flex flex-row items-center gap-4">
+      <!-- Campo de busca -->
+      <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
+        <lucide-icon matPrefix [img]="searchIcon" class="w-6 h-6"></lucide-icon>
+        <mat-label>Buscar por produto, descrição ou motivo...</mat-label>
+        <input
+          matInput 
+          type="text" 
+          id="search_movementation" 
+          name="search_movementation"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+        >
+        @if (searchTerm.trim()) {
+          <button matSuffix mat-icon-button (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Filtros expandidos -->
+    @if (showFilters) {
+      <div class="bg-gray-50 rounded-lg space-y-4">
+        <div class="px-4 grid grid-cols-1 items-center md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Filtro por tipo -->
+          <mat-form-field class="custom-outline md:pt-6">
+            <mat-label>Tipo de Movimentação</mat-label>
+            <mat-select [(value)]="filters.moveType" (selectionChange)="applyFilters()">
+              <mat-option value="">Todos</mat-option>
+              @for (type of movementationTypes; track type) {
+                <mat-option [value]="type">{{ getMovementTypeLabel(type) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Filtro por data inicial -->
+          <mat-form-field class="custom-outline md:pt-6">
+            <mat-label>Data Inicial</mat-label>
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="filters.startDate" (ngModelChange)="applyFilters()">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Filtro por data final -->
+          <mat-form-field class="custom-outline md:pt-6">
+            <mat-label>Data Final</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="filters.endDate" (ngModelChange)="applyFilters()">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Botão limpar filtros -->
+          <div class="flex items-end">
+            <button (click)="clearFilters()" class="w-full bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] text-white px-4 py-4 rounded-md hover:from-[#2a5f9a] hover:to-[#3377bc] transition-all duration-300">
+              Limpar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </mat-card>
+
+  <!-- Contador de registros e ordenação -->
+  <div class="movementations-quantity max-w-7xl mx-auto">
+    <div class="flex flex-row justify-between items-center pl-4 flex-wrap md:flex-nowrap">
+      <span class="text-md text-gray-500">
+        @if (searchTerm.trim()) {
+          Mostrando {{ filteredMovementations.length }} de {{ totalMovementations }} movimentações
+        } @else {
+          @if (paginatedItems && paginatedItems.data) {
+            Mostrando {{ paginatedItems.data.length }} de {{ totalMovementations }} movimentações
+          }
+        }
+      </span>
+
+      <mat-form-field class="custom-outline pt-6 pr-4">
+        <mat-label>Ordenar por</mat-label>
+        <mat-select [(value)]="selectedSortBy" (selectionChange)="onSortChange($event.value)">
+          @for (sort of sortBy; track sort.value) {
+            <mat-option [value]="sort.value">{{ sort.html }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Lista de movimentações ou estado vazio -->
+  @if (isEmpty || (searchTerm.trim() && filteredMovementations.length === 0)) {
+    <div class="max-w-7xl mx-auto py-2">
+      <app-empty-list
+        [icon]="packageIcon"
+        description="Nenhuma movimentação encontrada">
+      </app-empty-list>
+    </div>
+  } @else {
+    @if (isSearching) {
+      <div class="max-w-7xl mx-auto py-2">
+        <mat-progress-bar mode="indeterminate" class="mr-2"></mat-progress-bar>
+      </div>
+    }
+
+    <!-- Tabela de movimentações -->
+    <div class="max-w-7xl mx-auto space-y-6 mb-10">
+      <div #movementationsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]"
+        infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="movementationsTable"
+        (scrolled)="loadMore()"
+      >
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white h-20 text-white sticky top-0 z-10 border-b">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-[Lora] uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="packageIcon" class="w-4 h-4"></lucide-icon>
+                  Produto
+                </div>
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-[Lora] uppercase tracking-wider">
+                Tipo
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-[Lora] uppercase tracking-wider">
+                Quantidade
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-[Lora] uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="userIcon" class="w-4 h-4"></lucide-icon>
+                  Usuário
+                </div>
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-[Lora] uppercase tracking-wider">
+                <div class="flex items-center gap-2 justify-center">
+                  <lucide-icon [img]="calendarIcon" class="w-4 h-4"></lucide-icon>
+                  Data/Hora
+                </div>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-[Lora] uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="fileTextIcon" class="w-4 h-4"></lucide-icon>
+                  Motivo
+                </div>
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-[Lora] uppercase tracking-wider">
+                <div class="flex items-center gap-2 justify-center">
+                  <lucide-icon [img]="dollarSignIcon" class="w-4 h-4"></lucide-icon>
+                  Valor Total
+                </div>
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-[Lora] uppercase tracking-wider">
+                Ações
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (movementation of filteredMovementations; track movementation.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <!-- Coluna Produto -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-blue-100 text-blue-600">
+                      <lucide-icon [img]="packageIcon" class="w-5 h-5"></lucide-icon>
+                    </div>
+                    <div>
+                      <div class="font-[Lora] text-sm font-semibold text-gray-700">
+                        {{ movementation.item?.name || 'Produto não informado' }}
+                      </div>
+                      @if (movementation.item?.barcode) {
+                        <p class="text-xs text-gray-500">{{ movementation.item?.barcode }}</p>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Coluna Tipo -->
+                <td class="px-4 py-3 text-center">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium" [class]="getMovementTypeColor(movementation.move_type)">
+                    <lucide-icon [img]="getMovementTypeIcon(movementation.move_type)" class="w-3 h-3"></lucide-icon>
+                    {{ getMovementTypeLabel(movementation.move_type) }}
+                  </div>
+                </td>
+
+                <!-- Coluna Quantidade -->
+                <td class="px-4 py-3 text-center">
+                  <div class="font-mono text-sm" [class]="getQuantitySign(movementation.move_type) === '+' ? 'text-green-600' : 'text-red-600'">
+                    {{ getQuantitySign(movementation.move_type) }}{{ movementation.quantity }}
+                  </div>
+                </td>
+
+                <!-- Coluna Usuário -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div class="p-1 rounded-full bg-gray-100">
+                      <lucide-icon [img]="userIcon" class="w-4 h-4 text-gray-600"></lucide-icon>
+                    </div>
+                    <div>
+                      <div class="font-[Lora] text-sm text-gray-700">
+                        {{ getUserFullName(movementation) }}
+                      </div>
+                      @if (movementation.account_user?.email) {
+                        <p class="text-xs text-gray-500">{{ movementation.account_user?.email }}</p>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Coluna Data/Hora -->
+                <td class="px-4 py-3 text-center">
+                  <div class="text-sm text-gray-700 font-[Lora]">
+                    {{ movementation.created_at | date:'dd/MM/yyyy' }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ movementation.created_at | date:'HH:mm' }}
+                  </div>
+                </td>
+
+                <!-- Coluna Motivo -->
+                <td class="px-4 py-3">
+                  <div class="text-sm text-gray-700 max-w-xs truncate" [title]="movementation.description || 'Sem descrição'">
+                    {{ movementation.description || 'Sem descrição' }}
+                  </div>
+                </td>
+
+                <!-- Coluna Valor Total -->
+                <td class="px-4 py-3 text-center">
+                  @if (movementation.total_value) {
+                    <div class="font-mono text-sm text-gray-700">
+                      {{ movementation.total_value | currency:'BRL':'symbol':'1.2-2' }}
+                    </div>
+                  } @else {
+                    <div class="text-xs text-gray-400">
+                      N/A
+                    </div>
+                  }
+                </td>
+
+                <!-- Coluna Ações -->
+                <td class="px-4 py-3 text-center">
+                  @if (canRevertMovementation(movementation)) {
+                    <button 
+                      mat-icon-button 
+                      color="warn"
+                      matTooltip="Reverter movimentação"
+                      (click)="revertMovementation(movementation, $event)"
+                      class="hover:bg-red-50 transition-colors"
+                    >
+                      <lucide-icon [img]="revertIcon" class="w-5 h-5 text-red-600"></lucide-icon>
+                    </button>
+                  } @else {
+                    <span class="text-xs text-gray-400">N/A</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                  Nenhuma movimentação encontrada
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Loading indicator -->
+        @if (loading) {
+          <div class="p-4 text-center">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <p class="text-sm text-gray-500 mt-2">Carregando mais movimentações...</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</mat-drawer-container>
