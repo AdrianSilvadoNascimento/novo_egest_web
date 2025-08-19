@@ -1,17 +1,17 @@
 <div class="bg-white border-0 shadow-md p-0 overflow-hidden">
   <!-- Header -->
-  <div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white">
+  <div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-4 md:p-6 text-white">
     <button (click)="dialogRef.close()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
       <mat-icon>close</mat-icon>
     </button>
     <div class="text-center">
       <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Passo {{ currentStep }} de 3 </span>
-      <div class="text-3xl text-white font-semibold font-[Lora]">{{ welcomeSteps[currentStep - 1].title }}</div>
-      <p class="text-blue-100 font-[Lora]">{{ welcomeSteps[currentStep - 1].description }}</p>
+      <div class="text-2xl md:text-3xl text-white font-semibold font-[Lora]">{{ welcomeSteps[currentStep - 1].title }}</div>
+      <p class="text-sm md:text-base text-blue-100 font-[Lora]">{{ welcomeSteps[currentStep - 1].description }}</p>
     </div>
 
     <!-- Progress bar -->
-    <div class="mt-6">
+    <div class="mt-4 md:mt-6">
       <div class="w-full bg-white/20 rounded-full h-2">
         <div 
           class="bg-white h-2 rounded-full transition-all duration-500 ease-out"
@@ -21,14 +21,14 @@
     </div>
   </div>
 
-  <div class="p-6">
+  <div class="p-4 md:p-6">
     <!-- body -->
     @if (currentStep === 1) {
-      <div class="my-6 transition-all duration-500 ease-out">
+      <div class="my-4 md:my-6 transition-all duration-500 ease-out">
         <div class="mx-auto max-w-md">
           <div class="flex items-center justify-center">
-            <div class="w-24 h-24 shadow-md rounded-full bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] flex items-center justify-center">
-              <lucide-icon [img]="packageIcon" class="icon text-white w-12 h-12"></lucide-icon>
+            <div class="w-20 h-20 md:w-24 md:h-24 shadow-md rounded-full bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] flex items-center justify-center">
+              <lucide-icon [img]="packageIcon" class="icon text-white w-10 h-10 md:w-12 md:h-12"></lucide-icon>
             </div>
           </div>
         </div>
@@ -36,9 +36,9 @@
     
       <div class="body text-center">
         <div class="mx-auto">
-          <div class="text-lg mb-4 font-semibold">Estamos <span class="text-[#3377bc]">super empolgados</span> em tê-lo(a) como parte da nossa comunidade!</div>
+          <div class="text-base md:text-lg mb-4 font-semibold">Estamos <span class="text-[#3377bc]">super empolgados</span> em tê-lo(a) como parte da nossa comunidade!</div>
 
-          <p class="text-md text-gray-500">Preparamos uma plataforma completa e intuitiva para tornar o gerenciamento do seu estoque uma experiência incrível. Vamos começar essa jornada juntos?</p>
+          <p class="text-sm md:text-base text-gray-500">Preparamos uma plataforma completa e intuitiva para tornar o gerenciamento do seu estoque uma experiência incrível. Vamos começar essa jornada juntos?</p>
     
           <div class="mt-6 flex justify-center gap-2">
             <lucide-icon [img]="heartIcon" class="text-red-500 w-6 h-6"></lucide-icon>
@@ -49,46 +49,46 @@
     }
 
     @if (currentStep === 2) {
-      <div class="mt-6 transition-all duration-500 ease-out">
-        <div class="space-y-6 overflow-y-scroll h-[500px]">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mt-4 md:mt-6 transition-all duration-500 ease-out">
+        <div class="space-y-4 md:space-y-6 overflow-y-auto h-[400px] md:h-[500px]">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="border-2 border-blue-100 bg-blue-50 rounded-xl">
-              <div class="p-4 text-center">
+              <div class="p-3 md:p-4 text-center">
                 <div class="w-12 h-12 bg-[#3377bc] rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <lucide-icon [img]="packageIcon" class="w-6 h-6 text-white"></lucide-icon>
                 </div>
-                <div class="text-md font-semibold text-gray-900 mb-2">Gestão Inteligente</div>
-                <p class="text-sm text-gray-600">Controle total dos seus produtos com alertas automáticos</p>
+                <div class="text-sm md:text-base font-semibold text-gray-900 mb-2">Gestão Inteligente</div>
+                <p class="text-xs md:text-sm text-gray-600">Controle total dos seus produtos com alertas automáticos</p>
               </div>
             </div>
 
             <div class="border-2 border-green-100 bg-green-50 rounded-xl">
-              <div class="p-4 text-center">
+              <div class="p-3 md:p-4 text-center">
                 <div class="w-12 h-12 bg-green-600 rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <lucide-icon [img]="usersIcon" class="w-6 h-6 text-white"></lucide-icon>
                 </div>
-                <div class="text-md font-semibold text-gray-900 mb-2">Clientes Felizes</div>
-                <p class="text-sm text-gray-600">Gerencie sua base de clientes de forma eficiente</p>
+                <div class="text-sm md:text-base font-semibold text-gray-900 mb-2">Clientes Felizes</div>
+                <p class="text-xs md:text-sm text-gray-600">Gerencie sua base de clientes de forma eficiente</p>
               </div>
             </div>
 
             <div class="border-2 border-purple-100 bg-purple-50 rounded-xl">
-              <div class="p-4 text-center">
+              <div class="p-3 md:p-4 text-center">
                 <div class="w-12 h-12 bg-purple-600 rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <lucide-icon [img]="trendingUpIcon" class="w-6 h-6 text-white"></lucide-icon>
                 </div>
-                <div class="text-md font-semibold text-gray-900 mb-2">Relatórios Poderosos</div>
-                <p class="text-sm text-gray-600">Insights valiosos para crescer seu negócio</p>
+                <div class="text-sm md:text-base font-semibold text-gray-900 mb-2">Relatórios Poderosos</div>
+                <p class="text-xs md:text-sm text-gray-600">Insights valiosos para crescer seu negócio</p>
               </div>
             </div>
 
             <div class="border-2 border-orange-100 bg-orange-50 rounded-xl">
-              <div class="p-4 text-center">
+              <div class="p-3 md:p-4 text-center">
                 <div class="w-12 h-12 bg-orange-600 rounded-xl mx-auto mb-3 flex items-center justify-center">
                   <lucide-icon [img]="settingsIcon" class="w-6 h-6 text-white"></lucide-icon>
                 </div>
-                <div class="text-md font-semibold text-gray-900 mb-2">Totalmente Personalizável</div>
-                <p class="text-sm text-gray-600">Configure tudo do seu jeito, sem complicação</p>
+                <div class="text-sm md:text-base font-semibold text-gray-900 mb-2">Totalmente Personalizável</div>
+                <p class="text-xs md:text-sm text-gray-600">Configure tudo do seu jeito, sem complicação</p>
               </div>
             </div>
           </div>
@@ -106,39 +106,39 @@
     }
 
     @if (currentStep === 3) {
-      <div class="my-6 space-y-6 transition-all duration-500 ease-out">
+      <div class="my-4 md:my-6 space-y-4 md:space-y-6 transition-all duration-500 ease-out">
         <div class="text-center">
-          <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <lucide-icon [img]="checkCircleIcon" class="w-10 h-10 text-white"></lucide-icon>
+          <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <lucide-icon [img]="checkCircleIcon" class="w-8 h-8 md:w-10 md:h-10 text-white"></lucide-icon>
           </div>
-          <p class="text-gray-700 leading-relaxed">
+          <p class="text-sm md:text-base text-gray-700 leading-relaxed">
             Para que você tenha a <span class="font-semibold text-[#3377bc]">melhor experiência possível</span>, 
             vamos configurar algumas informações básicas da sua conta.
           </p>
         </div>
 
         <div class="border-2 border-[#3377bc] bg-blue-50 rounded-xl">
-          <div class="p-6">
-            <div class="text-lg font-semibold text-gray-900 mb-4 flex gap-2">
-              <lucide-icon [img]="starIcon" class="w-6 h-6 text-[#3377bc]"></lucide-icon>
+          <div class="p-4 md:p-6">
+            <div class="text-base md:text-lg font-semibold text-gray-900 mb-4 flex gap-2">
+              <lucide-icon [img]="starIcon" class="w-5 h-5 md:w-6 md:h-6 text-[#3377bc]"></lucide-icon>
               O que vamos configurar:
             </div>
-            <div class="space-y-3">
+            <div class="space-y-2 md:space-y-3">
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 bg-[#3377bc] rounded-full"></div>
-                <span class="text-md text-gray-700">Informações da sua empresa</span>
+                <span class="text-sm md:text-base text-gray-700">Informações da sua empresa</span>
               </div>
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 bg-[#3377bc] rounded-full"></div>
-                <span class="text-md text-gray-700">Configurações iniciais de produtos</span>
+                <span class="text-sm md:text-base text-gray-700">Configurações iniciais de produtos</span>
               </div>
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 bg-[#3377bc] rounded-full"></div>
-                <span class="text-md text-gray-700">Preferências de notificações</span>
+                <span class="text-sm md:text-base text-gray-700">Preferências de notificações</span>
               </div>
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 bg-[#3377bc] rounded-full"></div>
-                <span class="text-md text-gray-700">Personalização da interface</span>
+                <span class="text-sm md:text-base text-gray-700">Personalização da interface</span>
               </div>
             </div>
           </div>
@@ -152,10 +152,10 @@
       </div>
     }
 
-    <hr class="mt-10 mb-4">
+    <hr class="mt-6 md:mt-10 mb-4">
 
     <!-- Footer -->
-    <div class="flex gap-2 mb-6">
+    <div class="flex gap-2 mb-4 md:mb-6">
       @for (step of welcomeSteps; track step.title; let i = $index) {
         <div
           [class]="'h-2 rounded-full transition-all duration-300 ' + 
@@ -163,8 +163,8 @@
         ></div>
       }
     </div>
-    <div class="flex justify-end items-center gap-4">
-      <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-col md:flex-row justify-end items-center gap-2 md:gap-4">
+      <div class="flex items-center justify-between gap-2 w-full md:w-auto">
         @if (currentStep > 1) {
           <button
             (click)="previousStep()"

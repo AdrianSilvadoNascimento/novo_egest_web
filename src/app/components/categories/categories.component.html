@@ -1,27 +1,25 @@
 <div class="max-w-7xl mx-auto">
-  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
-    <div class="flex items-center space-x-4">
-      <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar categorias"
-        (click)="fileInput.click()">
-        <div class="flex justify-be tween items-center">
-          <mat-icon class="mr-3">
-            <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
-          </mat-icon>
-          <span class="text-white-500 text-sm font-[Lora]">Importar Categorias</span>
-        </div>
-      </button>
+  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4 flex-wrap md:flex-nowrap">
+    <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar categorias"
+      (click)="fileInput.click()">
+      <div class="flex justify-be tween items-center">
+        <mat-icon class="mr-3">
+          <lucide-icon [img]="importIcon" class="w-6 h-6"></lucide-icon>
+        </mat-icon>
+        <span class="text-white-500 text-sm font-[Lora]">Importar Categorias</span>
+      </div>
+    </button>
 
-      <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Inserir nova categoria" (click)="openDialog()"
-        class="flex items-center shadow gap-1">
-        <div class="flex justify-between items-center">
-          <lucide-icon [img]="addIcon" class="mr-3 w-6 h-6"></lucide-icon>
-          <span class="text-white-500 text-sm font-[Lora]">
-            Nova Categoria
-          </span>
-        </div>
-      </button>
-      <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;" (change)="onFileImport($event)" />
-    </div>
+    <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Inserir nova categoria" (click)="openDialog()"
+      class="flex items-center shadow gap-1">
+      <div class="flex justify-between items-center">
+        <lucide-icon [img]="addIcon" class="mr-3 w-6 h-6"></lucide-icon>
+        <span class="text-white-500 text-sm font-[Lora]">
+          Nova Categoria
+        </span>
+      </div>
+    </button>
+    <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;" (change)="onFileImport($event)" />
   </div>
 
   <div class="flex-grow"></div>

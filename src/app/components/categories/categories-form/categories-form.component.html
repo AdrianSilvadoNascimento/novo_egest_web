@@ -1,9 +1,12 @@
 <!-- Header gradient -->
-<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white">
+<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white mb-4 md:mb-0">
   <div class="text-center">
     <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Categoria</span>
     <div class="text-3xl text-white font-semibold font-[Lora]">{{ data ? 'Editar Categoria' : 'Nova Categoria' }}</div>
   </div>
+  <button (click)="dialogRef.close()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
+    <mat-icon>close</mat-icon>
+  </button>
 </div>
 <mat-dialog-content>
   @if (hasDraft) {
@@ -17,8 +20,8 @@
   </div>
   }
 
-  <form [formGroup]="form" class="space-y-4">
-    <mat-form-field class="custom-outline w-full mb-4">
+  <form [formGroup]="form" class="space-y-4 md:space-y-6 w-[90%] md:w-full mx-auto">
+    <mat-form-field class="custom-outline w-full">
       <mat-label>Nome da categoria</mat-label>
       <input #nameInput cdkFocusInitial matInput id="name" name="name" formControlName="name" />
       @if (form.get('name')?.invalid && form.get('name')?.touched) {
@@ -33,7 +36,9 @@
       }
     </mat-form-field>
 
-    <div class="flex flex-row justify-end gap-2">
+    <hr class="mb-4">
+
+    <div class="w-full flex flex-col md:flex-row justify-end gap-2 pb-4 md:pb-0">
       <button (click)="close()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         Cancelar
       </button>

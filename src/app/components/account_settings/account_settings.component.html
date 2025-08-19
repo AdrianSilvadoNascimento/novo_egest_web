@@ -1,201 +1,347 @@
-<div class="min-h-screen bg-gray-50 py-8">
-  <mat-card class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-    <mat-stepper [linear]="false" #stepper (selectionChange)="onStepChange($event)">
-      <mat-step [stepControl]="accountForm">
-        <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="mt-4 space-y-6">
-          <ng-template matStepLabel>Dados da Conta</ng-template>
-          <!-- Nome da Conta -->
-          <mat-form-field class="w-full">
-            <mat-label>Nome da Conta</mat-label>
-            <input matInput name="name" formControlName="name" placeholder="Digite o nome da conta">
-            <mat-error *ngIf="accountForm.get('name')?.hasError('required')">
-              Nome/Razão Social da conta é obrigatório
-            </mat-error>
-            <mat-error *ngIf="accountForm.get('name')?.hasError('minlength')">
-              Nome/Razão Social deve ter pelo menos 3 caracteres
-            </mat-error>
-          </mat-form-field>
+<mat-stepper [linear]="false" [orientation]="stepperOrientation" #stepper (selectionChange)="onStepChange($event)"
+  class="modern-stepper">
+  <mat-step [stepControl]="accountForm">
+    <ng-template matStepLabel>
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="buildingIcon" class="w-4 h-4 text-[#3377bc]"></lucide-icon>
+        <span>Dados da Conta</span>
+      </div>
+    </ng-template>
 
-          <!-- Email -->
-          <mat-form-field class="w-full">
-            <mat-label>Email</mat-label>
-            <input matInput name="email" formControlName="email" placeholder="Digite seu email">
-            <mat-error *ngIf="accountForm.get('email')?.hasError('required')">
-              Email é obrigatório
-            </mat-error>
-            <mat-error *ngIf="accountForm.get('email')?.hasError('email')">
-              Email inválido
-            </mat-error>
-          </mat-form-field>
+    <div class="space-y-6 mt-6">
+      <mat-card class="p-4">
+        <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Grid responsivo para os campos -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Nome da Conta -->
+            <div class="space-y-2">
+              <label for="name" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <lucide-icon [img]="buildingIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+                Nome da conta
+              </label>
+              <div class="relative">
+                <input id="name" name="name" formControlName="name" placeholder="Digite o nome da conta"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                  [class.border-red-300]="accountForm.get('name')?.invalid && accountForm.get('name')?.touched">
+                @if (accountForm.get('name')?.invalid && accountForm.get('name')?.touched) {
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+                </div>
+                }
+              </div>
+              @if (accountForm.get('name')?.invalid && accountForm.get('name')?.touched) {
+              <p class="text-sm text-red-600 flex items-center gap-1">
+                <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+                @if (accountForm.get('name')?.hasError('required')) {
+                Nome/Razão Social da conta é obrigatório
+                } @else if (accountForm.get('name')?.hasError('minlength')) {
+                Nome/Razão Social deve ter pelo menos 3 caracteres
+                }
+              </p>
+              }
+            </div>
 
-          <!-- CPF/CNPJ -->
-          <mat-form-field class="w-full">
-            <mat-label>CPF/CNPJ</mat-label>
-            <input matInput 
-              formControlName="cpf_cnpj" 
-              placeholder="Digite o CPF ou CNPJ"
-              [mask]="cpfCnpjMask"
-              name="cpf_cnpj"
-              (input)="onCpfCnpjInput($event)"
-              [showMaskTyped]="true">
-            <mat-error *ngIf="accountForm.get('cpf_cnpj')?.hasError('required')">
-              CPF/CNPJ é obrigatório
-            </mat-error>
-            <mat-error *ngIf="accountForm.get('cpf_cnpj')?.hasError('minlength')">
-              CPF/CNPJ inválido
-            </mat-error>
-          </mat-form-field>
+            <!-- Email -->
+            <div class="space-y-2">
+              <label for="email" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <lucide-icon [img]="mailIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+                Email
+              </label>
+              <div class="relative">
+                <input id="email" type="email" name="email" formControlName="email" placeholder="Digite seu email"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                  [class.border-red-300]="accountForm.get('email')?.invalid && accountForm.get('email')?.touched">
+                @if (accountForm.get('email')?.invalid && accountForm.get('email')?.touched) {
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+                </div>
+                }
+              </div>
+              @if (accountForm.get('email')?.invalid && accountForm.get('email')?.touched) {
+              <p class="text-sm text-red-600 flex items-center gap-1">
+                <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+                @if (accountForm.get('email')?.hasError('required')) {
+                Email é obrigatório
+                } @else if (accountForm.get('email')?.hasError('email')) {
+                Email inválido
+                }
+              </p>
+              }
+            </div>
+          </div>
 
-          <!-- Telefone -->
-          <mat-form-field class="w-full">
-            <mat-label>Telefone</mat-label>
-            <input matInput
-              name="phone_number"
-              formControlName="phone_number"
-              placeholder="(00) 00000-0000"
-              mask="(00) 00000-0000"
-              [showMaskTyped]="true">
-            <mat-error *ngIf="accountForm.get('phone_number')?.hasError('required')">
-              Telefone é obrigatório
-            </mat-error>
-            <mat-error *ngIf="accountForm.get('phone_number')?.hasError('pattern')">
-              Formato inválido. Use (00) 00000-0000
-            </mat-error>
-          </mat-form-field>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- CPF/CNPJ -->
+            <div class="space-y-2">
+              <label for="cpf_cnpj" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <lucide-icon [img]="fileTextIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+                CPF/CNPJ
+              </label>
+              <div class="relative">
+                <input id="cpf_cnpj" formControlName="cpf_cnpj" placeholder="Digite o CPF ou CNPJ" [mask]="cpfCnpjMask"
+                  name="cpf_cnpj" (input)="onCpfCnpjInput($event)" [showMaskTyped]="true"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                  [class.border-red-300]="accountForm.get('cpf_cnpj')?.invalid && accountForm.get('cpf_cnpj')?.touched">
+                @if (accountForm.get('cpf_cnpj')?.invalid && accountForm.get('cpf_cnpj')?.touched) {
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+                </div>
+                }
+              </div>
+              @if (accountForm.get('cpf_cnpj')?.invalid && accountForm.get('cpf_cnpj')?.touched) {
+              <p class="text-sm text-red-600 flex items-center gap-1">
+                <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+                @if (accountForm.get('cpf_cnpj')?.hasError('required')) {
+                CPF/CNPJ é obrigatório
+                } @else if (accountForm.get('cpf_cnpj')?.hasError('minlength')) {
+                CPF/CNPJ inválido
+                }
+              </p>
+              }
+            </div>
+
+            <!-- Telefone -->
+            <div class="space-y-2">
+              <label for="phone_number" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <lucide-icon [img]="phoneIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+                Telefone
+              </label>
+              <div class="relative">
+                <input id="phone_number" name="phone_number" formControlName="phone_number"
+                  placeholder="(00) 00000-0000" mask="(00) 00000-0000" [showMaskTyped]="true"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                  [class.border-red-300]="accountForm.get('phone_number')?.invalid && accountForm.get('phone_number')?.touched">
+                @if (accountForm.get('phone_number')?.invalid && accountForm.get('phone_number')?.touched) {
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+                </div>
+                }
+              </div>
+              @if (accountForm.get('phone_number')?.invalid && accountForm.get('phone_number')?.touched) {
+              <p class="text-sm text-red-600 flex items-center gap-1">
+                <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+                @if (accountForm.get('phone_number')?.hasError('required')) {
+                Telefone é obrigatório
+                } @else if (accountForm.get('phone_number')?.hasError('pattern')) {
+                Formato inválido. Use (00) 00000-0000
+                }
+              </p>
+              }
+            </div>
+          </div>
 
           <!-- Data de Nascimento -->
-          <mat-form-field class="w-full">
-            <mat-label>Data de Nascimento Do Responsável</mat-label>
-            <input matInput
-              [matDatepicker]="picker"
-              name="birth"
-              formControlName="birth"
-              placeholder="DD/MM/AAAA"
-            >
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="accountForm.get('birth')?.hasError('required')">
+          <div class="space-y-2">
+            <label for="birth" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="calendarIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Data de Nascimento do Responsável
+            </label>
+            <div class="relative">
+              <input id="birth" type="date" name="birth" formControlName="birth"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="accountForm.get('birth')?.invalid && accountForm.get('birth')?.touched">
+              @if (accountForm.get('birth')?.invalid && accountForm.get('birth')?.touched) {
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+              </div>
+              }
+            </div>
+            @if (accountForm.get('birth')?.invalid && accountForm.get('birth')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
               Data de nascimento é obrigatória
-            </mat-error>
-          </mat-form-field>
+            </p>
+            }
+          </div>
+
+          <hr class="mb-4">
 
           <!-- Botão de Submit -->
           <div class="flex justify-end">
-            <button 
-              mat-raised-button 
-              color="primary" 
-              type="submit"
-              [disabled]="!accountForm.valid"
-              matStepperNext
-              class="px-6 py-2">
+            <button type="submit" [disabled]="!accountForm.valid" matStepperNext
+              class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-6 py-3 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <lucide-icon [img]="saveIcon" class="w-4 h-4"></lucide-icon>
               Salvar Alterações
             </button>
           </div>
         </form>
-      </mat-step>
-      <mat-step [stepControl]="addressForm">
-        <form [formGroup]="addressForm" (ngSubmit)="onAddressSubmit()" class="mt-4 space-y-6">
-          <ng-template matStepLabel>Endereço</ng-template>
-          
+      </mat-card>
+    </div>
+  </mat-step>
+
+  <mat-step [stepControl]="addressForm">
+    <ng-template matStepLabel>
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-[#3377bc]"></lucide-icon>
+        <span>Endereço</span>
+      </div>
+    </ng-template>
+
+    <div class="space-y-6 mt-6">
+      <mat-card class="p-4">
+        <form [formGroup]="addressForm" (ngSubmit)="onAddressSubmit()" class="space-y-6">
           <!-- CEP -->
-          <mat-form-field class="w-full">
-            <mat-label>CEP</mat-label>
-            <input 
-              matInput 
-              name="postal_code"
-              formControlName="postal_code" 
-              placeholder="00000-000"
-              (blur)="buscarCep()"
-              [disabled]="isLoadingCep"
-              mask="00000-000"
-              [showMaskTyped]="true">
-            <mat-icon *ngIf="isLoadingCep" matSuffix class="animate-spin">sync</mat-icon>
-            <mat-error *ngIf="addressForm.get('postal_code')?.hasError('required')">
+          <div class="space-y-2">
+            <label for="postal_code" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              CEP
+            </label>
+            <div class="relative">
+              <input id="postal_code" name="postal_code" formControlName="postal_code" placeholder="00000-000"
+                (blur)="buscarCep()" [disabled]="isLoadingCep" mask="00000-000" [showMaskTyped]="true"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('postal_code')?.invalid && addressForm.get('postal_code')?.touched">
+              @if (isLoadingCep) {
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#3377bc]"></div>
+              </div>
+              } @else if (addressForm.get('postal_code')?.invalid && addressForm.get('postal_code')?.touched) {
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <lucide-icon [img]="alertIcon" class="w-4 h-4 text-red-500"></lucide-icon>
+              </div>
+              }
+            </div>
+            @if (addressForm.get('postal_code')?.invalid && addressForm.get('postal_code')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+              @if (addressForm.get('postal_code')?.hasError('required')) {
               CEP é obrigatório
-            </mat-error>
-            <mat-error *ngIf="addressForm.get('postal_code')?.hasError('pattern')">
+              } @else if (addressForm.get('postal_code')?.hasError('pattern')) {
               Formato inválido. Use 00000-000
-            </mat-error>
-          </mat-form-field>
+              }
+            </p>
+            }
+          </div>
 
           <!-- Rua -->
-          <mat-form-field class="w-full">
-            <mat-label>Rua</mat-label>
-            <input matInput name="street" formControlName="street" placeholder="Digite o nome da rua">
-            <mat-error *ngIf="addressForm.get('street')?.hasError('required')">
-              Rua é obrigatória
-            </mat-error>
-            <mat-error *ngIf="addressForm.get('street')?.hasError('minlength')">
-              Rua deve ter pelo menos 3 caracteres
-            </mat-error>
-          </mat-form-field>
+          <div class="space-y-2">
+            <label for="street" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Rua
+            </label>
+            <div class="relative">
+              <input id="street" name="street" formControlName="street" placeholder="Digite o nome da rua"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('street')?.invalid && addressForm.get('street')?.touched">
+            </div>
+          </div>
 
           <!-- Número -->
           <div class="w-full space-y-2">
-            <mat-form-field class="w-full">
-              <mat-label>Número</mat-label>
-              <input matInput name="house_number" formControlName="house_number" placeholder="Digite o número">
-              <mat-error *ngIf="addressForm.get('house_number')?.hasError('required')">
-                Número é obrigatório
-              </mat-error>
-            </mat-form-field>
-            
-            <mat-checkbox
-              name="hasNoHouseNumber"
-              formControlName="hasNoHouseNumber"
-              (change)="onNoHouseNumberChange()"
+            <label for="house_number" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Número
+            </label>
+            <div class="relative">
+              <input id="house_number" name="house_number" formControlName="house_number" placeholder="Digite o número"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('house_number')?.invalid && addressForm.get('house_number')?.touched">
+            </div>
+            @if (addressForm.get('house_number')?.invalid && addressForm.get('house_number')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+              Número é obrigatório
+            </p>
+            }
+
+            <mat-checkbox name="hasNoHouseNumber" formControlName="hasNoHouseNumber" (change)="onNoHouseNumberChange()"
               class="text-sm">
               Sem número
             </mat-checkbox>
           </div>
 
           <!-- Complemento -->
-          <mat-form-field class="w-full">
-            <mat-label>Complemento</mat-label>
-            <input matInput name="complement" formControlName="complement" placeholder="Digite o complemento (opcional)">
-          </mat-form-field>
+          <div class="space-y-2">
+            <label for="complement" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Complemento
+            </label>
+            <div class="relative">
+              <input id="complement" name="complement" formControlName="complement" placeholder="Digite o complemento (opcional)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('complement')?.invalid && addressForm.get('complement')?.touched">
+            </div>
+            @if (addressForm.get('complement')?.invalid && addressForm.get('complement')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+              Complemento é obrigatório
+            </p>
+            }
+          </div>
 
           <!-- Bairro -->
-          <mat-form-field class="w-full">
-            <mat-label>Bairro</mat-label>
-            <input matInput name="neighborhood" formControlName="neighborhood" placeholder="Digite o bairro">
-            <mat-error *ngIf="addressForm.get('neighborhood')?.hasError('required')">
-              Bairro é obrigatório
-            </mat-error>
-          </mat-form-field>
+          <div class="space-y-2">
+            <label for="neighborhood" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Bairro
+            </label>
+            <div class="relative">
+              <input id="neighborhood" name="neighborhood" formControlName="neighborhood" placeholder="Digite o bairro"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('neighborhood')?.invalid && addressForm.get('neighborhood')?.touched">
+            </div>
+          </div>
+          @if (addressForm.get('neighborhood')?.invalid && addressForm.get('neighborhood')?.touched) {
+          <p class="text-sm text-red-600 flex items-center gap-1">
+            <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
+            Bairro é obrigatório
+          </p>
+          }
 
           <!-- Estado -->
-          <mat-form-field class="w-full">
-            <mat-label>Estado</mat-label>
-            <input matInput name="state" formControlName="state" placeholder="Digite o estado">
-            <mat-error *ngIf="addressForm.get('state')?.hasError('required')">
+          <div class="space-y-2">
+            <label for="state" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              Estado
+            </label>
+            <div class="relative">
+              <input id="state" name="state" formControlName="state" placeholder="Digite o estado"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('state')?.invalid && addressForm.get('state')?.touched">
+            </div>
+            @if (addressForm.get('state')?.invalid && addressForm.get('state')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
               Estado é obrigatório
-            </mat-error>
-          </mat-form-field>
+            </p>
+            }
+          </div>
 
           <!-- País -->
-          <mat-form-field class="w-full">
-            <mat-label>País</mat-label>
-            <input matInput name="country" formControlName="country" placeholder="Digite o país">
-            <mat-error *ngIf="addressForm.get('country')?.hasError('required')">
+          <div class="space-y-2">
+            <label for="country" class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <lucide-icon [img]="mapPinIcon" class="w-4 h-4 text-gray-500"></lucide-icon>
+              País
+            </label>
+            <div class="relative">
+              <input id="country" name="country" formControlName="country" placeholder="Digite o país"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3377bc] focus:border-[#3377bc] transition-colors"
+                [class.border-red-300]="addressForm.get('country')?.invalid && addressForm.get('country')?.touched">
+            </div>
+            @if (addressForm.get('country')?.invalid && addressForm.get('country')?.touched) {
+            <p class="text-sm text-red-600 flex items-center gap-1">
+              <lucide-icon [img]="alertIcon" class="w-3 h-3"></lucide-icon>
               País é obrigatório
-            </mat-error>
-          </mat-form-field>
+            </p>
+            }
+          </div>
 
+          <hr class="mb-4">
+          
           <!-- Botão de Submit -->
-          <div class="flex justify-end">
-            <button mat-button matStepperPrevious class="mr-3">Voltar</button>
-            <button 
-              mat-raised-button 
-              color="primary" 
-              type="submit"
-              [disabled]="!addressForm.valid"
-              class="px-6 py-2">
+          <div class="flex flex-col md:flex-row justify-end gap-2">
+            <button matStepperPrevious class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              <lucide-icon [img]="arrowLeftIcon" class="mr-2 w-4 h-4"></lucide-icon>
+              Voltar
+            </button>
+            <button type="submit" [disabled]="!addressForm.valid"
+            class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-6 py-3 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <lucide-icon [img]="saveIcon" class="w-4 h-4"></lucide-icon>
               Salvar Endereço
             </button>
           </div>
         </form>
-      </mat-step>
-    </mat-stepper>
-  </mat-card>
-</div> 
+      </mat-card>
+    </div>
+  </mat-step>
+</mat-stepper>

@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialog } from '@angular/material/dialog';
 import { LucideAngularModule, Package, Calendar, Pencil, ChartColumn, X } from 'lucide-angular';
@@ -36,6 +37,7 @@ export class ProductDetailsComponent {
   constructor(
     public dialogRef: MatDialogRef<ProductDetailsComponent>,
     private dialog: MatDialog,
+    private breakpointObserver: BreakpointObserver,
     @Inject(MAT_DIALOG_DATA) public product: ItemModel
   ) { }
 
@@ -57,9 +59,14 @@ export class ProductDetailsComponent {
     editItem.active = item.active;
     editItem.product_image = item.product_image;
 
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(ProductFormComponent, {
       data: { item: editItem as ItemCreationModel, isEdit: true },
-      minWidth: '900px'
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '900px',
+      maxWidth: isMobile ? '95vw' : '900px',
+      height: 'auto',
+      maxHeight: '95vh'
     });
 
     dialogRef.afterClosed().subscribe(result => {

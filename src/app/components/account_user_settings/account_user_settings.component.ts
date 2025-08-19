@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { AccountUserModel } from '../../models/account_user.model';
 import { AccountUserService } from '../../services/account-user.service';
 import { ToastService } from '../../services/toast.service';
+import { LucideAngularModule, User, Mail, AlertCircle, Save } from 'lucide-angular';
 
 @Component({
   selector: 'app-account-user-settings',
@@ -21,11 +22,17 @@ import { ToastService } from '../../services/toast.service';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
+    LucideAngularModule,
   ],
   templateUrl: './account_user_settings.component.html',
   styleUrls: ['./account_user_settings.component.scss']
 })
 export class AccountUserSettingsComponent implements OnInit {
+  readonly userIcon = User;
+  readonly mailIcon = Mail;
+  readonly alertIcon = AlertCircle;
+  readonly saveIcon = Save;
+
   @Input() accountId: string = '';
   
   accountUserForm: FormGroup = new FormGroup({});

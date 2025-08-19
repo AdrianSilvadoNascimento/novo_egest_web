@@ -37,7 +37,7 @@
 
   </mat-drawer>
 
-  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
+  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4 flex-wrap md:flex-nowrap">
     <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar produtos"
       (click)="fileInput.click()">
       <div class="flex justify-be tween items-center">
@@ -61,11 +61,11 @@
       (change)="onFileImportSelected($event)" />
   </div>
 
-  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-2">
-    <div class="flex flex-row items-center gap-4">
+  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-4 md:mb-2">
+    <div class="flex flex-row items-center gap-0 flex-wrap md:flex-nowrap md:gap-4">
       <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
         <lucide-icon matPrefix [img]="searchIcon" class="w-6 h-6"></lucide-icon>
-        <mat-label>Buscar produto por nome, descrição ou código...</mat-label>
+        <mat-label>Buscar por nome, descrição ou código...</mat-label>
         <input
           matInput 
           type="text" 

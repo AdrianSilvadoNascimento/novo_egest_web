@@ -1,16 +1,18 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
-import { CategoriesFormComponent } from './categories-form/categories-form.component';
-import { CategoryModel } from '../../models/category.model';
 import { MatIconModule } from '@angular/material/icon';
 import { FileUp, LucideAngularModule, PlusCircle, Tag } from 'lucide-angular';
 import { MatButtonModule } from '@angular/material/button';
-import { ItemsService } from '../../services/items.service';
 import { MatMenuModule } from '@angular/material/menu';
+
+import { CategoriesFormComponent } from './categories-form/categories-form.component';
+import { CategoryModel } from '../../models/category.model';
+import { ItemsService } from '../../services/items.service';
 import { ToastService } from '../../services/toast.service';
 import { EmptyListComponent } from '../../shared/components/empty-list/empty-list.component';
 import { CategoryDetailsComponent } from './category-details/category-details.component';
@@ -47,7 +49,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   constructor(
     private dialog: MatDialog,
     private itemService: ItemsService,
-    private toast: ToastService
+    private toast: ToastService,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngAfterViewInit(): void {
@@ -91,8 +94,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   openDialog(category?: CategoryModel) {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(CategoriesFormComponent, {
-      minWidth: '600px',
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '600px',
+      maxWidth: isMobile ? '95vw' : '600px',
       data: category ? { ...category } : null,
     });
 
@@ -104,10 +110,12 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   openCategoryDetails(category: CategoryModel): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     this.dialog.open(CategoryDetailsComponent, {
       data: category,
-      minWidth: '400px',
-      panelClass: 'modern-dialog'
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '400px',
+      maxWidth: isMobile ? '95vw' : '400px',
     })
   }
 

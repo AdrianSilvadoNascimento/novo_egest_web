@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { LucideAngularModule, FileUp, PackagePlus, Package, Search, Funnel, LayoutGrid, List } from 'lucide-angular';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatCard } from "@angular/material/card";
@@ -109,7 +110,8 @@ export class ProductsComponent implements OnInit {
     private itemService: ItemsService,
     private moveService: MovementationService,
     private dashboardService: DashboardService,
-    private toast: ToastService
+    private toast: ToastService,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngOnInit(): void {
@@ -351,8 +353,12 @@ export class ProductsComponent implements OnInit {
   }
 
   onAddProduct(): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(ProductFormComponent, {
-      minWidth: '900px',
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '900px',
+      maxWidth: isMobile ? '95vw' : '900px',
+      height: 'auto',
       data: {
         item: new ItemCreationModel(),
         isEdit: false
@@ -374,10 +380,13 @@ export class ProductsComponent implements OnInit {
   openProductDetails(product: ItemModel): void {
     this.editedProduct = product;
     
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(ProductDetailsComponent, {
       data: this.editedProduct,
-      panelClass: 'modern-dialog',
-      minWidth: '600px'
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '800px',
+      maxWidth: isMobile ? '95vw' : '800px',
+      height: 'auto'
     })
 
     dialogRef.afterClosed().subscribe(itemDetails => {
@@ -511,12 +520,14 @@ export class ProductsComponent implements OnInit {
   }
 
   onMoveProduct(item: ItemModel): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     this.dialog.open(MovementationFormComponent, {
       data: { item },
-      width: '800px',
-      maxWidth: '90vw',
+      width: isMobile ? '95vw' : '800px',
+      maxWidth: isMobile ? '95vw' : '800px',
+      height: 'auto',
       disableClose: false,
-      panelClass: 'movement-dialog'
+      panelClass: isMobile ? 'mobile-dialog' : 'movement-dialog'
     }).afterClosed().subscribe(result => {
       if (result) {
         this.toast.success('Movimentação registrada com sucesso!');
@@ -543,9 +554,13 @@ export class ProductsComponent implements OnInit {
     editItem.active = item.active;
     editItem.product_image = item.product_image;
 
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(ProductFormComponent, {
       data: { item: editItem as ItemCreationModel, isEdit: true },
-      minWidth: '900px'
+      panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+      width: isMobile ? '95vw' : '900px',
+      maxWidth: isMobile ? '95vw' : '900px',
+      height: 'auto',
     });
 
     dialogRef.afterClosed().subscribe(result => {

@@ -1,23 +1,87 @@
-<div class="min-h-screen rounded-lg shadow-md bg-gray-50 py-8 mb-8">
-  <div class="w-full px-8 mx-auto space-y-6">
-    <!-- Título da Página -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-800">Configurações da Conta</h1>
-      <p class="text-gray-600 mt-2">Gerencie suas informações pessoais e dados da empresa</p>
+<div class="min-h-screen bg-gray-50">
+  <!-- Header com gradiente -->
+  <div class="relative bg-gradient-to-r rounded-t-lg from-[#3377bc] to-[#2a5f9a] p-6 md:p-8 text-white mb-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center">
+        <span class="text-sm px-3 py-1 rounded-full bg-white/20 text-white border border-white/30 mb-4 inline-block">Configurações</span>
+        <div class="text-3xl md:text-4xl text-white font-semibold font-[Lora] mb-2">Configurações da Conta</div>
+        <p class="text-md text-blue-100 font-[Lora]">Gerencie suas informações pessoais e dados da empresa</p>
+      </div>
     </div>
+  </div>
 
-    <hr>
+  <!-- Conteúdo principal -->
+  <div class="max-w-6xl mx-auto px-4 md:px-8 pb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+      <!-- Sidebar de navegação -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+          <div class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <lucide-icon [img]="settingsIcon" class="w-5 h-5 text-[#3377bc]"></lucide-icon>
+            Seções
+          </div>
 
-    @if (accountId) {
-      <!-- Bloco 1: Dados Pessoais (AccountUser) -->
-      <h3 class="font-semibold text-gray-800 mb-6">Dados Pessoais</h3>
-      <app-account-user-settings [accountId]="accountId"></app-account-user-settings>
+          <hr class="my-4">
+          
+          <nav class="space-y-2">
+            @if (accountId) {
+              <button 
+                (click)="activeSection = 'personal'"
+                [class]="activeSection === 'personal' ? 'bg-blue-50 text-[#3377bc] border-[#3377bc]' : 'text-gray-600 border-transparent hover:bg-gray-50'"
+                class="w-full text-left px-3 py-2 rounded-lg border transition-colors flex items-center gap-3">
+                <lucide-icon [img]="userIcon" class="w-4 h-4"></lucide-icon>
+                <span class="text-sm font-medium">Dados Pessoais</span>
+              </button>
+            }
 
-      <hr>
-    }
+            <button 
+              (click)="activeSection = 'company'"
+              [class]="activeSection === 'company' ? 'bg-blue-50 text-[#3377bc] border-[#3377bc]' : 'text-gray-600 border-transparent hover:bg-gray-50'"
+              class="w-full text-left px-3 py-2 rounded-lg border transition-colors flex items-center gap-3">
+              <lucide-icon [img]="buildingIcon" class="w-4 h-4"></lucide-icon>
+              <span class="text-sm font-medium">Dados da Empresa</span>
+            </button>
+          </nav>
+        </div>
+      </div>
 
-    <!-- Bloco 2: Dados da Empresa (Account) - Stepper -->
-    <h3 class="font-semibold text-gray-800 mb-6">Dados da Empresa</h3>
-    <app-account-settings></app-account-settings>
+      <!-- Conteúdo principal -->
+      <div class="lg:col-span-9">
+        @if (accountId && activeSection === 'personal') {
+          <!-- Dados Pessoais -->
+          <div class="bg-white rounded-xl shadow-sm border">
+            <div class="p-6 border-b border-gray-100">
+              <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] rounded-lg flex items-center justify-center">
+                  <lucide-icon [img]="userIcon" class="w-5 h-5 text-white"></lucide-icon>
+                </div>
+                Dados Pessoais
+              </h3>
+              <p class="text-gray-600 mt-1">Suas informações pessoais e de contato</p>
+            </div>
+            <div class="p-6">
+              <app-account-user-settings [accountId]="accountId"></app-account-user-settings>
+            </div>
+          </div>
+        }
+
+        @if (activeSection === 'company') {
+          <!-- Dados da Empresa -->
+          <div class="bg-white rounded-xl shadow-sm border">
+            <div class="p-6 border-b border-gray-100 mb-4">
+              <div class="text-2xl font-semibold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                  <lucide-icon [img]="buildingIcon" class="w-5 h-5 text-white"></lucide-icon>
+                </div>
+                Dados da Empresa
+              </div>
+              <p class="text-gray-600 mt-1 text-md">Informações da sua empresa e configurações corporativas</p>
+            </div>
+
+            <app-account-settings></app-account-settings>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 </div>

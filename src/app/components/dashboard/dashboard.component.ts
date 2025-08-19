@@ -22,6 +22,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { ProductFormComponent } from '../products/product-form/product-form.component';
 import { AuthService } from '../../services/auth.service';
 import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ItemCreationModel } from '../../models/item-creation.model';
 
 @Component({
@@ -54,13 +55,22 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly dashboardService: DashboardService,
     private readonly authService: AuthService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngAfterViewInit(): void {
     if (this.isFirstLogin && !this.hasShownWelcomeModal) {
       this.hasShownWelcomeModal = true;
-      const dialogRef = this.dialog.open(WelcomeDialogComponent);
+      const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
+      const dialogRef = this.dialog.open(WelcomeDialogComponent, {
+        panelClass: isMobile ? 'mobile-dialog' : 'modern-dialog',
+        width: isMobile ? '95vw' : '600px',
+        maxWidth: isMobile ? '95vw' : '600px',
+        height: 'auto',
+        maxHeight: '95vh',
+        disableClose: true
+      });
 
       dialogRef.afterClosed().subscribe(() => {
         this.isFirstLogin = false;

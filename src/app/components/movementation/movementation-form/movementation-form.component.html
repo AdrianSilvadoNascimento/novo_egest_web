@@ -1,5 +1,5 @@
 <!-- Header gradient -->
-<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white">
+<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white mb-4 md:mb-0">
   <div class="text-center">
     <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Movimentação</span>
     <div class="text-3xl text-white font-semibold font-[Lora]">Nova movimentação de estoque</div>
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Detalhes -->
-    <mat-card class="p-6 font-[Lora] mb-6">
+    <mat-card class="w-[90%] md:w-full mx-auto p-6 font-[Lora] mb-6">
       <div class="text-lg text-gray-900 mb-4">Detalhes</div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,7 +105,7 @@
     </mat-card>
 
     <!-- Informações Adicionais -->
-    <mat-card class="p-6 font-[Lora]">
+    <mat-card class="w-[90%] md:w-full mx-auto p-6 font-[Lora]">
       <div class="text-lg text-gray-900 mb-4">Informações Adicionais</div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,10 +168,10 @@
       </div>
     </mat-card>
 
-    <hr class="my-6">
+    <hr class="my-6 w-[90%] md:w-full mx-auto">
 
     <!-- Footer/Actions -->
-    <div class="flex flex-row justify-end gap-2">
+    <div class="w-[90%] md:w-full mx-auto pb-4 md:pb-0 flex flex-col md:flex-row justify-end gap-2">
       <!-- Botões -->
       <button (click)="onCancel()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         Cancelar

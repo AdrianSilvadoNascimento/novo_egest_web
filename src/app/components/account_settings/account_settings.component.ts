@@ -1,6 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,18 +13,17 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { AccountModel } from '../../models/account.model';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
-import { StepperSelectionEvent } from '@angular/cdk/stepper';
+import { MatCardModule } from '@angular/material/card';
+import { LucideAngularModule, Building2, MapPin, Info, AlertCircle, Save, Mail, Phone, FileText, Calendar, ArrowLeft } from 'lucide-angular';
+
+import { AccountModel } from '../../models/account.model';
 import { AccountAddressModel } from '../../models/account_address.model';
 import { CepService } from '../../services/cep.service';
-import { finalize } from 'rxjs';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ToastService } from '../../services/toast.service';
 import { AccountService } from '../../services/account.service';
 import { AuthService } from '../../services/auth.service';
-import { ActivatedRoute } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-account-settings',
@@ -37,13 +40,25 @@ import { MatCardModule } from '@angular/material/card';
     MatIconModule,
     MatCheckboxModule,
     NgxMaskDirective, 
-    MatCardModule
+    MatCardModule,
+    LucideAngularModule
   ],
   providers: [provideNgxMask()],
   templateUrl: './account_settings.component.html',
   styleUrls: ['./account_settings.component.scss']
 })
 export class AccountSettingsComponent implements OnInit {
+  readonly buildingIcon = Building2;
+  readonly mapPinIcon = MapPin;
+  readonly infoIcon = Info;
+  readonly alertIcon = AlertCircle;
+  readonly saveIcon = Save;
+  readonly mailIcon = Mail;
+  readonly phoneIcon = Phone;
+  readonly fileTextIcon = FileText;
+  readonly calendarIcon = Calendar;
+  readonly arrowLeftIcon = ArrowLeft;
+
   @ViewChild('stepper') stepper!: MatStepper;
   accountForm: FormGroup = new FormGroup({});
   addressForm: FormGroup = new FormGroup({});
@@ -52,6 +67,7 @@ export class AccountSettingsComponent implements OnInit {
   cpfCnpjMask: string = '000.000.000-00';
   accountId: string = '';
   addressFormInitialized: boolean = false;
+  stepperOrientation: 'vertical' | 'horizontal' = 'vertical';
 
   account!: AccountModel
   address!: AccountAddressModel
@@ -62,10 +78,13 @@ export class AccountSettingsComponent implements OnInit {
     private accountService: AccountService,
     private toastService: ToastService,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngOnInit(): void {
+    this.onResize();
+
     this.initializeBasicForms();
     this.createEmptyAddressForm();
     
@@ -82,6 +101,12 @@ export class AccountSettingsComponent implements OnInit {
     
     this.checkAccount();
     this.checkAddress();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
+    this.stepperOrientation = isMobile ? 'vertical' : 'horizontal';
   }
 
   checkAddress(): void {

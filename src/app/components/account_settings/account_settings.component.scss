@@ -28,6 +28,64 @@ mat-card, mat-stepper {
   background-color: #fff;
 }
 
+// Estilos para o stepper moderno
+::ng-deep .modern-stepper {
+  .mat-stepper-horizontal {
+    background: transparent;
+  }
+
+  .mat-stepper-horizontal-line {
+    border-top-color: #e5e7eb;
+  }
+
+  .mat-step-header {
+    border-radius: 8px;
+    margin: 0 8px;
+    
+    &.cdk-keyboard-focused,
+    &.cdk-program-focused {
+      background-color: rgba(51, 119, 188, 0.1);
+    }
+  }
+
+  .mat-step-header.cdk-keyboard-focused,
+  .mat-step-header.cdk-program-focused,
+  .mat-step-header:hover {
+    background-color: rgba(51, 119, 188, 0.05);
+  }
+
+  .mat-step-header.mat-step-header-ripple {
+    background-color: transparent;
+  }
+
+  .mat-step-label {
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .mat-step-header.mat-step-header-selected .mat-step-label {
+    color: #3377bc;
+  }
+
+  .mat-step-header.mat-step-header-selected .mat-step-icon {
+    background-color: #3377bc;
+    color: white;
+  }
+
+  .mat-step-icon {
+    background-color: #e5e7eb;
+    color: #6b7280;
+  }
+
+  .mat-step-header.mat-step-header-selected .mat-step-icon-selected {
+    background-color: #3377bc;
+  }
+
+  .mat-step-header.mat-step-header-selected .mat-step-icon-state-done {
+    background-color: #10b981;
+  }
+}
+
 // Estilos para o botão
 button[mat-raised-button] {
   transition: all 0.3s ease;

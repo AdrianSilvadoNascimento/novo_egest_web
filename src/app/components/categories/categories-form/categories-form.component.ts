@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Tag } from 'lucide-angular';
+import { MatIcon } from "@angular/material/icon";
 
 import { CategoryModel } from '../../../models/category.model';
 import { ItemsService } from '../../../services/items.service';
@@ -13,7 +14,7 @@ import { ToastService } from '../../../services/toast.service';
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatButtonModule, MatInputModule, MatDialogModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatButtonModule, MatInputModule, MatDialogModule, MatIcon],
   selector: 'app-category-dialog',
   styleUrls: ['./categories-form.component.scss'],
   templateUrl: './categories-form.component.html',

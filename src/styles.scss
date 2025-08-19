@@ -502,14 +502,18 @@ body {
 .mobile-dialog .mat-mdc-dialog-content {
   padding: 0 !important;
   overflow-y: auto;
-  height: calc(100vh - 80px); // Reserva espaço para header
+  // height: calc(100vh - 80px); // Reserva espaço para header
   max-height: calc(100vh - 80px);
 }
 
 // Responsividade específica para formulários em modais
 @media (max-width: 768px) {
   // Ajustes para CustomerFormComponent
-  .mobile-dialog {    
+  .mobile-dialog {
+    .mat-mdc-dialog-surface {
+      height: auto !important;
+    }
+    
     // Ajustes de grid para mobile
     .md\\:flex-row {
       flex-direction: column !important;
