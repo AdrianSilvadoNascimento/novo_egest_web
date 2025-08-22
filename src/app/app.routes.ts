@@ -11,6 +11,7 @@ import { AccountSettingsPageComponent } from './components/account_settings_page
 import { CustomerComponent } from './components/customer/customer.component';
 import { MovementationComponent } from './components/movementation/movementation.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { FinancialComponent } from './components/financial/financial.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -26,6 +27,7 @@ export const routes: Routes = [
   { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'financial', component: FinancialComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { 

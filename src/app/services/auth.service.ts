@@ -100,11 +100,17 @@ export class AuthService {
     this.toggleLogin.next(status);
   }
 
+  /**
+   * Realiza o login do usuário
+   * @param loginModel - Modelo de login
+   * @returns Observable com o resultado do login
+   */
   login(loginModel: LoginModel): Observable<any> {
     return this.http.post(`${this.API_URL}/login`, loginModel, {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
       tap((res: any) => {
+        console.log(res);
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -214,6 +220,11 @@ export class AuthService {
     return rememberMe === 'true';
   }
 
+  /**
+   * Registra um usuário
+   * @param registerModel - Modelo de registro
+   * @returns Observable com o resultado do registro
+   */
   register(registerModel: RegisterModel): Observable<any> {
     return this.http.post(`${this.API_URL}/register`, registerModel, {
       headers: { 'Content-Type': 'application/json' },
@@ -223,6 +234,11 @@ export class AuthService {
     })))
   }
 
+  /**
+   * Registra um usuário com Google
+   * @param googleRegisterData - Dados do registro com Google
+   * @returns Observable com o resultado do registro
+   */
   registerWithGoogle(googleRegisterData: any): Observable<any> {
     return this.http.post(`${this.API_URL}/register/google`, googleRegisterData, {
       headers: { 'Content-Type': 'application/json' },

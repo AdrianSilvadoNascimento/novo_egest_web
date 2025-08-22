@@ -20,11 +20,19 @@ export class AccountUserService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
+  /**
+   * Define os dados do usuário
+   * @param user - Dados do usuário
+   */
   setAccountUserData(user: AccountUserModel): void {
     this.accountUserData.next(user);
     sessionStorage.setItem('account_user_data', JSON.stringify(user))
   }
 
+  /**
+   * Obtém os dados do usuário
+   * @returns Observable com os dados do usuário
+   */
   getAccountUser(): Observable<AccountUserModel> {
     const accountUserData = sessionStorage.getItem('account_user_data');
 
@@ -41,6 +49,11 @@ export class AccountUserService {
     )
   }
 
+  /**
+   * Atualiza os dados do usuário
+   * @param accountUserModel - Dados do usuário
+   * @returns Observable com os dados do usuário atualizados
+   */
   updateAccountUser(accountUserModel: AccountUserModel): Observable<AccountUserModel> {
     const accountUserId = this.authService.getAccountUserId();
     

@@ -6,6 +6,10 @@ export class AccountUserModel {
   user_image!: string;
   phone_number!: string;
   confirm_password!: string;
+  type!: AccountUserType;
+  role!: AccountUserRole;
+  first_access!: boolean;
+  password_confirmed!: boolean;
   address!: string;
   city!: string;
   state!: string;
@@ -29,4 +33,17 @@ export class AccountUserModel {
     this.created_at = new Date();
     this.updated_at = new Date();
   }
+}
+
+export enum AccountUserType {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
+
+export enum AccountUserRole {
+  STORE_MANAGER = 'STORE_MANAGER',
+  STOCKIST = 'STOCKIST',
+  CASHIER = 'CASHIER',
+  SELLER = 'SELLER',
 }
