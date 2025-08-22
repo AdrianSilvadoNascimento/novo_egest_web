@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { AccountModel } from '../models/account.model';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { AccountAddressModel } from '../models/account_address.model';
 
 @Injectable({
@@ -42,8 +42,13 @@ export class AccountService {
   }
 
   getAccount(): Observable<AccountModel> {
+    const accountData = sessionStorage.getItem('account_data');
+
+    if (accountData) {
+      return of(JSON.parse(accountData));
+    }
+
     const accountId = this.authService.getAccountId()
-    
     return this.http.get<AccountModel>(`${this.API_URL}/${accountId}`).pipe(
       tap(res => this.setAccountData(res))
     )

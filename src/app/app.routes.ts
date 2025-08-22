@@ -10,6 +10,7 @@ import { CategoriesComponent } from './components/categories/categories.componen
 import { AccountSettingsPageComponent } from './components/account_settings_page/account_settings_page.component';
 import { CustomerComponent } from './components/customer/customer.component';
 import { MovementationComponent } from './components/movementation/movementation.component';
+import { CheckoutComponent } from './components/checkout/checkout.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'products', component: ProductsComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'movementations', component: MovementationComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },

@@ -76,7 +76,7 @@ export class AccountUserSettingsComponent implements OnInit {
 
   loadAccountUserData(): void {
     this.isLoading = true;
-    this.accountUserService.getAccountUser(this.accountId).subscribe({
+    this.accountUserService.getAccountUser().subscribe({
       next: (accountUser) => {
         this.accountUser = accountUser;
         sessionStorage.setItem('account_user_data', JSON.stringify(accountUser));

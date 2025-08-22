@@ -1,0 +1,84 @@
+<div class="min-h-screen bg-[#f3f4f6] py-12 px-4">
+  <div class="max-w-7xl mx-auto font-[Lora] text-center flex flex-col gap-2 mb-4 md:mb-10">
+    <div class="text-4xl font-bold text-gray-700">
+      Escolha o Plano Ideal
+    </div>
+    <div class="text-lg text-gray-500 mb-0 md:mb-4">
+      Gerencie seu estoque com eficiência.
+      Escolha o plano que melhor se adapta ao seu negócio e comece a otimizar suas operações hoje mesmo.
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+    @for (plan of plans; track plan.id) {
+    <mat-card class="relative rounded-2xl mb-4 md:mb-6 border-2 transition-all duration-300 hover:shadow-xl"
+      [class]="plan.name === 'Ouro' ? 'border-[#3377bc] shadow-2xl scale-105 bg-white' : 'border-gray-200 bg-white hover:border-[#3377bc]/30'">
+      @if (plan.name === 'Ouro') {
+      <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+        <div
+          class="badge bg-[#3377bc] text-white px-4 py-1 rounded-full text-sm font-semibold flex flex-row items-center justify-between gap-2">
+          <lucide-icon [img]="starIcon" class="w-4 h-4" />
+          Mais Popular
+        </div>
+      </div>
+      }
+
+      <!-- Header -->
+      <div class="card-header text-center pb-8 pt-8 mt-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 mx-auto"
+          [class]="plan.name === 'Ouro' ? 'bg-gradient-to-r from-[#3498db] to-[#5e3498]' : 'bg-gray-100'">
+          <lucide-icon [img]="sanitizeIcon(plan.name)"
+            [class]="plan.name === 'Ouro' ? 'text-white' : 'text-[#3498db]'" />
+        </div>
+
+        <div class="text-2xl font-bold text-gray-900 mb-2">
+          {{ plan.name }}
+        </div>
+
+        <div class="mb-4">
+          <span class="text-4xl font-bold text-gray-900">
+            {{ (plan.value / 100).toFixed(2) | currency: 'BRL' }}
+          </span>
+          <span class="text-gray-600">/mês</span>
+        </div>
+      </div>
+
+      <hr class="w-[90%] mx-auto mb-4">
+
+      <!-- Body -->
+      <div class="px-4 card-body w-[90%] mx-auto">
+        @for (feature of plan.feature_list; track feature) {
+        <div class="py-1.5 gap-2 text-left">
+          <span class="text-gray-700 font-[Lora]">{{ feature }}</span>
+        </div>
+        }
+      </div>
+
+      <hr class="w-[90%] mx-auto my-4">
+
+      <!-- Footer -->
+      <div class="pb-4 w-full flex justify-center">
+        @if (plan.name === 'Ouro') {
+        <button
+          (click)="openCheckoutForm(plan)"
+          class="bg-gradient-to-r from-[#3498db] to-[#5e3498] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gradient-to-r hover:from-[#5e3498] hover:to-[#3498db] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+          Escolher {{ plan.name }}
+        </button>
+        } @else if (plan.name === 'Bronze') {
+        <button
+          (click)="openCheckoutForm(plan)"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-[#3377bc] bg-white border border-[#3377bc] rounded-lg hover:bg-[#3377bc] hover:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+          Começar com {{ plan.name }}
+        </button>
+        } @else {
+        <button
+          (click)="openCheckoutForm(plan)"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-[#3377bc] bg-white border border-[#3377bc] rounded-lg hover:bg-[#3377bc] hover:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+          Escolher {{ plan.name }}
+        </button>
+        }
+      </div>
+    </mat-card>
+    }
+  </div>
+</div>

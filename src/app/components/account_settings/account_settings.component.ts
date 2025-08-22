@@ -147,6 +147,7 @@ export class AccountSettingsComponent implements OnInit {
       state: [addressModel.state || '', Validators.required],
       complement: [addressModel.complement || ''],
       country: [addressModel.country || '', Validators.required],
+      city: [addressModel.city || '', Validators.required],
       hasNoHouseNumber: [this.hasNoHouseNumber]
     });
 
@@ -189,6 +190,7 @@ export class AccountSettingsComponent implements OnInit {
         neighborhood: formValue.neighborhood,
         postal_code: formValue.postal_code,
         state: formValue.state,
+        city: formValue.city,
         complement: formValue.complement || '',
         country: formValue.country,
         account_id: this.accountId
@@ -354,15 +356,8 @@ export class AccountSettingsComponent implements OnInit {
       state: address.state,
       complement: address.complement,
       country: address.country,
+      city: address.city,
       hasNoHouseNumber: address.house_number === 'S/N'
     });
-  }
-
-  onStepChange(event: StepperSelectionEvent): void {
-    if (event.selectedIndex === 1 && !this.addressFormInitialized) {
-      // this.loadAccountAddress();
-      // this.populateAddressForm(this.address);
-      // this.addressFormInitialized = true;
-    }
   }
 }
