@@ -32,6 +32,13 @@ export class CheckoutComponent implements OnInit {
 
   plans: PlanModel[] = [];
 
+  hotQuestions: { question: string, answer: string }[] = [
+    { question: 'Posso mudar de plano a qualquer momento?', answer: 'Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. As alterações são aplicadas no próximo ciclo de cobrança.' },
+    { question: 'Existe período de fidelidade?', answer: 'Não! Todos os nossos planos são mensais e você pode cancelar a qualquer momento sem taxas adicionais ou multas.' },
+    { question: 'Posso ter acesso aos dados do meu estoque?', answer: 'Sim, você pode ter acesso aos dados do seu estoque. Basta entrar em contato conosco e solicitar o acesso.' },
+    { question: 'Preciso de treinamento?', answer: 'Nossa plataforma é intuitiva, mas oferecemos treinamento gratuito para todos os planos. O plano Ouro inclui treinamento personalizado.'}
+  ];
+
   constructor(
     private readonly checkoutService: CheckoutService,
     private readonly toastService: ToastService,

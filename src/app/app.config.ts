@@ -9,12 +9,14 @@ import { AuthInterceptor } from './auth/auth.interceptor';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { environment } from '../environments/environment';
+import { provideClientHydration } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimationsAsync(),
+    provideClientHydration(),
     provideHttpClient(
       withInterceptors([
         LoadingInterceptor,

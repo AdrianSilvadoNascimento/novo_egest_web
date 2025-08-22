@@ -45,6 +45,7 @@ export class AccountService {
     const accountData = sessionStorage.getItem('account_data');
 
     if (accountData) {
+      console.log(accountData);
       return of(JSON.parse(accountData));
     }
 

@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
-import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown, PanelLeft } from 'lucide-angular';
+import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown, PanelLeft, Wallet } from 'lucide-angular';
 
 import { AuthService } from '../../services/auth.service';
 import { SidenavService } from '../../services/sidenav.service';
@@ -22,6 +22,7 @@ export class HeaderComponent implements OnInit {
   readonly userIcon = CircleUserRound
   readonly chevronDownIcon = ChevronDown;
   readonly menuIcon = PanelLeft;
+  readonly financialIcon = Wallet;
 
   @Output() toggleSidenav = new EventEmitter<void>()
 
