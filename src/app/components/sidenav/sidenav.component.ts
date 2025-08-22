@@ -49,12 +49,12 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   links: { route: string, label: string, icon: LucideIconData }[] = [
     { route: '/home', label: 'Dashboard', icon: Home },
-    { route: '/products', label: 'Products', icon: Package },
-    { route: '/movementations', label: 'Movementations', icon: TrendingUpDown },
-    { route: '/categories', label: 'Categories', icon: Tag },
-    { route: '/customers', label: 'Customers', icon: NotebookTabs },
-    { route: '/reports', label: 'Reports', icon: FileChartColumn },
-    { route: '/settings', label: 'Settings', icon: Settings },
+    { route: '/products', label: 'Produtos', icon: Package },
+    { route: '/movementations', label: 'Movimentações', icon: TrendingUpDown },
+    { route: '/categories', label: 'Categorias', icon: Tag },
+    { route: '/customers', label: 'Clientes', icon: NotebookTabs },
+    { route: '/reports', label: 'Relatórios', icon: FileChartColumn },
+    { route: '/settings', label: 'Configurações', icon: Settings },
   ]
 
   constructor(

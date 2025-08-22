@@ -5,27 +5,30 @@ import { RegisterComponent } from './auth/register/register.component';
 import { AuthGuard } from './auth/auth.guard';
 import { PasswordSetupGuard } from './auth/password-setup.guard';
 import { PasswordConfirmationGuard } from './auth/password-confirmation.guard';
+import { TrialStatusGuard } from './guards';
 import { ProductsComponent } from './components/products/products.component';
 import { CategoriesComponent } from './components/categories/categories.component';
 import { AccountSettingsPageComponent } from './components/account_settings_page/account_settings_page.component';
 import { CustomerComponent } from './components/customer/customer.component';
 import { MovementationComponent } from './components/movementation/movementation.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { FinancialComponent } from './components/financial/financial.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { 
     path: 'home', 
     loadChildren: () => import('./components/dashboard/dashboard.module').then(m => m.DashboardModule),
-    canActivate: [AuthGuard, PasswordConfirmationGuard] 
+    canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] 
   },
-  { path: 'products', component: ProductsComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'movementations', component: MovementationComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'products', component: ProductsComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'movementations', component: MovementationComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'financial', component: FinancialComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { 

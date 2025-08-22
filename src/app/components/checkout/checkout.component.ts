@@ -2,6 +2,7 @@ import { Component, LOCALE_ID, OnInit } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { CurrencyPipe } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { MatCard } from "@angular/material/card";
 import { LucideAngularModule, Star } from "lucide-angular";
@@ -13,6 +14,9 @@ import { ToastService } from '../../services/toast.service';
 import { CheckoutFormComponent } from './checkout-form/checkout-form.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { UtilsService } from '../../services/utils/utils.service';
+import { TrialUtilsService } from '../../services/utils';
+import { AccountService } from '../../services/account.service';
+import { AccountModel } from '../../models/account.model';
 
 registerLocaleData(localePt);
 
@@ -31,17 +35,44 @@ export class CheckoutComponent implements OnInit {
   readonly starIcon = Star;
 
   plans: PlanModel[] = [];
+  account: AccountModel = new AccountModel();
+
+  hotQuestions: { question: string, answer: string }[] = [
+    { question: 'Posso mudar de plano a qualquer momento?', answer: 'Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. As alterações são aplicadas no próximo ciclo de cobrança.' },
+    { question: 'Existe período de fidelidade?', answer: 'Não! Todos os nossos planos são mensais e você pode cancelar a qualquer momento sem taxas adicionais ou multas.' },
+    { question: 'Posso ter acesso aos dados do meu estoque?', answer: 'Sim, você pode ter acesso aos dados do seu estoque. Basta entrar em contato conosco e solicitar o acesso.' },
+    { question: 'Preciso de treinamento?', answer: 'Nossa plataforma é intuitiva, mas oferecemos treinamento gratuito para todos os planos. O plano Ouro inclui treinamento personalizado.'}
+  ];
 
   constructor(
+    readonly utilsService: UtilsService,
+    readonly trialUtils: TrialUtilsService,
+    private readonly router: Router,
     private readonly checkoutService: CheckoutService,
     private readonly toastService: ToastService,
     private readonly dialog: MatDialog,
     private readonly breakpointObserver: BreakpointObserver,
-    readonly utilsService: UtilsService
+    private readonly accountService: AccountService
   ) { }
 
   ngOnInit(): void {
     this.fetchPlans();
+    this.fetchAccount();
+  }
+
+  /**
+   * Busca os dados da conta
+   */
+  fetchAccount(): void {
+    this.accountService.getAccount().subscribe({
+      next: (data) => {
+        this.account = data;
+      },
+      error: (error) => {
+        console.error(error);
+        this.toastService.error(error.message || 'Erro ao buscar conta');
+      }
+    })
   }
 
   /**
@@ -50,7 +81,7 @@ export class CheckoutComponent implements OnInit {
   fetchPlans(): void {
     this.checkoutService.getPlans().subscribe({
       next: (data) => {
-        this.plans = data;
+        this.plans = data.filter(plan => plan.name !== 'Free');
         this.orderPlans();
       },
       error: (error) => {
@@ -60,6 +91,10 @@ export class CheckoutComponent implements OnInit {
     })
   }
 
+  /**
+   * Abre o formulário de checkout
+   * @param plan - Plano selecionado
+   */
   openCheckoutForm(plan: PlanModel): void {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
 
@@ -84,6 +119,11 @@ export class CheckoutComponent implements OnInit {
     
     while (current <= right) {
       const currentPlan = this.plans[current];
+      if (currentPlan.name === 'Free') {
+        current++;
+        continue;
+      }
+
       const currentOrder = orderMap[currentPlan.name as keyof typeof orderMap] || 999;
       
       if (currentOrder === 1) {
@@ -119,5 +159,12 @@ export class CheckoutComponent implements OnInit {
    */
   sanitizeIcon(planName: string): any {
     return this.utilsService.sanitizeIcon(planName);
+  }
+
+  /**
+   * Redireciona para a página de dashboard
+   */
+  dashboard(): void {
+    this.router.navigate(['/home']);
   }
 }

@@ -11,6 +11,12 @@ export class AccountModel {
   updated_at!: Date;
   settings!: AccountSettingsModel;
   card!: AccountCardModel;
+  is_trial!: boolean;
+  is_assinant!: boolean;
+  type!: number;
+  subscription_plan!: number;
+  subscription_id!: number;
+  expiration_trial!: Date;
 
   constructor() {
     this.id = '';
@@ -32,6 +38,9 @@ export class AccountCardModel {
   card_mask!: string;
   expiration_date!: Date;
   brand!: string;
+  customer_document!: string;
+  created_at!: Date;
+  updated_at!: Date;
 }
 
 export class SubscriptionModel {
@@ -43,11 +52,22 @@ export class SubscriptionModel {
   card_mask!: string;
   expiration_date!: string;
   brand!: string;
+  holder_document!: string;
   created_at!: Date;
   updated_at!: Date;
   canceled_at!: Date;
   status!: string;
   is_expired!: boolean;
   next_renewal!: Date;
+  next_execution!: Date;
   efi_subscription_id!: string;
+  payment_history!: SubscriptionPaymentHistoryModel[];
+  card!: AccountCardModel;
+}
+
+export class SubscriptionPaymentHistoryModel {
+  id!: string;
+  total!: number;
+  status!: string;
+  created_at!: Date;
 }

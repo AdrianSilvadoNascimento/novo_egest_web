@@ -3,7 +3,7 @@
   <img src="egest-logo.png" alt="Logo Egest" width="150px" />
   } @else {
   <div class="flex flex-row items-center gap-2">
-    <div class="block sm:hidden">
+    <div class="block md:hidden">
       <a id="expand-panel-button" (click)="sidenavService.toggle()"
         class="cursor-pointer flex items-center p-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
         <lucide-icon [img]="menuIcon" class="w-6 h-6 mx-auto"></lucide-icon>
@@ -15,47 +15,69 @@
   </div>
   }
 
-  <div>
-    @if (isLogged) {
-    <div class="flex flex-row items-center gap-2">
-      <div class="hidden md:block">
-        @if (userImage) {
-        <img [src]="userImage" alt="User Image" class="w-12 h-12 shadow-lg border-2 border-gray-300 rounded-full">
-        }
-        @else {
-        <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
-        }
-      </div>
-      <button mat-raised-button color="primary" [matMenuTriggerFor]="userMenu" class="user-menu text-gray-700">
-        <div class="flex justify-between items-center">
-          <span class="text-white-500 text-sm">Olá, {{userName}}</span>
-          <mat-icon class="ml-3">
-            <lucide-icon [img]="chevronDownIcon" class="w-6 h-6"></lucide-icon>
-          </mat-icon>
+  @if (isLogged) {
+  <div class="flex flex-row justify-center items-center gap-10">
+    @if (account.is_trial && !account.is_assinant) {
+      <div class="hidden md:block h-full flex flex-row justify-between items-center rounded-lg shadow-md">
+        <div class="px-6 py-2 flex flex-row justify-between items-center font-[Lora] gap-4">
+          <div class="mb-0 text-sm text-gray-500 tracking-widest">
+            Teste grátis por {{calculateTrialDays()}} dias
+          </div>
+          <button
+            (click)="showPlans()"
+            class="font-[Lora] tracking-widest bg-gradient-to-r from-[#3498db] to-[#5e3498] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gradient-to-r hover:from-[#5e3498] hover:to-[#3498db] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+            Contratar plano
+          </button>
         </div>
-      </button>
-    </div>
-    <mat-menu #userMenu="matMenu">
-      <button mat-menu-item [routerLink]="['/settings/account', authService.getAccountId()]"
-        routerLinkActive="router-link-active">
-        <mat-icon class="mr-3">
+      </div>
+    }
+    <div>
+      <div class="flex flex-row items-center gap-2">
+        <div class="hidden md:block">
           @if (userImage) {
-          <img [src]="userImage" alt="User Image" class="w-6 h-6 mr-3 rounded-full">
+          <img [src]="userImage" alt="User Image" class="w-12 h-12 shadow-lg border-2 border-gray-300 rounded-full">
           }
           @else {
           <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
           }
-        </mat-icon>
-        <span>Minha Conta</span>
-      </button>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>
-          <lucide-icon [img]="logOutIcon" class="w-5 h-5 mr-2"></lucide-icon>
-        </mat-icon>
-        <span>Sair</span>
-      </button>
-    </mat-menu>
-    }
+        </div>
+        <button mat-raised-button color="primary" [matMenuTriggerFor]="userMenu" class="user-menu text-gray-700">
+          <div class="flex justify-between items-center font-[Lora]">
+            <span class="text-white-500 text-sm tracking-widest">Olá, {{userName}}</span>
+            <mat-icon class="ml-3">
+              <lucide-icon [img]="chevronDownIcon" class="w-6 h-6"></lucide-icon>
+            </mat-icon>
+          </div>
+        </button>
+      </div>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item [routerLink]="['/settings/account', authService.getAccountId()]"
+          routerLinkActive="router-link-active">
+          <mat-icon class="mr-3">
+            @if (userImage) {
+            <img [src]="userImage" alt="User Image" class="w-6 h-6 mr-3 rounded-full">
+            }
+            @else {
+            <lucide-icon [img]="userIcon" class="w-6 h-6"></lucide-icon>
+            }
+          </mat-icon>
+          <span class="font-[Lora]">Minha Conta</span>
+        </button>
+        <button mat-menu-item [routerLink]="['/financial']" routerLinkActive="router-link-active">
+          <mat-icon>
+            <lucide-icon [img]="financialIcon" class="w-5 h-5 mr-2"></lucide-icon>
+          </mat-icon>
+          <span class="font-[Lora]">Financeiro</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>
+            <lucide-icon [img]="logOutIcon" class="w-5 h-5 mr-2"></lucide-icon>
+          </mat-icon>
+          <span class="font-[Lora]">Sair</span>
+        </button>
+      </mat-menu>
 
+    </div>
   </div>
+  }
 </mat-toolbar>

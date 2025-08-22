@@ -11,6 +11,7 @@ export interface ConfirmationDialogData {
   cancelText?: string;
   confirmColor?: 'red' | 'green' | 'blue';
   icon?: any;
+  showCancel?: boolean;
 }
 
 @Component({
@@ -44,9 +45,11 @@ export interface ConfirmationDialogData {
 
         <!-- Actions -->
         <div class="flex flex-row justify-end gap-2">
-          <button (click)="onCancel()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-            {{ data.cancelText || 'Cancelar' }}
-          </button>
+          @if (data.showCancel !== false) {
+            <button (click)="onCancel()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              {{ data.cancelText || 'Cancelar' }}
+            </button>
+          }
           <button type="submit" (click)="onConfirm()" class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
             {{ data.confirmText || 'Confirmar' }}
           </button>
