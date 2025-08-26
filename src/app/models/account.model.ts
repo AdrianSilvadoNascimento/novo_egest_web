@@ -11,6 +11,12 @@ export class AccountModel {
   updated_at!: Date;
   settings!: AccountSettingsModel;
   card!: AccountCardModel;
+  is_trial!: boolean;
+  is_assinant!: boolean;
+  type!: number;
+  subscription_plan!: number;
+  subscription_id!: number;
+  expiration_trial!: Date;
 
   constructor() {
     this.id = '';

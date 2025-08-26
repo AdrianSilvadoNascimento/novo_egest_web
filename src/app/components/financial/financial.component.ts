@@ -16,6 +16,12 @@ import { EfiService } from '../../services/utils/efi.service';
 
 import { CardBrandIconComponent } from '../../shared/components';
 import { AccountService } from '../../services/account.service';
+<<<<<<< HEAD
+=======
+import { AccountUserModel } from '../../models/account_user.model';
+import { AccountUserService } from '../../services/account-user.service';
+import { ValidateUserService } from '../../services/utils/validate-user.service';
+>>>>>>> feat/implement-subscriptions-features
 
 registerLocaleData(localePt);
 
@@ -28,6 +34,12 @@ registerLocaleData(localePt);
   providers: [{
     provide: LOCALE_ID,
     useValue: "pt-BR"
+<<<<<<< HEAD
+=======
+  }, {
+    provide: ValidateUserService,
+    useClass: ValidateUserService
+>>>>>>> feat/implement-subscriptions-features
   }]
 })
 export class FinancialComponent implements OnInit {
@@ -42,6 +54,10 @@ export class FinancialComponent implements OnInit {
   goldPlan: PlanModel = new PlanModel();
   subscription: SubscriptionModel = new SubscriptionModel();
   account: AccountModel = new AccountModel();
+<<<<<<< HEAD
+=======
+  currentUser: AccountUserModel = new AccountUserModel();
+>>>>>>> feat/implement-subscriptions-features
 
   acceptedBrands: { [key: string]: string } = {
     'visa': 'visa',
@@ -56,10 +72,19 @@ export class FinancialComponent implements OnInit {
   constructor(
     readonly utilsService: UtilsService,
     readonly efiService: EfiService,
+<<<<<<< HEAD
     private readonly router: Router,
     private readonly checkoutService: CheckoutService,
     private readonly toastService: ToastService,
     private readonly accountService: AccountService
+=======
+    readonly validateUserService: ValidateUserService,
+    private readonly router: Router,
+    private readonly checkoutService: CheckoutService,
+    private readonly toastService: ToastService,
+    private readonly accountService: AccountService,
+    private readonly accountUserService: AccountUserService,
+>>>>>>> feat/implement-subscriptions-features
   ) { }
 
   ngOnInit(): void {
@@ -67,6 +92,23 @@ export class FinancialComponent implements OnInit {
     this.fetchPlanData();
     this.fetchSubscription();
     this.fetchAccount();
+<<<<<<< HEAD
+=======
+    this.fetchAccountUser();
+  }
+
+  /**
+   * Busca os dados do usuário atual
+   */
+  fetchAccountUser(): void {
+    this.accountUserService.getAccountUser().subscribe({
+      next: (accountUser: AccountUserModel) => {
+        this.currentUser = accountUser;
+      }, error: (error: any) => {
+        this.toastService.error(error.message);
+      }
+    });
+>>>>>>> feat/implement-subscriptions-features
   }
 
   /**
@@ -126,8 +168,15 @@ export class FinancialComponent implements OnInit {
   fetchSubscription(): void {
     this.checkoutService.$subscriptionData.subscribe({
       next: (subscription: SubscriptionModel) => {
+<<<<<<< HEAD
         this.subscription = subscription;
         this.subscription.card.card_mask = this.formatCardMask(this.subscription.card.card_mask);
+=======
+        if (subscription.id) {
+          this.subscription = subscription;
+          this.subscription.card.card_mask = this.formatCardMask(this.subscription.card.card_mask);
+        }
+>>>>>>> feat/implement-subscriptions-features
       }, error: (error: any) => {
         this.toastService.error(error.message);
       }

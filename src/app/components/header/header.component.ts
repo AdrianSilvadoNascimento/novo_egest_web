@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,6 +9,9 @@ import { CircleUserRound, LogOut, LucideAngularModule, ChevronDown, PanelLeft, W
 
 import { AuthService } from '../../services/auth.service';
 import { SidenavService } from '../../services/sidenav.service';
+import { AccountModel } from '../../models/account.model';
+import { AccountService } from '../../services/account.service';
+import { TrialUtilsService } from '../../services/utils/trial-utils.service';
 
 @Component({
   selector: 'app-header',
@@ -29,18 +32,23 @@ export class HeaderComponent implements OnInit {
   userName!: string;
   userImage!: string;
   isLogged: boolean = false;
+  account: AccountModel = new AccountModel();
 
   constructor(
     readonly authService: AuthService,
-    readonly sidenavService: SidenavService
+    readonly sidenavService: SidenavService,
+    readonly accountService: AccountService,
+    readonly router: Router,
+    readonly trialUtils: TrialUtilsService
   ) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {
       this.isLogged = isLogged
       this.getUserImage()
-
+      
       if (isLogged) {
+        this.getAccount();
         this.toggleSidenav.emit()
       }
     })
@@ -48,6 +56,23 @@ export class HeaderComponent implements OnInit {
     this.authService.$userName.subscribe((userName) => {
       this.userName = userName || 'Fulano'
     })
+  }
+
+  /**
+   * Obtém o usuário
+   */
+  getAccount(): void {
+    this.accountService.getAccount().subscribe((account) => {
+      this.account = account;
+    })
+  }
+
+  /**
+   * Calcula o número de dias restantes do teste grátis
+   * @returns O número de dias restantes
+   */
+  calculateTrialDays(): number {
+    return this.trialUtils.calculateTrialDays(this.account.created_at);
   }
 
   /**
@@ -65,5 +90,12 @@ export class HeaderComponent implements OnInit {
   logout(): void {
     this.authService.logout()
     this.toggleSidenav.emit();
+  }
+
+  /**
+   * Mostra os planos
+   */
+  showPlans(): void {
+    this.router.navigate(['/checkout']);
   }
 }

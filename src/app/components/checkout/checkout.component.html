@@ -82,26 +82,29 @@
     }
   </div>
 
-  <!-- Teste grátis por 14 dias -->
-  <div class="max-w-4xl mx-auto mb-6 md:mb-8">
-    <mat-card class="text-center font-[Lora] mb-6 px-6 py-8 border-2 transition-all duration-300 hover:shadow-xl">
-      <div class="flex flex-row justify-center">
-        <div class="text-2xl font-bold text-gray-800 mb-4">
-          Ainda tem dúvidas?
+  @if (!trialUtils.isTrialExpired(account.created_at)) {
+    <!-- Teste grátis por 14 dias -->
+    <div class="max-w-4xl mx-auto mb-6 md:mb-8">
+      <mat-card class="text-center font-[Lora] mb-6 px-6 py-8 border-2 transition-all duration-300 hover:shadow-xl">
+        <div class="flex flex-row justify-center">
+          <div class="text-2xl font-bold text-gray-800 mb-4">
+            Ainda tem dúvidas?
+          </div>
         </div>
-      </div>
-      <div class="text-md text-gray-500 mb-12">
-        Nossa equipe está pronta para ajudar você a escolher o plano ideal para seu negócio. Entre em contato conosco e
-        tire todas as suas dúvidas.
-      </div>
-      <div class="flex flex-row justify-center">
-        <button
-          class="bg-gradient-to-r from-[#3498db] to-[#5e3498] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gradient-to-r hover:from-[#5e3498] hover:to-[#3498db] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
-          Teste grátis por 14 dias
-        </button>
-      </div>
-    </mat-card>
-  </div>
+        <div class="text-md text-gray-500 mb-12">
+          Nossa equipe está pronta para ajudar você a escolher o plano ideal para seu negócio. Entre em contato conosco e
+          tire todas as suas dúvidas.
+        </div>
+        <div class="flex flex-row justify-center">
+          <button
+            (click)="dashboard()"
+            class="bg-gradient-to-r from-[#3498db] to-[#5e3498] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gradient-to-r hover:from-[#5e3498] hover:to-[#3498db] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+            Continue com o teste grátis por 14 dias
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
 
   <!-- Perguntas frequentes -->
   <div class="max-w-5xl mx-auto text-center font-[Lora] mb-6 md:mb-8 px-6 py-8">
