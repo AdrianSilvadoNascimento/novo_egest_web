@@ -21,7 +21,8 @@
       <div class="hidden md:block h-full flex flex-row justify-between items-center rounded-lg shadow-md">
         <div class="px-6 py-2 flex flex-row justify-between items-center font-[Lora] gap-4">
           <div class="mb-0 text-sm text-gray-500 tracking-widest">
-            Teste grátis por {{calculateTrialDays()}} dias
+            <!-- Teste grátis por {{calculateTrialDays()}} dias -->
+             {{ trialDaysMessage }}
           </div>
           <button
             (click)="showPlans()"

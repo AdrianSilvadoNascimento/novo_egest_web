@@ -26,6 +26,8 @@ import { CustomerDetailsComponent } from './customer-details/customer-details.co
 import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { AccountModel } from '../../models/account.model';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-customer',
@@ -68,6 +70,8 @@ export class CustomerComponent implements OnInit {
 
   @ViewChild('customersTable', { static: true }) customersTable!: ElementRef;
   
+  account: AccountModel = new AccountModel();
+  
   searchTerm: string = '';
   viewMode: { card: boolean, list: boolean } = { card: true, list: false };
   sortBy: { html: string, value: string }[] = [
@@ -97,11 +101,22 @@ export class CustomerComponent implements OnInit {
     private dialog: MatDialog,
     private customerService: CustomerService,
     private toast: ToastService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private accountService: AccountService
   ) {}
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.getAccount();
+  }
+
+  /**
+   * Obtém a conta do usuário logado
+   */
+  getAccount(): void {
+    this.accountService.getAccount().subscribe((account: AccountModel) => {
+      this.account = account;
+    })
   }
 
   /**

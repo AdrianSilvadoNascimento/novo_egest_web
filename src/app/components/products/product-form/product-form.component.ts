@@ -77,12 +77,15 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const draft = sessionStorage.getItem(this.draftKey);
     this.hasDraft = !!draft;
 
-    if (this.data.item) {
+    if (this.data.isEdit) {
+      console.log('Editando produto');
       this.createForm(this.data.item);
       this.imagePreview = this.data.item.product_image;
     } else if (this.hasDraft) {
+      console.log('Carregando draft');
       this.loadDraft();
     } else if (!this.data.item && !this.hasDraft) {
+      console.log('Criando novo produto');
       this.createForm(new ItemCreationModel());
     }
   }
@@ -138,7 +141,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   sendData(isToClose: boolean = true): void {
     if (this.form.valid) {
-      if (!this.data.item) {
+      if (!this.data.isEdit) {
         this.createItem(isToClose);
         return;
       }
@@ -263,11 +266,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   private processFile(file: File): void {
-    // Criar preview da imagem
-    // const reader = new FileReader();
-    // reader.onload = () => this.imagePreview = reader.result as string;
-    // reader.readAsDataURL(file);
-
     const base64Reader = new FileReader();
     base64Reader.onload = () => {
       const base64String = base64Reader.result as string;

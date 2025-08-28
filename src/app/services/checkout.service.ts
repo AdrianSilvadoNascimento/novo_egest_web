@@ -263,7 +263,7 @@ export class CheckoutService implements OnDestroy {
       card: newCardData
     }
 
-    return this.http.post<any>(`${this.apiUrl}/subscription`, newSubscriptionData, { headers: this.withAuth() });
+    return this.http.post<any>(`${this.apiUrl}/subscription`, newSubscriptionData, { headers: this.withAuth(true) });
   }
 
   /**
