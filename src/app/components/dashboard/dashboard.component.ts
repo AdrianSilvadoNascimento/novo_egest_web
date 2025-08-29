@@ -155,10 +155,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   onAddProduct(): void {
     const dialogRef = this.dialog.open(ProductFormComponent, {
       minWidth: '900px',
-      data: {
-        item: new ItemCreationModel(),
-        isEdit: false
-      }
+      data: { isEdit: false }
     });
 
     dialogRef.afterClosed().subscribe(result => {

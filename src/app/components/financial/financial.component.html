@@ -156,11 +156,7 @@
     </div>
   </mat-card>
 
-<<<<<<< HEAD
-  @if (subscription.card) {
-=======
   @if (subscription.efi_subscription_id && subscription.card) {
->>>>>>> feat/implement-subscriptions-features
   <mat-card class="p-6 font-[Lora] border-2 transition-all duration-300 hover:shadow-xl">
     <!-- Título -->
     <div class="text-xl flex font-bold flex-row items-center gap-2 text-gray-700">
@@ -206,15 +202,6 @@
   
         <hr class="text-white my-4">
   
-<<<<<<< HEAD
-        <!-- Alterar cartão -->
-        <div class="flex flex-row justify-center items-center">
-          <button class="bg-white text-[#3377bc] hover:bg-gray-100 px-4 py-2 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-all duration-300">
-            <lucide-icon [img]="refreshIcon" class="w-4 h-4 mr-2"></lucide-icon>
-            Alterar cartão
-          </button>
-        </div>
-=======
         @if (validateUserService.isOwnerOrManager(currentUser.type)) {
           <!-- Alterar cartão -->
           <div class="flex flex-row justify-center items-center">
@@ -224,109 +211,12 @@
             </button>
           </div>
         }
->>>>>>> feat/implement-subscriptions-features
       </div>
     </mat-card>
   </mat-card>
   }
 </div>
 
-<<<<<<< HEAD
-<div class="bg-white gap-8 p-4 md:p-8">
-  <mat-card class="p-6 font-[Lora] border-2 transition-all duration-300 hover:shadow-xl">
-    <div class="text-xl text-gray-700 mb-2">
-      Histórico de pagamentos
-    </div>
-    <p class="text-sm text-gray-500">
-      Suas últimas transações
-    </p>
-
-    <hr class="my-4">
-
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b">
-            <th class="text-left py-3 px-4 font-medium text-gray-600">Data</th>
-            <th class="text-left py-3 px-4 font-medium text-gray-600">Fatura</th>
-            <th class="text-left py-3 px-4 font-medium text-gray-600">Valor</th>
-            <th class="text-center py-3 px-4 font-medium text-gray-600">Status</th>
-            <th class="text-center py-3 px-4 font-medium text-gray-600">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (payment of subscription.payment_history; track payment) {
-          <tr class="border-b hover:bg-gray-50">
-            <td class="py-3 px-4">{{ payment.created_at | date: 'dd/MM/yyyy' }}</td>
-            <td class="py-3 px-4 font-mono text-sm">{{ payment.id }}</td>
-            <td class="py-3 px-4 font-medium">{{ payment.total / 100 | currency: 'BRL' }}</td>
-            <td class="py-3 px-4">
-              <div class="badge text-center rounded-full px-4 py-0.5"
-                [class]="efiService.getPaymentStatusClasses(payment.status).bgClass">
-                <span class="text-sm font-semibold"
-                  [class]="efiService.getPaymentStatusClasses(payment.status).textClass">
-                  {{ sanitizePaymentStatus(payment.status) }}
-                </span>
-              </div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex flex-col md:flex-row gap-2 justify-center items-center">
-
-                <!-- Pagar agora -->
-                @if (['unpaid'].includes(payment.status)) {
-                <button
-                  (click)="retryPayment(payment.id, $event)"
-                  [disabled]="isPaymentLoading(payment.id)"
-                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-[#3377bc] bg-white border border-[#3377bc] rounded-lg hover:bg-[#3377bc] hover:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <div class="flex flex-col md:flex-row items-center gap-2">
-                    @if (isPaymentLoading(payment.id)) {
-                      <mat-spinner color="primary" diameter="20"></mat-spinner>
-                    } @else {
-                      <lucide-icon [img]="refreshIcon" class="w-4 h-4"></lucide-icon>
-                    }
-                    <span class="text-sm">
-                      @if (isPaymentLoading(payment.id)) {
-                        Processando...
-                      } @else {
-                        Reprocessar pagamento
-                      }
-                    </span>
-                  </div>
-                </button>
-                }
-
-                <!-- Pagar com cartão -->
-                @if (['expired', 'canceled'].includes(payment.status)) {
-                <button
-                  (click)="payWithCard(payment.id, $event)"
-                  [disabled]="isPaymentLoading(payment.id)"
-                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-[#3377bc] bg-white border border-[#3377bc] rounded-lg hover:bg-[#3377bc] hover:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <div class="flex flex-col md:flex-row items-center gap-2 transition-all duration-300">
-                    @if (isPaymentLoading(payment.id)) {
-                      <mat-spinner color="primary" diameter="20"></mat-spinner>
-                    } @else {
-                      <lucide-icon [img]="creditCardIcon" class="w-4 h-4"></lucide-icon>
-                    }
-                    <span class="text-sm">
-                      @if (isPaymentLoading(payment.id)) {
-                        Processando...
-                      } @else {
-                        Pagar com cartão
-                      }
-                    </span>
-                  </div>
-                </button>
-                }
-              </div>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </mat-card>
-</div>
-=======
 @if (subscription.efi_subscription_id) {
   <div class="bg-white gap-8 p-4 md:p-8">
     <mat-card class="p-6 font-[Lora] border-2 transition-all duration-300 hover:shadow-xl">
@@ -423,7 +313,6 @@
     </mat-card>
   </div>
 }
->>>>>>> feat/implement-subscriptions-features
 
 <!-- CTA -->
 @if (plan.name !== "Ouro") {
