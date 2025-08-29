@@ -16,6 +16,8 @@ import { ItemsService } from '../../services/items.service';
 import { ToastService } from '../../services/toast.service';
 import { EmptyListComponent } from '../../shared/components/empty-list/empty-list.component';
 import { CategoryDetailsComponent } from './category-details/category-details.component';
+import { AccountModel } from '../../models/account.model';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   standalone: true,
@@ -42,6 +44,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   categories: CategoryModel[] = [];
   paginatedCategories: CategoryModel[] = [];
   isEmpty: boolean = true;
+  account: AccountModel = new AccountModel();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('categoriesTable') categoriesTable!: ElementRef;
@@ -50,7 +53,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private itemService: ItemsService,
     private toast: ToastService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private readonly accountService: AccountService
   ) { }
 
   ngAfterViewInit(): void {
@@ -61,8 +65,23 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.getCategories();
     this.updatedCategories();
+    this.getAccount();
   }
 
+  /**
+   * Obtém a conta do usuário logado
+   * @param account - A conta do usuário logado
+   */
+  getAccount(): void {
+    this.accountService.getAccount().subscribe((account: AccountModel) => {
+      this.account = account;
+    })
+  }
+
+  /**
+   * Obtém as categorias do usuário logado
+   * @param categories - As categorias a serem obtidas
+   */
   getCategories(): void {
     this.itemService.getCategories().subscribe((categories: CategoryModel[]) => {
       this.categories = categories;
@@ -77,12 +96,20 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     })
   }
 
+  /**
+   * Evento de mudança de página
+   * @param event - O evento de mudança de página
+   */
   onPageChange(event: PageEvent): void {
     const start = event.pageIndex * event.pageSize;
     const end = start + event.pageSize;
     this.paginatedCategories = this.categories.slice(start, end);
   }
 
+  /**
+   * Atualiza as categorias
+   * @param categories - As categorias a serem atualizadas
+   */
   updatedCategories(): void {
     if (!this.paginator) return;
 
@@ -93,6 +120,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     })
   }
 
+  /**
+   * Abre o diálogo de criação de categoria
+   * @param category - A categoria a ser criada
+   */
   openDialog(category?: CategoryModel) {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(CategoriesFormComponent, {
@@ -109,6 +140,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /**
+   * Abre o diálogo de detalhes de categoria
+   * @param category - A categoria a ser detalhada
+   */
   openCategoryDetails(category: CategoryModel): void {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     this.dialog.open(CategoryDetailsComponent, {
@@ -119,6 +154,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     })
   }
 
+  /**
+   * Importa categorias de um arquivo
+   * @param event - O evento de seleção de arquivo
+   */
   onFileImport(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -167,10 +206,18 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     input.value = '';
   }
 
+  /**
+   * Edita uma categoria
+   * @param category - A categoria a ser editada
+   */
   onEditCategory(category: CategoryModel): void {
     this.openDialog(category);
   }
 
+  /**
+   * Deleta uma categoria
+   * @param category - A categoria a ser deletada
+   */
   onDeleteCategory(category: CategoryModel): void {
     this.itemService.deleteCategory(category.id).subscribe(() => {
       this.toast.success('Categoria excluída com sucesso!');

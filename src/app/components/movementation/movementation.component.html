@@ -1,6 +1,6 @@
 <mat-drawer-container>
   <!-- Header com ações -->
-  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4">
+  <div class="mb-6 flex flex-row items-center justify-end gap-4">
     <!-- Botão de filtros -->
     <button mat-stroked-button color="primary" (click)="toggleFilters()" matTooltip="Filtros" class="gap-1">
       <mat-icon matPrefix>
@@ -11,7 +11,7 @@
   </div>
 
   <!-- Card de busca e filtros -->
-  <mat-card class="max-w-7xl mx-auto shadow-md p-6 mb-4 md:mb-2">
+  <mat-card class="shadow-md p-6 mb-4 md:mb-2">
     <div class="flex flex-row items-center gap-4">
       <!-- Campo de busca -->
       <mat-form-field class="custom-outline w-full h-full pt-6 text-gray-500">
@@ -76,7 +76,7 @@
   </mat-card>
 
   <!-- Contador de registros e ordenação -->
-  <div class="movementations-quantity max-w-7xl mx-auto">
+  <div class="movementations-quantity">
     <div class="flex flex-row justify-between items-center pl-4 flex-wrap md:flex-nowrap">
       <span class="text-md text-gray-500">
         @if (searchTerm.trim()) {
@@ -101,7 +101,7 @@
 
   <!-- Lista de movimentações ou estado vazio -->
   @if (isEmpty || (searchTerm.trim() && filteredMovementations.length === 0)) {
-    <div class="max-w-7xl mx-auto py-2">
+    <div class="py-2">
       <app-empty-list
         [icon]="packageIcon"
         description="Nenhuma movimentação encontrada">
@@ -109,13 +109,13 @@
     </div>
   } @else {
     @if (isSearching) {
-      <div class="max-w-7xl mx-auto py-2">
+      <div class="py-2">
         <mat-progress-bar mode="indeterminate" class="mr-2"></mat-progress-bar>
       </div>
     }
 
     <!-- Tabela de movimentações -->
-    <div class="max-w-7xl mx-auto space-y-6 mb-10">
+    <div class="space-y-6 mb-10">
       <div #movementationsTable class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]"
         infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="150" [infiniteScrollContainer]="movementationsTable"
         (scrolled)="loadMore()"

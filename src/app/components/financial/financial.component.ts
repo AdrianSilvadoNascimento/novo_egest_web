@@ -168,15 +168,10 @@ export class FinancialComponent implements OnInit {
   fetchSubscription(): void {
     this.checkoutService.$subscriptionData.subscribe({
       next: (subscription: SubscriptionModel) => {
-<<<<<<< HEAD
-        this.subscription = subscription;
-        this.subscription.card.card_mask = this.formatCardMask(this.subscription.card.card_mask);
-=======
         if (subscription.id) {
           this.subscription = subscription;
           this.subscription.card.card_mask = this.formatCardMask(this.subscription.card.card_mask);
         }
->>>>>>> feat/implement-subscriptions-features
       }, error: (error: any) => {
         this.toastService.error(error.message);
       }

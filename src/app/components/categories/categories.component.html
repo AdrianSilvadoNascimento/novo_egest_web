@@ -1,5 +1,5 @@
-<div class="max-w-7xl mx-auto">
-  <div class="max-w-7xl mx-auto mb-6 flex flex-row items-center justify-end gap-4 flex-wrap md:flex-nowrap">
+<div class="mb-6 flex flex-row items-center justify-end gap-4 flex-wrap md:flex-nowrap">
+  @if (account.subscription.plan.features.import_features.excel_import) {
     <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar categorias"
       (click)="fileInput.click()">
       <div class="flex justify-be tween items-center">
@@ -9,74 +9,75 @@
         <span class="text-white-500 text-sm font-[Lora]">Importar Categorias</span>
       </div>
     </button>
-
-    <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Inserir nova categoria" (click)="openDialog()"
-      class="flex items-center shadow gap-1">
-      <div class="flex justify-between items-center">
-        <lucide-icon [img]="addIcon" class="mr-3 w-6 h-6"></lucide-icon>
-        <span class="text-white-500 text-sm font-[Lora]">
-          Nova Categoria
-        </span>
-      </div>
-    </button>
-    <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;" (change)="onFileImport($event)" />
-  </div>
-
-  <div class="flex-grow"></div>
-
-  @if (isEmpty) {
-    <app-empty-list [icon]="tagIcon" description="Categorias está vazio"></app-empty-list>
-  } @else {
-    <div #categoryTable class="shadow-md rounded-md bg-white overflow-y-auto max-h-[600px]">
-      <table class="min-w-full text-sm">
-        <thead class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white h-20 text-white sticky top-0 z-10 border-b">
-          <tr>
-            <th class="text-left px-4 py-2 border-b">Categoria</th>
-            <th class="text-left px-4 py-2 border-b">Data de criação</th>
-            <th class="text-left px-4 py-2 border-b">Última atualização</th>
-            <th class="text-center px-4 py-2 border-b">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (category of paginatedCategories; track category.id) {
-          <tr class="hover:bg-gray-50 border-b">
-            <td class="px-4 py-3 cursor-pointer" (click)="openCategoryDetails(category)">
-              <a class="text-blue-600 hover:underline">
-                {{ category.name }}
-              </a>
-            </td>
-            <td class="px-4 py-3 text-left cursor-pointer" (click)="openCategoryDetails(category)">
-              {{ category.created_at | date:'dd/MM/yyyy' }} às {{ category.created_at | date:'HH:mm' }}
-            </td>
-            <td class="px-4 py-3 text-left cursor-pointer" (click)="openCategoryDetails(category)">
-              {{ category.updated_at ? (category.updated_at | date:'dd/MM/yyyy') : '-' }} 
-
-              @if (category.updated_at) {
-                às {{ category.updated_at | date:'HH:mm' }}
-              }
-            </td>
-            <td class="px-4 py-3 text-center">
-              <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #categoryMenu="matMenu">
-                <button mat-menu-item (click)="onEditCategory(category)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Editar</span>
-                </button>
-                <button mat-menu-item (click)="onDeleteCategory(category)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Excluir</span>
-                </button>
-              </mat-menu>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <mat-paginator (page)="onPageChange($event)" [length]="categories.length" [pageSizeOptions]="[5, 10, 25, 100]"
-    [pageSize]=" 10" class="rounded-md mt-4 shadow-md" showFirstLastButtons></mat-paginator>
   }
+
+  <button mat-raised-button color="primary" class="user-menu text-gray-700" matTooltip="Inserir nova categoria"
+    (click)="openDialog()" class="flex items-center shadow gap-1">
+    <div class="flex justify-between items-center">
+      <lucide-icon [img]="addIcon" class="mr-3 w-6 h-6"></lucide-icon>
+      <span class="text-white-500 text-sm font-[Lora]">
+        Nova Categoria
+      </span>
+    </div>
+  </button>
+  <input type="file" #fileInput accept=".xls,.xlsx" style="display: none;" (change)="onFileImport($event)" />
 </div>
+
+<div class="flex-grow"></div>
+
+@if (isEmpty) {
+<app-empty-list [icon]="tagIcon" description="Categorias está vazio"></app-empty-list>
+} @else {
+<div #categoryTable class="shadow-md rounded-md bg-white overflow-y-auto max-h-[600px]">
+  <table class="min-w-full text-sm">
+    <thead
+      class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white h-20 text-white sticky top-0 z-10 border-b">
+      <tr>
+        <th class="text-left px-4 py-2 border-b">Categoria</th>
+        <th class="text-left px-4 py-2 border-b">Data de criação</th>
+        <th class="text-left px-4 py-2 border-b">Última atualização</th>
+        <th class="text-center px-4 py-2 border-b">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (category of paginatedCategories; track category.id) {
+      <tr class="hover:bg-gray-50 border-b">
+        <td class="px-4 py-3 cursor-pointer" (click)="openCategoryDetails(category)">
+          <a class="text-blue-600 hover:underline">
+            {{ category.name }}
+          </a>
+        </td>
+        <td class="px-4 py-3 text-left cursor-pointer" (click)="openCategoryDetails(category)">
+          {{ category.created_at | date:'dd/MM/yyyy' }} às {{ category.created_at | date:'HH:mm' }}
+        </td>
+        <td class="px-4 py-3 text-left cursor-pointer" (click)="openCategoryDetails(category)">
+          {{ category.updated_at ? (category.updated_at | date:'dd/MM/yyyy') : '-' }}
+
+          @if (category.updated_at) {
+          às {{ category.updated_at | date:'HH:mm' }}
+          }
+        </td>
+        <td class="px-4 py-3 text-center">
+          <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #categoryMenu="matMenu">
+            <button mat-menu-item (click)="onEditCategory(category)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="onDeleteCategory(category)">
+              <mat-icon>delete</mat-icon>
+              <span>Excluir</span>
+            </button>
+          </mat-menu>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<mat-paginator (page)="onPageChange($event)" [length]="categories.length" [pageSizeOptions]="[5, 10, 25, 100]"
+  [pageSize]=" 10" class="rounded-md mt-4 shadow-md" showFirstLastButtons></mat-paginator>
+}

@@ -76,8 +76,6 @@ export class AuthService {
     const firstAccess = this.firstAccess.value;
     const passwordConfirmed = this.passwordConfirmed.value;
 
-    console.log('Redirecionando baseado nas flags:', { firstAccess, passwordConfirmed });
-
     if (firstAccess && !passwordConfirmed) {
       this.router.navigate(['/auth/password-setup']);
     } else {
@@ -110,7 +108,6 @@ export class AuthService {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
       tap((res: any) => {
-        console.log(res);
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,

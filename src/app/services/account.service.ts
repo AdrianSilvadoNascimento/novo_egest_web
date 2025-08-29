@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { AccountModel } from '../models/account.model';
-import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { AccountAddressModel } from '../models/account_address.model';
 
 @Injectable({
@@ -21,16 +21,29 @@ export class AccountService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
+  /**
+   * Define os dados da conta
+   * @param account - Os dados da conta
+   */
   setAccountData(account: AccountModel): void {
     this.accountData.next(account);
     sessionStorage.setItem('account', JSON.stringify(account))
   }
 
+  /**
+   * Define os dados do endereço da conta
+   * @param address - Os dados do endereço da conta
+   */
   setAccountAddressData(address: AccountAddressModel): void {
     this.accountAddressData.next(address);
     sessionStorage.setItem('account_address', JSON.stringify(address))
   }
 
+  /**
+   * Atualiza os dados da conta
+   * @param accountModel - Os dados da conta
+   * @returns Os dados da conta atualizados
+   */
   updateAccount(accountModel: AccountModel): Observable<AccountModel> {
     const accountId = this.authService.getAccountId();
     const accountUserId = this.authService.getAccountUserId();
@@ -41,11 +54,14 @@ export class AccountService {
     }).pipe(tap(() => this.getAccount()))
   }
 
+  /**
+   * Obtém os dados da conta
+   * @returns Os dados da conta
+   */
   getAccount(): Observable<AccountModel> {
     const accountData = sessionStorage.getItem('account_data');
 
     if (accountData) {
-      console.log(accountData);
       return of(JSON.parse(accountData));
     }
 
@@ -55,6 +71,10 @@ export class AccountService {
     )
   }
 
+  /**
+   * Obtém os dados do endereço da conta
+   * @returns Os dados do endereço da conta
+   */
   getAccountAddress(): Observable<AccountAddressModel> {
     const accountId = this.authService.getAccountId();
     return this.http.get<AccountAddressModel>(`${this.API_URL}/${accountId}/address`).pipe(
@@ -62,6 +82,11 @@ export class AccountService {
     )
   }
 
+  /**
+   * Atualiza os dados do endereço da conta
+   * @param accountAddressModel - Os dados do endereço da conta
+   * @returns Os dados do endereço da conta atualizados
+   */
   updateAccountAddress(accountAddressModel: AccountAddressModel): Observable<AccountAddressModel> {
     const accountId = this.authService.getAccountId();
     return this.http.put<AccountAddressModel>(`${this.API_URL}/address`, {
