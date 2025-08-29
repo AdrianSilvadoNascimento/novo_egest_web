@@ -33,6 +33,7 @@ export class HeaderComponent implements OnInit {
   userImage!: string;
   isLogged: boolean = false;
   account: AccountModel = new AccountModel();
+  ctaMessage: string = '';
 
   constructor(
     readonly authService: AuthService,
@@ -56,6 +57,25 @@ export class HeaderComponent implements OnInit {
     this.authService.$userName.subscribe((userName) => {
       this.userName = userName || 'Fulano'
     })
+  }
+
+  /**
+   * Getter que calcula dinamicamente a mensagem do trial
+   * Sempre retorna o valor correto baseado no estado atual da conta
+   */
+  get trialDaysMessage(): string {
+    if (!this.account?.created_at) {
+      return 'Carregando...';
+    }
+    
+    const daysRemaining = this.calculateTrialDays();
+    const daysMessage = daysRemaining === 1 ? 'dia' : 'dias';
+    
+    if (daysRemaining <= 0) {
+      return 'Seu teste grátis expirou';
+    } else {
+      return `Seu teste grátis termina em ${daysRemaining} ${daysMessage}`;
+    }
   }
 
   /**

@@ -29,9 +29,10 @@ import { EmptyListComponent } from "../../shared/components/empty-list/empty-lis
 import { CategoryModel } from '../../models/category.model';
 import { CategoryDetailsComponent } from '../categories/category-details/category-details.component';
 import { MovementationFormComponent } from '../movementation/movementation-form/movementation-form.component';
-import { MovementationService } from '../../services/movementation.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { DashboardModel } from '../../models/dashboard.model';
+import { AccountModel } from '../../models/account.model';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-products',
@@ -104,21 +105,35 @@ export class ProductsComponent implements OnInit {
   searchTerm: string = '';
   filteredProducts: ItemModel[] = [];
   isSearching: boolean = false;
+  account: AccountModel = new AccountModel();
 
   constructor(
     private dialog: MatDialog,
     private itemService: ItemsService,
-    private moveService: MovementationService,
     private dashboardService: DashboardService,
     private toast: ToastService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private readonly accountService: AccountService
   ) { }
 
   ngOnInit(): void {
     this.loadInitialData();
     this.getTotalProducts();
+    this.getAccount();
   }
 
+  /**
+   * Obtém a conta do usuário logado
+   */
+  getAccount(): void {
+    this.accountService.getAccount().subscribe((account: AccountModel) => {
+      this.account = account;
+    })
+  }
+
+  /**
+   * Carrega os dados iniciais
+   */
   loadInitialData(): void {
     this.itemService.getPaginatedItems('', this.pageSize).subscribe({
       next: (itemData: PaginatedItemsModel) => {
@@ -134,6 +149,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Ordena os produtos
+   * @param sortBy - O campo de ordenação
+   */
   onSortChange(sortBy: string): void {
     this.selectedSortBy = sortBy;
     this.selectedSortOrder = 'asc';
@@ -145,6 +164,10 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  /**
+   * Busca por produtos
+   * @param term - O termo de busca
+   */
   onSearchChange(term: string): void {
     this.searchTerm = term;
     
@@ -158,6 +181,10 @@ export class ProductsComponent implements OnInit {
     this.performBackendSearch(term);
   }
 
+  /**
+   * Realiza a busca por produtos no backend
+   * @param term - O termo de busca
+   */
   private performBackendSearch(term: string): void {
     this.isSearching = true;
     
@@ -187,11 +214,17 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Limpa a busca
+   */
   clearSearch(): void {
     this.searchTerm = '';
     this.filteredProducts = [...this.paginatedItems.data];
   }
 
+  /**
+   * Filtra os produtos
+   */
   private filterProducts(): void {
     if (!this.searchTerm.trim()) {
       this.filteredProducts = [...this.paginatedItems.data];
@@ -208,6 +241,9 @@ export class ProductsComponent implements OnInit {
     this.sortFilteredProducts();
   }
 
+  /**
+   * Ordena os produtos filtrados
+   */
   private sortFilteredProducts(): void {
     this.filteredProducts = this.sortArray(
       this.filteredProducts,
@@ -216,6 +252,9 @@ export class ProductsComponent implements OnInit {
     );
   }
   
+  /**
+   * Ordena os dados atuais
+   */
   private sortCurrentData(): void {
     this.paginatedItems.data = this.sortArray(
       this.paginatedItems.data,
@@ -230,6 +269,13 @@ export class ProductsComponent implements OnInit {
     }
   }  
 
+  /**
+   * Ordena um array
+   * @param array - O array a ser ordenado
+   * @param sortBy - O campo de ordenação
+   * @param sortOrder - A ordem de ordenação
+   * @returns O array ordenado
+   */
   private sortArray<T>(array: T[], sortBy: string, sortOrder: string): T[] {
     if (!array.length || sortBy === 'none') {
       return array;
@@ -272,6 +318,9 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Obtém o total de produtos
+   */
   getTotalProducts(): void {
     this.dashboardService.getDashboardQuick().subscribe({
       next: (dashboard: DashboardModel) => {
@@ -287,6 +336,10 @@ export class ProductsComponent implements OnInit {
     })
   }
 
+  /**
+   * Alterna o modo de visualização
+   * @param mode - O modo de visualização
+   */
   toggleViewMode(mode: 'card' | 'list'): void {
     this.viewMode.card = false;
     this.viewMode.list = false;
@@ -297,6 +350,9 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  /**
+   * Carrega os produtos
+   */
   loadProducts(): void {
     this.itemService.$itemData.subscribe({
       next: (itemData: PaginatedItemsModel) => {
@@ -315,6 +371,9 @@ export class ProductsComponent implements OnInit {
     })
   }
 
+  /**
+   * Carrega mais produtos
+   */
   loadMore(): void {
     if (this.loading || !this.hasNext) return;
 
@@ -352,6 +411,9 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Adiciona um novo produto
+   */
   onAddProduct(): void {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     const dialogRef = this.dialog.open(ProductFormComponent, {
@@ -360,7 +422,6 @@ export class ProductsComponent implements OnInit {
       maxWidth: isMobile ? '95vw' : '900px',
       height: 'auto',
       data: {
-        item: new ItemCreationModel(),
         isEdit: false
       }
     });
@@ -377,6 +438,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Abre os detalhes de um produto
+   * @param product - O produto a ser aberto
+   */
   openProductDetails(product: ItemModel): void {
     this.editedProduct = product;
     
@@ -405,6 +470,9 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Alterna os filtros
+   */
   toggleFilters() {
     this.filterDrawer.toggle();
 
@@ -413,12 +481,18 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  /**
+   * Aplica os filtros
+   */
   applyFilters() {
     this.clearSearch();
     this.loadProducts();
     this.filterDrawer.close();
   }
 
+  /**
+   * Reseta os filtros
+   */
   resetFilters() {
     this.filters = {
       startDate: '',
@@ -430,6 +504,10 @@ export class ProductsComponent implements OnInit {
     this.clearSearch();
   }
 
+  /**
+   * Importa produtos de um arquivo
+   * @param event - O evento de seleção de arquivo
+   */
   onFileImportSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -483,6 +561,10 @@ export class ProductsComponent implements OnInit {
     input.value = '';
   }
 
+  /**
+   * Abre os detalhes de uma categoria
+   * @param categoryId - O ID da categoria
+   */
   categoryDetails(categoryId: string): void {
     let categories = JSON.parse(sessionStorage.getItem('categoryData')!!)
     let category: CategoryModel
@@ -507,6 +589,10 @@ export class ProductsComponent implements OnInit {
     this.openCategoryDetails(category)
   }
 
+  /**
+   * Abre os detalhes de uma categoria
+   * @param category - A categoria a ser aberta
+   */
   openCategoryDetails(category: CategoryModel): void {    
     this.dialog.open(CategoryDetailsComponent, {
       data: category
@@ -519,6 +605,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Move um produto
+   * @param item - O produto a ser movido
+   */
   onMoveProduct(item: ItemModel): void {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     this.dialog.open(MovementationFormComponent, {
@@ -540,6 +630,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Edita um produto
+   * @param product - O produto a ser editado
+   */
   onEditProduct(product: ItemModel): void {
     const item = product;
     const editItem = new ItemCreationModel()
@@ -576,6 +670,10 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /**
+   * Deleta um produto
+   * @param product - O produto a ser deletado
+   */
   onDeleteProduct(product: any): void {
     this.itemService.deleteItem(product.id).subscribe()
 

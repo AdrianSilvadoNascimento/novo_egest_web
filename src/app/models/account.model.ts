@@ -1,4 +1,5 @@
 import { AccountSettingsModel } from "./account_settings.model";
+import { PlanFeaturesModel, PlanModel } from "./plan.model";
 
 export class AccountModel {
   id!: string;
@@ -17,6 +18,9 @@ export class AccountModel {
   subscription_plan!: number;
   subscription_id!: number;
   expiration_trial!: Date;
+  subscription!: SubscriptionModel;
+  plan_features!: PlanFeaturesModel;
+  plan!: PlanModel;
 
   constructor() {
     this.id = '';
@@ -63,6 +67,7 @@ export class SubscriptionModel {
   efi_subscription_id!: string;
   payment_history!: SubscriptionPaymentHistoryModel[];
   card!: AccountCardModel;
+  plan!: PlanModel;
 }
 
 export class SubscriptionPaymentHistoryModel {
