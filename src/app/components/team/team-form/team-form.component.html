@@ -1,0 +1,72 @@
+<!-- Header gradient -->
+<div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white mb-4 md:mb-0">
+  <div class="text-center">
+    <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Membro</span>
+    <div class="text-3xl text-white font-semibold font-[Lora]">{{ data ? 'Editar Membro' : 'Convidar Membro' }}</div>
+  </div>
+  <button (click)="dialogRef.close()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content>
+  <form [formGroup]="form" class="space-y-4 md:space-y-6 w-[90%] md:w-full mx-auto">
+    <mat-form-field class="custom-outline w-full">
+      <mat-label>Email do membro</mat-label>
+      <input cdkFocusInitial matInput id="email" name="email" formControlName="email" />
+      @if (form.get('email')?.invalid && form.get('email')?.touched) {
+      <mat-error>
+        @if (form.get('email')?.hasError('email')) {
+        Email inválido
+        } @else {
+        Email é obrigatório
+        }
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="custom-outline w-full">
+      <mat-label>Função do membro</mat-label>
+      <mat-select formControlName="role">
+        @for (role of roles; track role) {
+        <mat-option [value]="role">{{ utilsService.sanitizeUserRole(role) }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('role')?.invalid && form.get('role')?.touched) {
+      <mat-error>
+        Função é obrigatória
+      </mat-error>
+      }
+    </mat-form-field>
+
+    @if (!validateUserService.isOwner(data.member.type)) {
+    <mat-form-field class="custom-outline w-full">
+      <mat-label>Tipo de membro</mat-label>
+      <mat-select formControlName="type">
+        @for (type of types; track type) {
+        <mat-option [value]="type">{{ utilsService.sanitizeUserType(type) }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('type')?.invalid && form.get('type')?.touched) {
+      <mat-error>
+        Tipo é obrigatório
+      </mat-error>
+      }
+    </mat-form-field>
+    }
+    <hr class="mb-4">
+
+    <div class="w-full flex flex-col md:flex-row justify-end gap-2 pb-4 md:pb-0">
+      <button (click)="dialogRef.close()"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        Cancelar
+      </button>
+      <button type="submit" (click)="sendData()" [disabled]="form.invalid"
+        class="bg-[#3377bc] text-white inline-flex gap-2 items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        @if (isInviting) {
+        <mat-spinner color="primary" diameter="20"></mat-spinner>
+        }
+        {{ data.isEdit ? 'Salvar Alterações' : 'Convidar Membro' }}
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

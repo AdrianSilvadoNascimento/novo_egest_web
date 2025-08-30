@@ -17,7 +17,8 @@ import {
   LucideIconData,
   PanelLeft,
   Tag,
-  TrendingUpDown
+  TrendingUpDown,
+  Users
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { SidenavService } from '../../services/sidenav.service';
@@ -54,6 +55,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     { route: '/categories', label: 'Categorias', icon: Tag },
     { route: '/customers', label: 'Clientes', icon: NotebookTabs },
     { route: '/reports', label: 'Relatórios', icon: FileChartColumn },
+    { route: '/team', label: 'Equipe', icon: Users },
     { route: '/settings', label: 'Configurações', icon: Settings },
   ]
 

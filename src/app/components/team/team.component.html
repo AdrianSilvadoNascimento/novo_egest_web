@@ -1,0 +1,262 @@
+<div class="flex flex-row justify-between items-center mb-6">
+  <div class="spacer"></div>
+
+  @if (validateUserService.isOwnerOrManager(currentUser.type)) {
+  <button mat-raised-button color="primary" class="user-menu text-gray-700" (click)="onInviteUser()"
+    matTooltip="Inserir novo produto">
+    <div class="flex justify-between items-center">
+      <mat-icon class="mr-3">
+        <lucide-icon [img]="addIcon" class="w-6 h-6"></lucide-icon>
+      </mat-icon>
+      <span class="text-white-500 text-sm font-[Lora]">Convidar Membro</span>
+    </div>
+  </button>
+  }
+</div>
+
+<div class="flex flex-row justify-between items-center mb-6">
+  <div class="flex flex-row justify-start items-center gap-4">
+    <button mat-stroked-button [class.active]="tabView.active" color="primary" matTooltip="Visualizar em Cards"
+      (click)="toggleTabView('active')">
+      Membros Ativos
+    </button>
+    <button mat-stroked-button [class.active]="tabView.pending" color="primary" matTooltip="Visualizar em Lista"
+      (click)="toggleTabView('pending')">
+      Convites Pendentes
+    </button>
+  </div>
+  @if (tabView.active) {
+  <div class="view-toggle-buttons flex flex-row items-center">
+    <button mat-stroked-button [class.active]="viewMode.card" color="primary" matTooltip="Visualizar em Cards"
+      (click)="toggleViewMode('card')">
+      <lucide-icon [img]="cardIcon" class="w-4 h-4"></lucide-icon>
+    </button>
+    <button mat-stroked-button [class.active]="viewMode.list" color="primary" matTooltip="Visualizar em Lista"
+      (click)="toggleViewMode('list')">
+      <lucide-icon [img]="listIcon" class="w-4 h-4"></lucide-icon>
+    </button>
+  </div>
+  }
+</div>
+
+@if (teamData?.data.length) {
+  @if (tabView.active) {
+  @if (viewMode.card) {
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    @for (member of teamData.data; track member.id) {
+    <mat-card class="users-content shadow-md hover:shadow-lg transition-shadow p-6">
+      <div class="flex flex-row justify-between items-centert">
+        <div class="flex flex-row justify-start items-center gap-3">
+          <div
+            class="member-tag w-10 h-10 text-lg font-semibold rounded-full bg-[#3377bc] text-white flex justify-center items-center">
+            @if (member.lastname) {
+            {{ member.name[0].toUpperCase() }}{{ member.lastname[0].toUpperCase() }}
+            } @else {
+            {{ getMemberInitials(member.name) }}
+            }
+          </div>
+          <div class="flex flex-col justify-start items-start">
+            <div class="member-name font-[Lora] text-md font-semibold text-gray-700">
+              {{ member.name }} {{ member!.lastname }}
+            </div>
+            <div class="status flex flex-row justify-start items-center gap-2">
+              <div class="rounded-full w-2 h-2" [class]="member.active ? 'bg-green-500' : 'bg-red-500'"></div>
+              <span class="text-sm text-gray-700">{{ member.active ? 'Ativo' : 'Inativo' }}</span>
+            </div>
+          </div>
+        </div>
+  
+        <div class="flex flex-row justify-end items-center gap-3">
+          @if (validateUserService.isOwnerOrManager(member.type)) {
+          <button mat-icon-button [matMenuTriggerFor]="memberCardMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+  
+          <mat-menu #memberCardMenu="matMenu">
+            <button mat-menu-item (click)="onEditMember(member)">
+              <div class="flex justify-center items-center gap-2">
+                <lucide-icon [img]="editIcon" class="w-4 h-4"></lucide-icon>
+                <span>Editar</span>
+              </div>
+            </button>
+            @if (!validateUserService.isOwner(member.type)) {
+            <button mat-menu-item (click)="onDeleteMember(member)">
+              <div class="text-red-500 flex justify-center items-center gap-2">
+                <lucide-icon [img]="deleteIcon" class="w-4 h-4"></lucide-icon>
+                <span>Excluir</span>
+              </div>
+            </button>
+            }
+          </mat-menu>
+          }
+        </div>
+      </div>
+  
+      <hr class="mt-2 mb-6">
+  
+      <div class="email-content mb-4">
+        <div class="text-md text-gray-400">Email</div>
+        <div class="text-sm font-semibold text-gray-700">{{ member.email }}</div>
+      </div>
+  
+      <div class="flex flex-row justify-start items-center gap-2">
+        <div
+          class="badge rounded-lg {{ utilsService.sanitizeUserTypeColor(member.type).bgColor }} {{ utilsService.sanitizeUserTypeColor(member.type).textColor }} px-3 py-1 text-xs">
+          {{ utilsService.sanitizeUserType(member.type) }}
+        </div>
+        <div
+          class="badge rounded-lg {{ utilsService.sanitizeUserRoleColor(member.role).bgColor }} {{ utilsService.sanitizeUserRoleColor(member.role).textColor }} px-3 py-1 text-xs">
+          {{ utilsService.sanitizeUserRole(member.role) }}
+        </div>
+      </div>
+    </mat-card>
+    }
+  </div>
+  }
+  
+  @if (viewMode.list) {
+  <mat-card class="users-content shadow-md space-y-6 mb-6 transition-all duration-150">
+    <div class="shadow rounded-md bg-white overflow-y-auto max-h-[600px]">
+      <table class="min-w-full text-sm">
+        <thead
+          class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white h-20 text-white sticky top-0 z-10 border-b">
+          <tr>
+            <th class="text-left px-4 py-2 border-b">Nome</th>
+            <th class="text-left px-4 py-2 border-b">Email</th>
+            <th class="text-left px-4 py-2 border-b">Função</th>
+            <th class="text-left px-4 py-2 border-b">Tipo</th>
+            <th class="text-left px-4 py-2 border-b">Status</th>
+            <th class="text-center px-4 py-2 border-b"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (member of teamData.data; track member.id) {
+          <tr>
+            <td class="px-4 py-2">
+              <div class="flex flex-row justify-start items-center gap-3">
+                <div
+                  class="member-tag w-8 h-8 text-md font-semibold rounded-full bg-[#3377bc] text-white flex justify-center items-center">
+                  @if (member.lastname) {
+                  {{ member.name[0].toUpperCase() }}{{ member.lastname[0].toUpperCase() }}
+                  } @else {
+                  {{ getMemberInitials(member.name) }}
+                  }
+                </div>
+                <div class="member-name font-[Lora] text-md font-semibold text-gray-700">
+                  {{ member.name }} {{ member!.lastname }}
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-2">{{member.email}}</td>
+            <td class="px-4 py-2">
+              <div
+                class="badge rounded-lg text-center {{ utilsService.sanitizeUserRoleColor(member.role).bgColor }} {{ utilsService.sanitizeUserRoleColor(member.role).textColor }} px-3 py-1 text-xs">
+                {{ utilsService.sanitizeUserRole(member.role) }}
+              </div>
+            </td>
+            <td class="px-4 py-2">
+              <div
+                class="badge rounded-lg text-center {{ utilsService.sanitizeUserTypeColor(member.type).bgColor }} {{ utilsService.sanitizeUserTypeColor(member.type).textColor }} px-3 py-1 text-xs">
+                {{ utilsService.sanitizeUserType(member.type) }}
+              </div>
+            </td>
+            <td class="px-4 py-2">{{member.active ? 'Ativo' : 'Inativo'}}</td>
+            <td class="px-4 py-2">
+              @if (validateUserService.isOwnerOrManager(member.type)) {
+              <button mat-icon-button [matMenuTriggerFor]="memberListMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+  
+              <mat-menu #memberListMenu="matMenu">
+                <button mat-menu-item (click)="onEditMember(member)">
+                  <div class="flex justify-center items-center gap-2">
+                    <lucide-icon [img]="editIcon" class="w-4 h-4"></lucide-icon>
+                    <span>Editar</span>
+                  </div>
+                </button>
+                @if (!validateUserService.isOwner(member.type)) {
+                <button mat-menu-item (click)="onDeleteMember(member)">
+                  <div class="text-red-500 flex justify-center items-center gap-2">
+                    <lucide-icon [img]="deleteIcon" class="w-4 h-4"></lucide-icon>
+                    <span>Excluir</span>
+                  </div>
+                </button>
+                }
+              </mat-menu>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+  }
+  } @else {
+  <mat-card class="users-content p-6 max-h-[600px] overflow-y-auto shadow-md space-y-6 mb-6 transition-all duration-150">
+    <div class="title flex flex-row justify-start items-center gap-2 mb-4">
+      <div class="text-md font-semibold text-gray-700 flex flex-row justify-start items-center gap-2">
+        <lucide-icon [img]="mailIcon" class="w-6 h-6"></lucide-icon>
+        <span>Convites Pendentes</span>
+      </div>
+    </div>
+  
+    @for (invite of invitesData.data; track invite.id) {
+    <mat-card class="shadow-md mb-4 p-4 space-y-6 transition-all duration-150">
+      <div class="flex justify-between items-center gap-4">
+        <div class="flex flex-row items-center gap-4">
+          <div class="flex flex-col justify-center items-center gap-2">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center {{ utilsService.sanitizeInviteStatusColor(invite.status).bgColor }} {{ utilsService.sanitizeInviteStatusColor(invite.status).textColor }}">
+              <lucide-icon [img]="getInviteIcon(invite.status)" class="w-6 h-6"></lucide-icon>
+            </div>
+            <div class="text-sm text-gray-500">{{ utilsService.sanitizeInviteStatus(invite.status) }}</div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <div class="email-content">
+              <div class="text-sm font-semibold text-gray-700">{{ invite.email }}</div>
+            </div>
+            <div class="flex flex-row justify-start items-center gap-2">
+              <div
+                class="badge rounded-lg {{ utilsService.sanitizeUserTypeColor(invite.type).bgColor }} {{ utilsService.sanitizeUserTypeColor(invite.type).textColor }} px-3 py-1 text-xs">
+                {{ utilsService.sanitizeUserType(invite.type) }}
+              </div>
+              <div
+                class="badge rounded-lg {{ utilsService.sanitizeUserRoleColor(invite.role).bgColor }} {{ utilsService.sanitizeUserRoleColor(invite.role).textColor }} px-3 py-1 text-xs">
+                {{ utilsService.sanitizeUserRole(invite.role) }}
+              </div>
+            </div>
+            <div class="send-at">
+              <div class="text-sm text-gray-500">
+                Enviado em: {{ invite.created_at | date: 'dd/MM/yyyy HH:mm' }}
+              </div>
+            </div>
+          </div>
+        </div>
+        @if (validateUserService.isOwnerOrManager(invite.type)) {
+          @if (isPendingInvite(invite.status)) {
+          <div class="flex gap-2">
+            @if (isExpiredInvite(invite.status)) {
+              <button (click)="onResendInvite(invite.id)"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="mailIcon" class="w-4 h-4"></lucide-icon>
+                  <span>Reenviar convite</span>
+                </div>
+              </button>
+            }
+  
+            <!-- TODO: Add confirmation dialog -->
+            <button matTooltip="Cancelar convite" (click)="onCancelInvite(invite.id)"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-red-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              <lucide-icon [img]="cancelIcon" class="text-red-500 w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+          }
+        }
+      </div>
+    </mat-card>
+    }
+  </mat-card>
+  }
+}

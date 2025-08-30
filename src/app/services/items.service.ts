@@ -20,33 +20,64 @@ export class ItemsService {
     'Accept': 'application/json',
   })
 
-  private itemData = new BehaviorSubject<PaginatedItemsModel>({} as PaginatedItemsModel);
-  $itemData = this.itemData.asObservable();
+  private itemData: BehaviorSubject<PaginatedItemsModel>;
+  $itemData: Observable<PaginatedItemsModel>;
 
-  private allItemData = new BehaviorSubject<ItemModel[]>([] as ItemModel[]);
-  $allItemData = this.allItemData.asObservable();
+  private allItemData: BehaviorSubject<ItemModel[]>
+  $allItemData: Observable<ItemModel[]>;
 
-  private categoryData = new BehaviorSubject<CategoryModel[]>([] as CategoryModel[]);
-  $categoryData = this.categoryData.asObservable();
+  private categoryData: BehaviorSubject<CategoryModel[]>
+  $categoryData: Observable<CategoryModel[]>;
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(private http: HttpClient, private authService: AuthService) {
+    const storedItemData = sessionStorage.getItem('itemData');
+    const storedAllItemData = sessionStorage.getItem('allItemData');
+    const storedCategoryData = sessionStorage.getItem('categoryData');
 
+    this.itemData = new BehaviorSubject<PaginatedItemsModel>(storedItemData ? JSON.parse(storedItemData) : {} as PaginatedItemsModel);
+    this.allItemData = new BehaviorSubject<ItemModel[]>(storedAllItemData ? JSON.parse(storedAllItemData) : [] as ItemModel[]);
+    this.categoryData = new BehaviorSubject<CategoryModel[]>(storedCategoryData ? JSON.parse(storedCategoryData) : [] as CategoryModel[]);
+
+    this.$itemData = this.itemData.asObservable();
+    this.$allItemData = this.allItemData.asObservable();
+    this.$categoryData = this.categoryData.asObservable();
+  }
+
+  /**
+   * Define os dados dos itens
+   * @param data - Dados dos itens
+   */
   setItemData(data: PaginatedItemsModel) {
     this.itemData.next(data);
 
     sessionStorage.setItem('itemData', JSON.stringify(data));
   }
 
+  /**
+   * Define todos os dados dos itens
+   * @param data - Dados dos itens
+   */
   setAllItemsData(data: ItemModel[]) {
     this.allItemData.next(data);
     sessionStorage.setItem('allItemData', JSON.stringify(data));
   }
 
+  /**
+   * Define os dados das categorias
+   * @param data - Dados das categorias
+   */
   setCategoryData(data: CategoryModel[]) {
     this.categoryData.next(data);
     sessionStorage.setItem('categoryData', JSON.stringify(data));
   }
 
+  /**
+   * Obtém os dados paginados dos itens
+   * @param page - Página
+   * @param limit - Limite
+   * @param isIgnoringLoading - Se deve ignorar o loading
+   * @returns Observable com os dados paginados dos itens
+   */
   getPaginatedItems(page: string, limit: number, isIgnoringLoading: boolean = false): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', isIgnoringLoading ? 'true' : 'false');
@@ -59,6 +90,12 @@ export class ItemsService {
     })));
   }
 
+  /**
+   * Pesquisa os itens
+   * @param searchTerm - Termo de pesquisa
+   * @param limit - Limite
+   * @returns Observable com os dados pesquisados
+   */
   searchItems(searchTerm: string, limit: number = 50): Observable<ItemModel[]> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true'); // Skip global loading for search
@@ -69,6 +106,10 @@ export class ItemsService {
     });
   }
 
+  /**
+   * Obtém todos os itens
+   * @returns Observable com os dados de todos os itens
+   */
   getAllItems(): Observable<ItemModel[]> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();
@@ -80,6 +121,11 @@ export class ItemsService {
     })));
   }
 
+  /**
+   * Cria um item
+   * @param item - Dados do item
+   * @returns Observable com o dado criado
+   */
   createItem(item: ItemCreationModel): Observable<ItemModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();
@@ -101,6 +147,12 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Atualiza um item
+   * @param id - ID do item
+   * @param item - Dados do item
+   * @returns Observable com o dado atualizado
+   */
   updateItem(id: string, item: ItemCreationModel): Observable<ItemModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
@@ -122,6 +174,11 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Importa itens
+   * @param file - Arquivo
+   * @returns Observable com os dados importados
+   */
   importItems(file: File): Observable<any> {
     const formData = new FormData();
 
@@ -142,6 +199,11 @@ export class ItemsService {
     }).pipe(tap(data => data));
   }
 
+  /**
+   * Importa categorias
+   * @param file - Arquivo
+   * @returns Observable com os dados importados
+   */
   importCategories(file: File): Observable<any> {
     const formData = new FormData();
 
@@ -161,6 +223,11 @@ export class ItemsService {
     }).pipe(tap(data => data));
   }
 
+  /**
+   * Obtém o status de importação
+   * @param jobId - ID do job
+   * @returns Observable com o status de importação
+   */
   getImportStatus(jobId: string): Observable<{ status: string, result: any }> {
     return this.http.get<{ status: string, result: any }>(`${this.baseUrl}/import/status/${jobId}`, {
       headers: {
@@ -169,6 +236,11 @@ export class ItemsService {
     });
   }
 
+  /**
+   * Deleta um item
+   * @param id - ID do item
+   * @returns Observable com o dado deletado
+   */
   deleteItem(id: string): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
@@ -185,6 +257,11 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Cria uma categoria
+   * @param category - Dados da categoria
+   * @returns Observable com o dado criado
+   */
   createCategory(category: CategoryModel): Observable<CategoryModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();
@@ -198,6 +275,12 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Atualiza uma categoria
+   * @param id - ID da categoria
+   * @param category - Dados da categoria
+   * @returns Observable com o dado atualizado
+   */
   updateCategory(id: string, category: CategoryModel): Observable<CategoryModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const categories = JSON.parse(sessionStorage.getItem('categoryData')!!);
@@ -210,6 +293,10 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Obtém todas as categorias
+   * @returns Observable com os dados de todas as categorias
+   */
   getCategories(): Observable<any> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();
@@ -221,6 +308,11 @@ export class ItemsService {
     })))
   }
 
+  /**
+   * Deleta uma categoria
+   * @param categoryId - ID da categoria
+   * @returns Observable com o dado deletado
+   */
   deleteCategory(categoryId: string): Observable<any> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     const accountId = this.authService.getAccountId();

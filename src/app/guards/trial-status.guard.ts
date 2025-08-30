@@ -36,7 +36,7 @@ export class TrialStatusGuard implements CanActivate {
     }
 
     // Obtém os dados da conta e verifica o status do trial
-    return this.accountService.getAccount().pipe(
+    return this.accountService.$accountData.pipe(
       switchMap(account => {
         if (!account) {
           this.router.navigate(['/login']);

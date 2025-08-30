@@ -78,14 +78,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.hasDraft = !!draft;
 
     if (this.data.isEdit) {
-      console.log('Editando produto');
       this.createForm(this.data.item);
       this.imagePreview = this.data.item.product_image;
     } else if (this.hasDraft) {
-      console.log('Carregando draft');
       this.loadDraft();
     } else if (!this.data.item && !this.hasDraft) {
-      console.log('Criando novo produto');
       this.createForm(new ItemCreationModel());
     }
   }

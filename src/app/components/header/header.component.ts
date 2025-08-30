@@ -82,7 +82,7 @@ export class HeaderComponent implements OnInit {
    * Obtém o usuário
    */
   getAccount(): void {
-    this.accountService.getAccount().subscribe((account) => {
+    this.accountService.$accountData.subscribe((account: AccountModel) => {
       this.account = account;
     })
   }

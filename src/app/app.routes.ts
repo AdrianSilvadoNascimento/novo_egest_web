@@ -13,6 +13,7 @@ import { CustomerComponent } from './components/customer/customer.component';
 import { MovementationComponent } from './components/movementation/movementation.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { FinancialComponent } from './components/financial/financial.component';
+import { TeamComponent } from './components/team/team.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -29,6 +30,7 @@ export const routes: Routes = [
   { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'financial', component: FinancialComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
+  { path: 'team', component: TeamComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { 

@@ -126,7 +126,7 @@ export class ProductsComponent implements OnInit {
    * Obtém a conta do usuário logado
    */
   getAccount(): void {
-    this.accountService.getAccount().subscribe((account: AccountModel) => {
+    this.accountService.$accountData.subscribe((account: AccountModel) => {
       this.account = account;
     })
   }

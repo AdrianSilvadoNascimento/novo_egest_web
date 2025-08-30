@@ -13,13 +13,19 @@ import { AccountAddressModel } from '../models/account_address.model';
 export class AccountService {
   private readonly API_URL = `${environment.apiUrl}/account`;
 
-  private accountData = new BehaviorSubject<AccountModel>({} as AccountModel);
-  $accountData = this.accountData.asObservable();
+  private accountData: BehaviorSubject<AccountModel>;
+  $accountData: Observable<AccountModel>;
 
   private accountAddressData = new BehaviorSubject<AccountAddressModel>({} as AccountAddressModel);
   $accountAddressData = this.accountAddressData.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService) {
+    const storedAccount = sessionStorage.getItem('account');
+    const parsedAccount = storedAccount ? JSON.parse(storedAccount) : ({} as AccountModel);
+
+    this.accountData = new BehaviorSubject<AccountModel>(parsedAccount);
+    this.$accountData = this.accountData.asObservable();
+  }
 
   /**
    * Define os dados da conta
@@ -61,7 +67,7 @@ export class AccountService {
   getAccount(): Observable<AccountModel> {
     const accountData = sessionStorage.getItem('account_data');
 
-    if (accountData) {
+    if (accountData?.length) {
       return of(JSON.parse(accountData));
     }
 

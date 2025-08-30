@@ -73,7 +73,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
    * @param account - A conta do usuário logado
    */
   getAccount(): void {
-    this.accountService.getAccount().subscribe((account: AccountModel) => {
+    this.accountService.$accountData.subscribe((account: AccountModel) => {
       this.account = account;
     })
   }
