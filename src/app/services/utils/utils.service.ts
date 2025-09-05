@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+import { HttpHeaders } from '@angular/common/http';
 
 import { Crown, Shield, Zap } from 'lucide-angular';
 
 import { AccountUserType, AccountUserRole } from '../../models/account_user.model';
 import { InviteStatus } from '../../models/invite.model';
+import { AuthService } from '../auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,25 @@ export class UtilsService {
   readonly crownIcon = Crown;
   readonly zapIcon = Zap;
 
-  constructor() { }
+  private headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  });
+
+  constructor(
+    private readonly authService: AuthService
+  ) { }
+
+  /**
+   * Adiciona o token de autenticação ao headers
+   * @param skipLoading - se o loading deve ser ignorado
+   * @returns headers com o token de autenticação
+   */
+  withAuth(skipLoading: boolean = false): HttpHeaders {
+    let header = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
+    if (skipLoading) header = header.set('X-Skip-Loading', 'true');
+    return header;
+  }
 
   /**
    * Sanitiza o nome do plano para retornar o ícone correspondente
@@ -135,6 +155,8 @@ export class UtilsService {
         return 'Aceito';
       case InviteStatus.EXPIRED:
         return 'Expirado';
+      case InviteStatus.REJECTED:
+        return 'Rejeitado';
       case InviteStatus.CANCELLED:
         return 'Cancelado';
       default:
@@ -154,6 +176,8 @@ export class UtilsService {
       case InviteStatus.ACCEPTED:
         return { bgColor: 'bg-green-100', textColor: 'text-green-600' };
       case InviteStatus.EXPIRED:
+        return { bgColor: 'bg-red-100', textColor: 'text-red-600' };
+      case InviteStatus.REJECTED:
         return { bgColor: 'bg-red-100', textColor: 'text-red-600' };
       case InviteStatus.CANCELLED:
         return { bgColor: 'bg-orange-100', textColor: 'text-orange-600' };

@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { FormsModule } from '@angular/forms';
 
-import { CheckCircle, CircleX, ClockAlert, ClockFading, Edit, LayoutGrid, List, LucideAngularModule, Mail, Trash, UserPlus } from 'lucide-angular';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+
+import { CheckCircle, CircleX, ClockAlert, ClockFading, Edit, LayoutGrid, List, LucideAngularModule, Mail, Search, Trash, Trash2, UserPlus } from 'lucide-angular';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -34,7 +37,9 @@ import { InviteStatus } from '../../models/invite.model';
     MatCard,
     MatButtonToggleModule,
     MatMenuModule,
-    DatePipe
+    DatePipe,
+    InfiniteScrollDirective,
+    FormsModule
   ],
   templateUrl: './team.component.html',
   styleUrl: './team.component.scss'
@@ -50,13 +55,26 @@ export class TeamComponent {
   readonly clockAlertIcon = ClockAlert;
   readonly checkIcon = CheckCircle;
   readonly cancelIcon = CircleX;
+  readonly searchIcon = Search;
+  readonly trashIcon = Trash2;
+
+  @ViewChild('teamTable', { static: true }) teamTable!: ElementRef;
+  @ViewChild('pendingInvitesCard', { static: true }) pendingInvitesCard!: ElementRef;
 
   tabView: { active: boolean, pending: boolean } = { active: true, pending: false };
   viewMode: { card: boolean, list: boolean } = { card: true, list: false };
 
   currentUser: AccountUserModel = new AccountUserModel();
+  filteredTeamData: any[] = [];
   teamData: any;
   invitesData: any;
+  hasNext: boolean = false;
+  pageIndex: number = 1;
+  pageSize: number = 10;
+  loading: boolean = false;
+  isSearching: boolean = false;
+  searchTerm: string = '';
+  private searchTimeout: any;
 
   constructor(
     private readonly accountUserService: AccountUserService,
@@ -113,9 +131,12 @@ export class TeamComponent {
    * Obtém os dados da equipe atualizados
    */
   fetchFreshTeamData(): void {
-    this.teamService.getTeamData().subscribe({
+    this.teamService.getTeamData({ page: this.pageIndex, limit: this.pageSize, isIgnoringLoading: true }).subscribe({
       next: (data: any) => {
         this.teamData = data;
+        this.filteredTeamData = [...this.teamData.data];
+        this.hasNext = data.pagination.pages > 1;
+        this.pageIndex = data.pagination.page;
       },
       error: (err) => {
         this.toast.error(err.error.message);
@@ -165,30 +186,137 @@ export class TeamComponent {
    * Obtém os dados dos convites
    */
   getPendingInvites(isForcing: boolean = false): void {
+    const isIgnoringLoading = true;
     if (isForcing) {
-      this.fetchFreshPendingInvites();
+      this.fetchFreshPendingInvites(isIgnoringLoading);
       return;
     }
 
     this.teamService.$invitesData.subscribe((data: any) => {
       this.invitesData = data;
+      this.hasNext = data.pagination.pages > 1;
+      this.pageIndex = data.pagination.page;
     });
 
     if (this.invitesData?.length) return;
 
-    this.fetchFreshPendingInvites();
+    this.fetchFreshPendingInvites(isIgnoringLoading);
   }
 
   /**
    * Obtém os dados dos convites atualizados
    */
-  fetchFreshPendingInvites(): void {
-    this.teamService.getPendingInvites().subscribe({
+  fetchFreshPendingInvites(isIgnoringLoading: boolean = false): void {
+    const options = {
+      page: this.pageIndex,
+      limit: this.pageSize,
+      isIgnoringLoading,
+    }
+
+    this.teamService.getPendingInvites(options).subscribe({
       next: (data: any) => {
         this.invitesData = data;
+        this.hasNext = data.pagination.pages > 1;
+        this.pageIndex = data.pagination.page;
       },
       error: (err) => {
         this.toast.error(err.error.message);
+      }
+    });
+  }
+
+  /**
+   * Limpa os convites pendentes
+   */
+  onClearPendingInvites(): void {
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: isMobile ? '95vw' : '450px',
+      maxWidth: isMobile ? '95vw' : '450px',
+      panelClass: isMobile ? 'mobile-dialog' : 'confirmation-dialog',
+      data: {
+        title: 'Limpar Convites pendentes?',
+        message: 'Tem certeza que deseja limpar os convites pendentes expirados com mais de 1 dia?',
+        confirmText: 'Sim',
+        cancelText: 'Não',
+        confirmColor: 'red',
+        icon: CircleX
+      }
+    });
+    
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.teamService.clearPendingInvites().subscribe({
+          next: () => {
+            this.toast.success('Convites pendentes limpos com sucesso!');
+          },
+          error: (err) => {
+            this.toast.error(err.error.message);
+          }, 
+          complete: () => {
+            this.fetchFreshPendingInvites(true);
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Carrega mais convites pendentes
+   */
+  loadMoreInvites(): void {
+    if (this.loading || !this.hasNext) return;
+
+    this.loading = true;
+    this.toast.info('Carregando mais convites pendentes...');
+
+    const lastPage = this.pageIndex;
+    const options = {
+      page: lastPage + 1,
+      limit: this.pageSize,
+      isIgnoringLoading: true,
+    }
+
+    this.teamService.getPendingInvites(options).subscribe({
+      next: (data: any) => {
+        this.invitesData.data = [...this.invitesData.data, ...data.data];
+        this.hasNext = data.pagination.pages > 1;
+        this.pageIndex = data.pagination.page;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.toast.error(err.error.message);
+        this.loading = false;
+      }
+    });
+  }
+
+  /**
+   * Carrega mais membros da equipe
+   */
+  loadMoreMembers(): void {
+    if (this.loading || !this.hasNext) return;
+    this.loading = true;
+    this.toast.info('Carregando mais membros da equipe...');
+
+    const lastPage = this.pageIndex;
+    const options = {
+      page: lastPage + 1,
+      limit: this.pageSize,
+      isIgnoringLoading: true,
+    }
+
+    this.teamService.getTeamData(options).subscribe({
+      next: (data: any) => {
+        this.teamData.data = [...this.teamData.data, ...data.data];
+        this.filteredTeamData = [...this.filteredTeamData, ...data.data];
+        this.hasNext = data.pagination.pages > 1;
+        this.pageIndex = data.pagination.page;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.toast.error(err.error.message);
+        this.loading = false;
       }
     });
   }
@@ -222,7 +350,7 @@ export class TeamComponent {
 
       this.toast.success('Membro convidado com sucesso!');
 
-      this.getTeamData(true);
+      this.fetchFreshPendingInvites(true);
     })
   }
 
@@ -292,6 +420,7 @@ export class TeamComponent {
         this.teamService.deleteMember(member.id).subscribe({
           next: () => {
             this.toast.success('Membro excluído com sucesso!');
+            this.getTeamData(true);
           },
           error: (err) => {
             this.toast.error(err.error.message);
@@ -325,14 +454,13 @@ export class TeamComponent {
         this.teamService.cancelInvite(inviteId).subscribe({
           next: () => {
             this.toast.success('Convite cancelado com sucesso!');
+            this.fetchFreshPendingInvites(true);
           },
           error: (err) => {
             this.toast.error(err.error.message);
           }
         });
       }
-
-      this.getPendingInvites(true);
     })
   }
 
@@ -360,14 +488,46 @@ export class TeamComponent {
         this.teamService.resendInvite(inviteId).subscribe({
           next: () => {
             this.toast.success('Convite reenviado com sucesso!');
+            this.fetchFreshPendingInvites(true);
           },
           error: (err) => {
             this.toast.error(err.error.message);
           }
         });
       }
-
-      this.getPendingInvites(true);
     })
+  }
+
+  /**
+   * Busca membros por nome ou email
+   * @param event - Evento de busca
+   */
+  onSearchChange(event: any): void {
+    this.searchTerm = event;
+    this.debounceSearch();
+  }
+
+  /**
+   * Busca membros por nome ou email com debounce de 0.5s
+   * @param event - Evento de busca
+   */
+  private debounceSearch(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      if (!this.searchTerm.trim()) {
+        this.filteredTeamData = [...this.teamData.data];
+        return;
+      }
+
+      this.filteredTeamData = this.teamData.data.filter((member: any) =>
+        member.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        member.email?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        member.function?.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+      console.log(this.filteredTeamData);
+    }, 500);
   }
 }

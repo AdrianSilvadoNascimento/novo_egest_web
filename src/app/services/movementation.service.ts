@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ItemsService } from './items.service';
 import { ItemModel } from '../models/item.model';
 import { PaginatedItemsModel } from '../models/paginated-items.model';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,8 @@ export class MovementationService {
   constructor(
     private readonly http: HttpClient,
     private readonly authService: AuthService,
-    private readonly itemService: ItemsService
+    private readonly itemService: ItemsService,
+    private readonly utilsService: UtilsService
   ) { }
 
   /**
@@ -34,15 +36,6 @@ export class MovementationService {
   setMovementationData(data: PaginatedMovementationModel) {
     this.movementationData.next(data);
     sessionStorage.setItem('movementationData', JSON.stringify(data));
-  }
-
-  /**
-   * Adiciona o token de autenticação e o cabeçalho de skip loading
-   */
-  private withAuth(skipLoading: boolean = false): HttpHeaders {
-    let h = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    if (skipLoading) h = h.set('X-Skip-Loading', 'true');
-    return h;
   }
 
   /**
@@ -79,7 +72,7 @@ export class MovementationService {
     if (filters?.search) params.set('search', filters.search);
 
     return this.http.get<PaginatedMovementationModel>(`${this.apiUrl}/account/${accountId}/paginated?${params.toString()}`, {
-      headers: this.withAuth()
+      headers: this.utilsService.withAuth()
     }).pipe(tap((data: PaginatedMovementationModel) => this.setMovementationData(data)));
   }
 
@@ -89,7 +82,7 @@ export class MovementationService {
   getMovementations(accountId?: string): Observable<MovementationModel[]> {
     const id = accountId || this.authService.getAccountId();
     return this.http.get<MovementationModel[]>(`${this.apiUrl}/account/${id}`, {
-      headers: this.withAuth(true)
+      headers: this.utilsService.withAuth(true)
     });
   }
 
@@ -98,7 +91,7 @@ export class MovementationService {
    */
   getMovementationTypes(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/types`, {
-      headers: this.withAuth(true)
+      headers: this.utilsService.withAuth(true)
     });
   }
 
@@ -114,7 +107,7 @@ export class MovementationService {
       account_id: accountId,
       account_user_id: accountUserId,
     }, {
-      headers: this.withAuth()
+      headers: this.utilsService.withAuth()
     }).pipe(tap((updatedItem: ItemModel) => {
       // Atualizar os dados do item no service de itens
       const itemData = JSON.parse(sessionStorage.getItem('itemData') || '{}');
@@ -135,7 +128,7 @@ export class MovementationService {
    */
   revertMovementation(movementationId: string): Observable<ItemModel> {
     return this.http.delete<ItemModel>(`${this.apiUrl}/${movementationId}`, {
-      headers: this.withAuth()
+      headers: this.utilsService.withAuth()
     });
   }
 

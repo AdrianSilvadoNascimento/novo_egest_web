@@ -70,7 +70,7 @@ export class CustomerComponent implements OnInit {
 
   @ViewChild('customersTable', { static: true }) customersTable!: ElementRef;
   
-  account: AccountModel = new AccountModel();
+  currentAccount: AccountModel = new AccountModel();
   
   searchTerm: string = '';
   viewMode: { card: boolean, list: boolean } = { card: true, list: false };
@@ -107,15 +107,15 @@ export class CustomerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInitialData();
-    this.getAccount();
+    this.getCurrentAccount();
   }
 
   /**
    * Obtém a conta do usuário logado
    */
-  getAccount(): void {
+  getCurrentAccount(): void {
     this.accountService.$accountData.subscribe((account: AccountModel) => {
-      this.account = account;
+      this.currentAccount = account;
     })
   }
 

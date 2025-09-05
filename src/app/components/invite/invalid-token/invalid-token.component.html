@@ -1,0 +1,11 @@
+<div class="h-full p-4 w-full max-w-md mx-auto relative">
+  <mat-card class="p-4 w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div class="text-center">
+      <div class="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4" [class]="errorContent.bgColor">
+        <lucide-icon [img]="errorContent.icon" class="w-6 h-6" [class]="errorContent.textColor"></lucide-icon>
+      </div>
+      <div class="text-lg font-bold font-[Lora]" [class]="errorContent.textColor">{{ errorContent.title }}</div>
+      <p class="text-sm text-gray-500 font-[Lora]">{{ errorContent.description }}</p>
+    </div>
+  </mat-card>
+</div>

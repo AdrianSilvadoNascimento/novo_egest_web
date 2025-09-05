@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { SubscriptionModel } from '../models/account.model';
 import { AccountUserService } from './account-user.service';
 import { IdentityModel } from '../models/identity.model';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,8 @@ export class CheckoutService implements OnDestroy {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private accountUserService: AccountUserService
+    private accountUserService: AccountUserService,
+    private utilsService: UtilsService
   ) {
     this.startAutoRefresh();
   }
@@ -71,21 +73,6 @@ export class CheckoutService implements OnDestroy {
   }
 
   /**
-   * Adiciona o token de autenticação ao headers
-   * @param skipLoading - se o loading deve ser ignorado
-   * @returns headers com o token de autenticação
-   */
-  private withAuth(skipLoading: boolean = false): HttpHeaders {
-    this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`)
-
-    if (skipLoading) {
-      this.headers = this.headers.set('X-Skip-Loading', 'true');
-    }
-
-    return this.headers;
-  }
-
-  /**
    * Inicia o timer de atualização automática
    */
   private startAutoRefresh(): void {
@@ -106,7 +93,7 @@ export class CheckoutService implements OnDestroy {
     }
 
     // Headers com flag para evitar loading global
-    const silentHeaders = this.withAuth().set('X-Silent-Request', 'true');
+    const silentHeaders = this.utilsService.withAuth().set('X-Silent-Request', 'true');
 
     // Atualiza dados da assinatura (apenas em memória)
     this.http.get<SubscriptionModel>(`${this.apiUrl}/subscription/${accountId}`, {
@@ -156,7 +143,7 @@ export class CheckoutService implements OnDestroy {
     }
 
     // Headers com flag para evitar loading global
-    const silentHeaders = this.withAuth().set('X-Silent-Request', 'true');
+    const silentHeaders = this.utilsService.withAuth().set('X-Silent-Request', 'true');
 
     // Atualiza dados da assinatura
     const subscriptionRequest = this.http.get<SubscriptionModel>(
@@ -202,7 +189,7 @@ export class CheckoutService implements OnDestroy {
       return of(JSON.parse(plans));
     }
 
-    return this.http.get<PlanModel[]>(`${this.apiUrl}/plans`, { headers: this.withAuth() }).pipe(
+    return this.http.get<PlanModel[]>(`${this.apiUrl}/plans`, { headers: this.utilsService.withAuth() }).pipe(
       tap((data: any) => this.setPlanData(data))
     );
   }
@@ -219,7 +206,7 @@ export class CheckoutService implements OnDestroy {
 
     this.accountId = this.authService.getAccountId() || '';
 
-    return this.http.get<SubscriptionModel>(`${this.apiUrl}/subscription/${this.accountId}`, { headers: this.withAuth() }).pipe(
+    return this.http.get<SubscriptionModel>(`${this.apiUrl}/subscription/${this.accountId}`, { headers: this.utilsService.withAuth() }).pipe(
       tap((data: any) => this.setSubscriptionData(data))
     );
   }
@@ -236,7 +223,7 @@ export class CheckoutService implements OnDestroy {
 
     this.accountId = this.authService.getAccountId() || '';
 
-    return this.http.get<PlanModel>(`${this.apiUrl}/subscription/plan/${this.accountId}`, { headers: this.withAuth() }).pipe(
+    return this.http.get<PlanModel>(`${this.apiUrl}/subscription/plan/${this.accountId}`, { headers: this.utilsService.withAuth() }).pipe(
       tap((data: any) => this.setSubscriptionPlanData(data))
     );
   }
@@ -263,7 +250,7 @@ export class CheckoutService implements OnDestroy {
       card: newCardData
     }
 
-    return this.http.post<any>(`${this.apiUrl}/subscription`, newSubscriptionData, { headers: this.withAuth(true) });
+    return this.http.post<any>(`${this.apiUrl}/subscription`, newSubscriptionData, { headers: this.utilsService.withAuth(true) });
   }
 
   /**
@@ -272,7 +259,7 @@ export class CheckoutService implements OnDestroy {
    * @returns 
    */
   cancelSubscription(subscriptionId: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/subscription/${subscriptionId}`, { headers: this.withAuth() });
+    return this.http.delete<any>(`${this.apiUrl}/subscription/${subscriptionId}`, { headers: this.utilsService.withAuth() });
   }
 
   /**
@@ -282,7 +269,7 @@ export class CheckoutService implements OnDestroy {
    * @returns 
    */
   updateSubscription(subscriptionId: string, subscriptionData: Partial<SubscriptionModel>): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/subscription/${subscriptionId}`, subscriptionData, { headers: this.withAuth() });
+    return this.http.put<any>(`${this.apiUrl}/subscription/${subscriptionId}`, subscriptionData, { headers: this.utilsService.withAuth() });
   }
 
   /**
@@ -295,7 +282,7 @@ export class CheckoutService implements OnDestroy {
     identity.accountId = this.authService.getAccountId() || '';
     identity.accountUserId = this.authService.getAccountUserId() || '';
 
-    return this.http.post<any>(`${this.apiUrl}/charge/${chargeId}/pay`, identity, { headers: this.withAuth(true) }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/charge/${chargeId}/pay`, identity, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(() => this.forceRefresh())
     );
   }
@@ -311,7 +298,7 @@ export class CheckoutService implements OnDestroy {
     identity.accountId = this.authService.getAccountId() || '';
     identity.accountUserId = this.authService.getAccountUserId() || '';
 
-    return this.http.post<any>(`${this.apiUrl}/charge/${chargeId}/retry`, identity, { headers: this.withAuth(true) }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/charge/${chargeId}/retry`, identity, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(() => this.forceRefresh())
     );
   }

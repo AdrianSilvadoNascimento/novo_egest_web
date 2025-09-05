@@ -1,0 +1,9 @@
+<div class="h-[calc(100vh-64px)]">
+  @if (isInvalidInviteStatus()) {
+  <app-invalid-token [status]="inviteStatus" [expiresAt]="expiresAt"></app-invalid-token>
+  }
+
+  @if (isPendingInviteStatus()) {
+  <app-valid-token [data]="inviteData" (onRejectInvite)="onRejectInvite()"></app-valid-token>
+  }
+</div>

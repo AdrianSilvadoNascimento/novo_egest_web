@@ -5,21 +5,22 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { CustomerModel, PaginatedCustomersModel } from '../models/customer.model';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
   private readonly baseUrl = `${environment.apiUrl}/customers`;
-  private headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  });
 
   private customerData = new BehaviorSubject<PaginatedCustomersModel>({} as PaginatedCustomersModel);
   $customerData = this.customerData.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private utilsService: UtilsService
+  ) { }
 
   /**
    * Define os dados do cliente no BehaviorSubject e no sessionStorage
@@ -29,17 +30,6 @@ export class CustomerService {
     this.customerData.next(data);
 
     sessionStorage.setItem('customerData', JSON.stringify(data));
-  }
-
-  /**
-   * Adiciona o token de autenticação e o cabeçalho de skip loading
-   * @param skipLoading - se o loading deve ser ignorado
-   * @returns headers com o token de autenticação e o cabeçalho de skip loading
-   */
-  private withAuth(skipLoading: boolean = false): HttpHeaders {
-    let h = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    if (skipLoading) h = h.set('X-Skip-Loading', 'true');
-    return h;
   }
 
   /**
@@ -67,7 +57,7 @@ export class CustomerService {
     if (search) params.set('search', search);
 
     return this.http.get<PaginatedCustomersModel>(`${this.baseUrl}/${accountId}/paginated?${params.toString()}`, {
-      headers: this.withAuth()
+      headers: this.utilsService.withAuth()
     }).pipe((tap((data: any) => this.setCustomerData(data))));
   }
 
@@ -83,7 +73,7 @@ export class CustomerService {
     if (search) params.set('search', search);
     
     return this.http.get<CustomerModel[]>(`${this.baseUrl}/${accountId}?${params.toString()}`, {
-      headers: this.withAuth(true)
+      headers: this.utilsService.withAuth(true)
     });
   }
 
@@ -95,7 +85,7 @@ export class CustomerService {
   create(model: CustomerModel): Observable<CustomerModel> {
     const customerData = this.fetchCustomerData();
     
-    return this.http.post<CustomerModel>(`${this.baseUrl}`, model, { headers: this.withAuth() })
+    return this.http.post<CustomerModel>(`${this.baseUrl}`, model, { headers: this.utilsService.withAuth() })
     .pipe((tap((data: any) => {
       const paginatedCustomers = {
         data: [...customerData.data, data],
@@ -115,7 +105,7 @@ export class CustomerService {
   update(id: string, model: Partial<CustomerModel>): Observable<CustomerModel> {
     const customerData = this.fetchCustomerData();
     
-    return this.http.put<CustomerModel>(`${this.baseUrl}/${id}`, model, { headers: this.withAuth() })
+    return this.http.put<CustomerModel>(`${this.baseUrl}/${id}`, model, { headers: this.utilsService.withAuth() })
     .pipe((tap((data: any) => {
       const paginatedCustomers = {
         data: customerData.data.map((customer: CustomerModel) => customer.id === id ? data : customer),
@@ -133,7 +123,7 @@ export class CustomerService {
    * @returns cliente atualizado
    */
   updateStatus(id: string, active: boolean): Observable<CustomerModel> {
-    return this.http.put<CustomerModel>(`${this.baseUrl}/${id}/status`, { active }, { headers: this.withAuth() });
+    return this.http.put<CustomerModel>(`${this.baseUrl}/${id}/status`, { active }, { headers: this.utilsService.withAuth() });
   }
 
   /**
@@ -144,7 +134,7 @@ export class CustomerService {
   delete(id: string): Observable<void> {
     const customerData = this.fetchCustomerData();
     
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.withAuth() }).pipe(tap(() => {}))
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.utilsService.withAuth() }).pipe(tap(() => {}))
     .pipe((tap((data: any) => {
       const paginatedCustomers = {
         data: customerData.data.filter((customer: CustomerModel) => customer.id !== id),
@@ -161,7 +151,7 @@ export class CustomerService {
    * @returns clientes inativos
    */
   listInactive(accountId: string): Observable<CustomerModel[]> {
-    return this.http.get<CustomerModel[]>(`${this.baseUrl}/${accountId}/inactive`, { headers: this.withAuth(true) });
+    return this.http.get<CustomerModel[]>(`${this.baseUrl}/${accountId}/inactive`, { headers: this.utilsService.withAuth(true) });
   }
 
   /**
@@ -170,6 +160,6 @@ export class CustomerService {
    * @returns mensagem de sucesso
    */
   reactivate(id: string): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>(`${this.baseUrl}/${id}/reactivate`, {}, { headers: this.withAuth() });
+    return this.http.put<{ message: string }>(`${this.baseUrl}/${id}/reactivate`, {}, { headers: this.utilsService.withAuth() });
   }
 }

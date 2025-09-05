@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,6 @@ import { AuthService } from './auth.service';
 export class TeamService {
   private readonly API_URL = `${environment.apiUrl}/team`;
   private readonly API_URL_INVITES = `${environment.apiUrl}/invites`;
-
-  private headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-  });
 
   private teamData: BehaviorSubject<any>;
   $teamData: Observable<any>;
@@ -24,7 +21,8 @@ export class TeamService {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly utilsService: UtilsService
   ) {
     const storedTeam = sessionStorage.getItem('teamData');
     const parsedTeam = storedTeam ? JSON.parse(storedTeam) : ({} as any);
@@ -58,21 +56,11 @@ export class TeamService {
   }
 
   /**
-   * Adiciona o token de autenticação ao headers
-   * @returns Headers com o token de autenticação
-   */
-  private withAuth(skipLoading: boolean = false): HttpHeaders {
-    let header = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    if (skipLoading) header = header.set('X-Skip-Loading', 'true');
-    return header;
-  }
-
-  /**
    * Obtém os dados da equipe
    * @returns Observable com os dados da equipe
    */
-  getTeamData(): Observable<any> {
-    return this.http.get<any>(`${this.API_URL}/members`, { headers: this.withAuth() }).pipe(
+  getTeamData(options: { page: number, limit: number, isIgnoringLoading: boolean }): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/members?page=${options.page}&limit=${options.limit}`, { headers: this.utilsService.withAuth(options.isIgnoringLoading) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }
@@ -81,8 +69,8 @@ export class TeamService {
    * Obtém os convites pendentes
    * @returns Observable com os convites pendentes
    */
-  getPendingInvites(): Observable<any> {
-    return this.http.get<any>(`${this.API_URL_INVITES}`, { headers: this.withAuth() }).pipe(
+  getPendingInvites(options: { page: number, limit: number, isIgnoringLoading: boolean }): Observable<any> {
+    return this.http.get<any>(`${this.API_URL_INVITES}?page=${options.page}&limit=${options.limit}`, { headers: this.utilsService.withAuth(options.isIgnoringLoading) }).pipe(
       tap(res => this.setInvitesData(res))
     );
   }
@@ -95,7 +83,7 @@ export class TeamService {
    * @returns Observable com os dados da equipe
    */
   inviteMember(inviteMember: { email: string, role: string, type: string }): Observable<any> {
-    return this.http.post<any>(`${this.API_URL_INVITES}`, inviteMember, { headers: this.withAuth(true) }).pipe(
+    return this.http.post<any>(`${this.API_URL_INVITES}`, inviteMember, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }
@@ -106,7 +94,7 @@ export class TeamService {
    * @returns Observable com os dados da equipe
    */
   updateMember(member: any): Observable<any> {
-    return this.http.put<any>(`${this.API_URL}/members/${member.id}`, member, { headers: this.withAuth(true) }).pipe(
+    return this.http.put<any>(`${this.API_URL}/members/${member.id}`, member, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }
@@ -117,7 +105,7 @@ export class TeamService {
    * @returns Observable com os dados da equipe
    */
   deleteMember(memberId: string): Observable<any> {
-    return this.http.delete<any>(`${this.API_URL}/members/${memberId}`, { headers: this.withAuth(true) }).pipe(
+    return this.http.delete<any>(`${this.API_URL}/members/${memberId}`, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }
@@ -128,7 +116,7 @@ export class TeamService {
    * @returns Observable com os dados da equipe
    */
   cancelInvite(inviteId: string): Observable<any> {
-    return this.http.delete<any>(`${this.API_URL_INVITES}/${inviteId}/cancel`, { headers: this.withAuth(true) }).pipe(
+    return this.http.delete<any>(`${this.API_URL_INVITES}/${inviteId}/cancel`, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }
@@ -139,7 +127,17 @@ export class TeamService {
    * @returns Observable com os dados da equipe
    */
   resendInvite(inviteId: string): Observable<any> {
-    return this.http.put<any>(`${this.API_URL_INVITES}/${inviteId}/resend`, { headers: this.withAuth(true) }).pipe(
+    return this.http.put<any>(`${this.API_URL_INVITES}/${inviteId}/resend`, { headers: this.utilsService.withAuth(true) }).pipe(
+      tap(res => this.setTeamData(res))
+    );
+  }
+
+  /**
+   * Limpa os convites pendentes
+   * @returns Observable com os dados da equipe
+   */
+  clearPendingInvites(): Observable<any> {
+    return this.http.delete<any>(`${this.API_URL_INVITES}/clear`, { headers: this.utilsService.withAuth(true) }).pipe(
       tap(res => this.setTeamData(res))
     );
   }

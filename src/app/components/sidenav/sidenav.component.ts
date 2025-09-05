@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -22,6 +22,9 @@ import {
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { SidenavService } from '../../services/sidenav.service';
+import { AccountModel } from '../../models/account.model';
+import { AccountService } from '../../services/account.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -37,7 +40,7 @@ import { SidenavService } from '../../services/sidenav.service';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss'
 })
-export class SidenavComponent implements OnInit, OnDestroy {
+export class SidenavComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly menuIcon = PanelLeft;
 
   expanded: boolean = false;
@@ -45,6 +48,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
   isMobile: boolean = false;
   mode: 'side' | 'over' = 'side';
   opened: boolean = true;
+
+  currentAccount: AccountModel = new AccountModel();
 
   private subscriptions: Subscription[] = [];
 
@@ -62,12 +67,57 @@ export class SidenavComponent implements OnInit, OnDestroy {
   constructor(
     private readonly authService: AuthService,
     private readonly sidenavService: SidenavService,
-    private readonly breakpointObserver: BreakpointObserver
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly accountService: AccountService,
+    private readonly toastService: ToastService
   ) { }
 
   ngOnInit(): void {
     this.setupSubscriptions();
     this.setupResponsiveBehavior();
+    if (this.authService.isLoggedIn()) {
+      this.getCurrentAccount();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.authService.isLoggedIn()) {
+        this.filterLinks();
+      }
+    })
+  }
+
+  /**
+   * Filtra os links com base no plano do usuário
+   */
+  private filterLinks(): void {
+    this.links = this.links.filter((link) => {
+      if (link.route === '/team') {
+        return this.currentAccount.subscription.plan.features.team_features.enabled;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * Obtém a conta do usuário logado
+   */
+  getCurrentAccount(): void {
+    this.accountService.$accountData.subscribe((account: AccountModel) => {
+      this.currentAccount = account;
+    });
+
+    if (!this.currentAccount.id) {
+      this.accountService.getAccount().subscribe({
+        next: (account: AccountModel) => {
+          this.currentAccount = account;
+        },
+        error: (error: any) => {
+          this.toastService.error(error.message);
+        }
+      });
+    }
   }
 
   /**

@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 import { LucideAngularModule } from 'lucide-angular';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
-import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +20,6 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
   selector: 'app-team-form',
   standalone: true,
   imports: [
-    MatCard,
     ReactiveFormsModule,
     LucideAngularModule,
     MatIcon,

@@ -14,6 +14,7 @@ import { MovementationComponent } from './components/movementation/movementation
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { FinancialComponent } from './components/financial/financial.component';
 import { TeamComponent } from './components/team/team.component';
+import { InviteComponent } from './components/invite/invite.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'team', component: TeamComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'invite/accept/:token', component: InviteComponent },
   { 
     path: 'auth/password-setup', 
     loadChildren: () => import('./auth/password-setup/password-setup.module').then(m => m.PasswordSetupModule),

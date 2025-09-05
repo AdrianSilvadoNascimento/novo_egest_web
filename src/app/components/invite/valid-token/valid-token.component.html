@@ -1,0 +1,85 @@
+<div class="p-4 w-full max-w-3xl mx-auto">
+  <div class="w-full space-y-6 font-[Lora]">
+    <div class="text-center">
+      <img src="egest-logo.png" alt="Logo Egest" class="mx-auto" width="150px" />
+      <p class="text-gray-600">Sistema de Gestão de Estoque Inteligente</p>
+    </div>
+
+    <mat-card class="p-4">
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="mailIcon" class="w-5 h-5 text-[#3377bc]" />
+        <span class="text-lg font-semibold">Convite para Equipe</span>
+      </div>
+      <p class="text-sm text-gray-600">Você foi convidado para participar de uma equipe no e-Gest</p>
+
+      <div class="bg-gray-50 mt-4 rounded-lg px-4 py-6">
+        <div class="flex items-center gap-2 mb-6">
+          <lucide-icon [img]="buildingIcon" class="w-5 h-5" />
+          <div class="text-sm text-gray-500">Empresa</div>
+        </div>
+
+        <div class="text-xl font-semibold">{{ data.invite.account.name }}</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="p-3">
+          <div class="text-sm text-gray-500 mb-1">Email</div>
+          <div class="text-gray-800">{{ data.invite.email }}</div>
+        </div>
+
+        <div class="p-3">
+          <div class="text-sm text-gray-500 mb-1">Função</div>
+          <div
+            class="max-w-fit badge rounded-lg {{ utilsService.sanitizeUserRoleColor(data.invite.role).bgColor }} {{ utilsService.sanitizeUserRoleColor(data.invite.role).textColor }} px-3 py-1 text-xs">
+            {{ utilsService.sanitizeUserRole(data.invite.role) }}
+          </div>
+        </div>
+
+        <div class="p-3">
+          <div class="text-sm text-gray-500 mb-1">Convidado por</div>
+          <div class="text-gray-800">{{ data.invite.invited_by.name }} {{ data.invite.invited_by.lastname }}</div>
+        </div>
+
+        <div class="p-3">
+          <div class="text-sm text-gray-500 mb-1">Expira em</div>
+          <div class="text-gray-800">{{ data.invite.invite_expires_at | date: 'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+
+      <hr class="mt-2 mb-6" />
+
+      <div class="px-4 py-2 border border-gray-300 rounded-lg mb-6">
+        <div class="flex flex-row items-center gap-4">
+          <lucide-icon [img]="infoIcon" class="w-5 h-5" />
+          <div class="text-sm text-gray-400">
+            Ao aceitar este convite, você terá acesso ao sistema e-Gest da empresa
+            <span class="font-semibold">{{ data.invite.account.name }}</span> com as permissões de <span
+              class="font-semibold">{{ utilsService.sanitizeUserRole(data.invite.role) }}</span>.
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-row items-center justify-between gap-4">
+        <button
+          class="w-full text-center bg-[#3377bc] text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex items-center gap-2">
+            @if (isLoading.action === 'accept' && isLoading.loading) {
+            <mat-spinner class="text-gray-700" diameter="20"></mat-spinner>
+            }
+            Aceitar convite
+          </div>
+        </button>
+        <button
+          (click)="rejectInvite()"
+          class="w-full text-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex items-center gap-2">
+            @if (isLoading.action === 'reject' && isLoading.loading) {
+            <mat-spinner class="text-gray-700" diameter="20"></mat-spinner>
+            }
+            Rejeitar convite
+          </div>
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>
