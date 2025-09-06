@@ -21,7 +21,6 @@ export class TeamService {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly authService: AuthService,
     private readonly utilsService: UtilsService
   ) {
     const storedTeam = sessionStorage.getItem('teamData');

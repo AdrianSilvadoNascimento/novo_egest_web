@@ -6,11 +6,12 @@ import { ERROR_MESSAGES, INVITE_STATUS } from '../../services/utils/constants/co
 import { ToastService } from '../../services/toast.service';
 import { InvalidTokenComponent } from "./invalid-token/invalid-token.component";
 import { ValidTokenComponent } from "./valid-token/valid-token.component";
+import { AcceptedComponent } from "./accepted/accepted.component";
 
 @Component({
   selector: 'app-invite',
   standalone: true,
-  imports: [InvalidTokenComponent, ValidTokenComponent],
+  imports: [InvalidTokenComponent, ValidTokenComponent, AcceptedComponent],
   templateUrl: './invite.component.html',
   styleUrl: './invite.component.scss'
 })
@@ -44,14 +45,12 @@ export class InviteComponent implements OnInit {
         this.inviteStatus = this.getInviteStatus(res.message);
         this.expiresAt = res.data.expiresAt;
         this.inviteData = res.data;
-        console.log(res);
 
         if (!res.data.valid) {
           this.toastService.error(res.message);
         }
       },
       error: (err) => {
-        console.log(err.error.message);
         this.toastService.error(err.error.message);
       }
     });
@@ -73,6 +72,13 @@ export class InviteComponent implements OnInit {
    */
   isPendingInviteStatus(): boolean {
     return this.inviteStatus === INVITE_STATUS.PENDING;
+  }
+
+  /**
+   * Checa se o status do convite é aceito
+   */
+  isAcceptedInviteStatus(): boolean {
+    return this.inviteStatus === INVITE_STATUS.ACCEPTED;
   }
 
   /**
@@ -99,6 +105,13 @@ export class InviteComponent implements OnInit {
    * Rejeita o convite
    */
   onRejectInvite(): void {
+    this.validateInviteToken();
+  }
+
+  /**
+   * Aceita o convite
+   */
+  onAcceptInvite(): void {
     this.validateInviteToken();
   }
 }

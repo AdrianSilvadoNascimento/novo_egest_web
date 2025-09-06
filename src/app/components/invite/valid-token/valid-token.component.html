@@ -6,6 +6,7 @@
     </div>
 
     <mat-card class="p-4">
+      @if (!isAcceptingInvite) {
       <div class="flex items-center gap-2">
         <lucide-icon [img]="mailIcon" class="w-5 h-5 text-[#3377bc]" />
         <span class="text-lg font-semibold">Convite para Equipe</span>
@@ -60,26 +61,182 @@
       </div>
 
       <div class="flex flex-row items-center justify-between gap-4">
-        <button
-          class="w-full text-center bg-[#3377bc] text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-          <div class="flex items-center gap-2">
-            @if (isLoading.action === 'accept' && isLoading.loading) {
-            <mat-spinner class="text-gray-700" diameter="20"></mat-spinner>
-            }
-            Aceitar convite
-          </div>
-        </button>
-        <button
-          (click)="rejectInvite()"
-          class="w-full text-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-          <div class="flex items-center gap-2">
+        <button (click)="rejectInvite()"
+          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex justify-center items-center gap-2">
             @if (isLoading.action === 'reject' && isLoading.loading) {
             <mat-spinner class="text-gray-700" diameter="20"></mat-spinner>
             }
             Rejeitar convite
           </div>
         </button>
+        <button (click)="acceptInvite()"
+          class="w-full bg-[#3377bc] text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex justify-center items-center gap-2">
+            Aceitar convite
+          </div>
+        </button>
       </div>
+      } @else {
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="userIcon" class="w-5 h-5 text-[#3377bc]" />
+        <span class="text-lg font-semibold">Complete seu cadastro</span>
+      </div>
+      <p class="text-sm text-gray-600">Preencha as informações abaixo para finalizar sua conta</p>
+
+      <form [formGroup]="form" class="space-y-6 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <!-- Nome -->
+          <div class="w-full">
+            <label for="name" class="text-sm block text-gray-700 font-[Lora] mb-1">Nome</label>
+            <div class="relative">
+              <input id="name" name="name" type="text" formControlName="name"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o seu nome">
+              @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <mat-error>
+                @if (form.get('name')?.hasError('minlength')) {
+                Nome deve ter pelo menos 3 caracteres
+                } @else {
+                Nome é obrigatório
+                }
+              </mat-error>
+              }
+            </div>
+          </div>
+
+          <!-- Sobrenome -->
+          <div class="w-full">
+            <label for="name" class="text-sm block text-gray-700 font-[Lora] mb-1">Sobrenome</label>
+            <div class="relative">
+              <input id="name" name="name" type="text" formControlName="lastname"
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+                placeholder="Insira o seu sobrenome">
+              @if (form.get('lastname')?.invalid && form.get('lastname')?.touched) {
+              <mat-error>
+                @if (form.get('lastname')?.hasError('minlength')) {
+                Nome deve ter pelo menos 3 caracteres
+                } @else {
+                Nome é obrigatório
+                }
+              </mat-error>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Senha -->
+        <div class="password-field">
+          <label for="password" class="text-sm block text-gray-700 font-medium mb-1">Senha</label>
+          <div class="relative">
+            <input id="password" name="password" [type]="showPassword ? 'text' : 'password'" required
+              formControlName="password"
+              class="w-full px-4 py-2 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              [class.border-red-500]="hasFieldError('password')"
+              placeholder="Preencha sua senha">
+            <button type="button" (click)="togglePasswordVisibility()"
+              class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors toggle-password-btn">
+              <lucide-icon [img]="showPassword ? EyeOffIcon : EyeIcon" size="20"></lucide-icon>
+            </button>
+          </div>
+
+          @if (form.get('password')?.value) {
+          <div class="mt-2 password-indicators">
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full transition-all duration-300 rounded-full password-strength-bar" [class]="passwordStrength === 'weak' ? 'weak' : 
+                                passwordStrength === 'medium' ? 'medium' : 'strong'" [style.width]="passwordStrength === 'weak' ? '33.33%' : 
+                                     passwordStrength === 'medium' ? '66.66%' : '100%'">
+                </div>
+              </div>
+              <span class="text-xs font-medium" [class]="passwordStrength === 'weak' ? 'text-red-500' : 
+                               passwordStrength === 'medium' ? 'text-yellow-600' : 
+                               'text-green-600'">
+                {{ passwordStrength === 'weak' ? 'Fraca' :
+                passwordStrength === 'medium' ? 'Média' : 'Forte' }}
+              </span>
+            </div>
+
+            <!-- Critérios da senha -->
+            <div class="grid grid-cols-2 gap-1 text-xs password-criteria">
+              <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasLength"
+                [class.invalid]="!passwordCriteria.hasLength">
+                <lucide-icon [img]="passwordCriteria.hasLength ? CheckIcon : XIcon" size="14"></lucide-icon>
+                <span>Mínimo 8 caracteres</span>
+              </div>
+              <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasUppercase"
+                [class.invalid]="!passwordCriteria.hasUppercase">
+                <lucide-icon [img]="passwordCriteria.hasUppercase ? CheckIcon : XIcon" size="14"></lucide-icon>
+                <span>Letra maiúscula</span>
+              </div>
+              <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasLowercase"
+                [class.invalid]="!passwordCriteria.hasLowercase">
+                <lucide-icon [img]="passwordCriteria.hasLowercase ? CheckIcon : XIcon" size="14"></lucide-icon>
+                <span>Letra minúscula</span>
+              </div>
+              <div class="flex items-center space-x-2 criteria-item" [class.valid]="passwordCriteria.hasNumber"
+                [class.invalid]="!passwordCriteria.hasNumber">
+                <lucide-icon [img]="passwordCriteria.hasNumber ? CheckIcon : XIcon" size="14"></lucide-icon>
+                <span>Número</span>
+              </div>
+              <div class="flex items-center space-x-2 col-span-2 criteria-item"
+                [class.valid]="passwordCriteria.hasSpecial" [class.invalid]="!passwordCriteria.hasSpecial">
+                <lucide-icon [img]="passwordCriteria.hasSpecial ? CheckIcon : XIcon" size="14"></lucide-icon>
+                <span>Caractere especial</span>
+              </div>
+            </div>
+          </div>
+          }
+
+          @if (hasFieldError('password')) {
+          <div class="error-message text-red-500">{{ getPasswordErrorMessage() }}</div>
+          }
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div class="password-field">
+          <label for="password_confirmation" class="text-sm block text-gray-700 font-medium mb-1">Confirmar
+            Senha</label>
+          <div class="relative">
+            <input id="password_confirmation" name="password_confirmation"
+              [type]="showPasswordConfirmation ? 'text' : 'password'" required formControlName="password_confirmation"
+              class="w-full px-4 py-2 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
+              [class.border-red-500]="hasFieldError('password_confirmation')"
+              placeholder="Confirme sua senha">
+            <button type="button" (click)="togglePasswordConfirmationVisibility()"
+              class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors toggle-password-btn">
+              <lucide-icon [img]="showPasswordConfirmation ? EyeOffIcon : EyeIcon" size="20"></lucide-icon>
+            </button>
+          </div>
+
+          @if (hasFieldError('password_confirmation')) {
+          <div class="error-message text-red-500">{{ getPasswordConfirmationErrorMessage() }}</div>
+          }
+        </div>
+      </form>
+
+      <hr class="mb-6">
+
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <button (click)="goBack()"
+          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex justify-center items-center gap-2">
+            Voltar
+          </div>
+        </button>
+
+        <button
+          (click)="onSubmit()"
+          class="w-full bg-[#3377bc] text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <div class="flex justify-center items-center gap-2">
+            @if (isLoading.action === 'accept' && isLoading.loading) {
+            <mat-spinner class="text-gray-700" diameter="20"></mat-spinner>
+            }
+            Completar cadastro
+          </div>
+        </button>
+      </div>
+      }
     </mat-card>
   </div>
 </div>

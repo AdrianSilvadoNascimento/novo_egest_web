@@ -81,7 +81,7 @@
       </div>
 
       <div class="flex flex-row justify-end items-center gap-3">
-        @if (validateUserService.isOwnerOrManager(member.type)) {
+        @if (validateUserService.isOwnerOrManager(currentUser.type)) {
         <button mat-icon-button [matMenuTriggerFor]="memberCardMenu">
           <mat-icon>more_vert</mat-icon>
         </button>
@@ -93,7 +93,7 @@
               <span>Editar</span>
             </div>
           </button>
-          @if (!validateUserService.isOwner(member.type)) {
+          @if (!validateUserService.isOwner(currentUser.type)) {
           <button mat-menu-item (click)="onDeleteMember(member)">
             <div class="text-red-500 flex justify-center items-center gap-2">
               <lucide-icon [img]="deleteIcon" class="w-4 h-4"></lucide-icon>
@@ -163,7 +163,7 @@
               </div>
             </div>
           </td>
-          <td class="px-4 py-2">{{member.email}}</td>
+          <td class="px-4 py-2">{{ member.email }}</td>
           <td class="px-4 py-2">
             <div
               class="badge max-w-fit rounded-lg text-center {{ utilsService.sanitizeUserRoleColor(member.role).bgColor }} {{ utilsService.sanitizeUserRoleColor(member.role).textColor }} px-3 py-1 text-xs">
@@ -178,7 +178,7 @@
           </td>
           <td class="px-4 py-2">{{member.active ? 'Ativo' : 'Inativo'}}</td>
           <td class="px-4 py-2">
-            @if (validateUserService.isOwnerOrManager(member.type)) {
+            @if (validateUserService.isOwnerOrManager(currentUser.type)) {
             <button mat-icon-button [matMenuTriggerFor]="memberListMenu">
               <mat-icon>more_vert</mat-icon>
             </button>
@@ -190,7 +190,7 @@
                   <span>Editar</span>
                 </div>
               </button>
-              @if (!validateUserService.isOwner(member.type)) {
+              @if (!validateUserService.isOwner(currentUser.type)) {
               <button mat-menu-item (click)="onDeleteMember(member)">
                 <div class="text-red-500 flex justify-center items-center gap-2">
                   <lucide-icon [img]="deleteIcon" class="w-4 h-4"></lucide-icon>

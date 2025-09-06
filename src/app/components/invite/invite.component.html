@@ -4,6 +4,11 @@
   }
 
   @if (isPendingInviteStatus()) {
-  <app-valid-token [data]="inviteData" (onRejectInvite)="onRejectInvite()"></app-valid-token>
+  <app-valid-token [data]="inviteData" (onRejectInvite)="onRejectInvite()"
+    (onAcceptInvite)="onAcceptInvite()"></app-valid-token>
+  }
+
+  @if (isAcceptedInviteStatus()) {
+  <app-accepted></app-accepted>
   }
 </div>

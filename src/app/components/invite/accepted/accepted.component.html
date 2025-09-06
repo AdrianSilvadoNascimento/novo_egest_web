@@ -1,0 +1,20 @@
+<div class="h-full p-4 w-full max-w-md mx-auto relative">
+  <mat-card class="p-4 w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div class="text-center">
+      <div class="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
+        <lucide-icon [img]="checkIcon" class="w-6 h-6 text-green-600"></lucide-icon>
+      </div>
+      <div class="text-lg font-bold font-[Lora] text-green-600">
+        Bem-vindo à equipe!
+      </div>
+      <p class="text-sm text-gray-500 font-[Lora]">
+        Sua conta foi criada com sucesso. Você já pode acessar o e-Gest e começar a trabalhar com sua equipe.
+      </p>
+    </div>
+    <button
+      (click)="onAccessSystem()"
+      class="w-full bg-[#3377bc] text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+      Acessar o sistema
+    </button>
+  </mat-card>
+</div>

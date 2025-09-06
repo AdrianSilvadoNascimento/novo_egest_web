@@ -1,24 +1,28 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { AccountUserModel } from '../models/account_user.model';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountUserService {
   private readonly API_URL = `${environment.apiUrl}/account-user`;
-  private headers: HttpHeaders = new HttpHeaders({
-    'Content-Type': 'application/json',
-  });
 
-  private accountUserData = new BehaviorSubject<AccountUserModel>({} as AccountUserModel);
-  $accountUserData = this.accountUserData.asObservable();
+  private accountUserData: BehaviorSubject<AccountUserModel>
+  $accountUserData: Observable<AccountUserModel>;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService, private utilsService: UtilsService) {
+    const storedAccountUserData = sessionStorage.getItem('account_user_data');
+    const parsedAccountUserData = storedAccountUserData ? JSON.parse(storedAccountUserData) : ({} as AccountUserModel);
+
+    this.accountUserData = new BehaviorSubject<AccountUserModel>(parsedAccountUserData);
+    this.$accountUserData = this.accountUserData.asObservable();
+  }
 
   /**
    * Define os dados do usuário
@@ -34,17 +38,9 @@ export class AccountUserService {
    * @returns Observable com os dados do usuário
    */
   getAccountUser(): Observable<AccountUserModel> {
-    const accountUserData = sessionStorage.getItem('account_user_data');
+    const accountUserId = this.authService.getAccountUserId();
 
-    if (accountUserData) {
-      return of(JSON.parse(accountUserData));
-    }
-    
-    const accountId = this.authService.getAccountId();
-
-    this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    
-    return this.http.get<AccountUserModel>(`${this.API_URL}/${accountId}`, { headers: this.headers }).pipe(
+    return this.http.get<AccountUserModel>(`${this.API_URL}/${accountUserId}`, { headers: this.utilsService.withAuth() }).pipe(
       tap(res => this.setAccountUserData(res))
     )
   }
@@ -56,13 +52,11 @@ export class AccountUserService {
    */
   updateAccountUser(accountUserModel: AccountUserModel): Observable<AccountUserModel> {
     const accountUserId = this.authService.getAccountUserId();
-    
-    this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
 
     return this.http.put<AccountUserModel>(this.API_URL, {
       ...accountUserModel,
       id: accountUserId,
-    }, { headers: this.headers }).pipe(tap((res: any) => {
+    }, { headers: this.utilsService.withAuth() }).pipe(tap((res: any) => {
       return res;
     }));
   }

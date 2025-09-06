@@ -2,7 +2,7 @@
 <div class="relative bg-gradient-to-r from-[#3377bc] to-[#2a5f9a] p-6 text-white mb-4 md:mb-0">
   <div class="text-center">
     <span class="text-sm px-2 rounded-md bg-white/20 text-white border border-white/30 mb-3">Membro</span>
-    <div class="text-3xl text-white font-semibold font-[Lora]">{{ data ? 'Editar Membro' : 'Convidar Membro' }}</div>
+    <div class="text-3xl text-white font-semibold font-[Lora]">{{ data.isEdit ? 'Editar Membro' : 'Convidar Membro' }}</div>
   </div>
   <button (click)="dialogRef.close()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
     <mat-icon>close</mat-icon>

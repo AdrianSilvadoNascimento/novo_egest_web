@@ -527,7 +527,6 @@ export class TeamComponent {
         member.email?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         member.function?.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
-      console.log(this.filteredTeamData);
     }, 500);
   }
 }
