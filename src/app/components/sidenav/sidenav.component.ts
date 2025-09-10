@@ -40,7 +40,7 @@ import { ToastService } from '../../services/toast.service';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss'
 })
-export class SidenavComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SidenavComponent implements OnInit, OnDestroy {
   readonly menuIcon = PanelLeft;
 
   expanded: boolean = false;
@@ -75,17 +75,6 @@ export class SidenavComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.setupSubscriptions();
     this.setupResponsiveBehavior();
-    if (this.authService.isLoggedIn()) {
-      this.getCurrentAccount();
-    }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      if (this.authService.isLoggedIn()) {
-        this.filterLinks();
-      }
-    })
   }
 
   /**
@@ -106,12 +95,14 @@ export class SidenavComponent implements OnInit, OnDestroy, AfterViewInit {
   getCurrentAccount(): void {
     this.accountService.$accountData.subscribe((account: AccountModel) => {
       this.currentAccount = account;
+      this.filterLinks();
     });
 
     if (!this.currentAccount.id) {
       this.accountService.getAccount().subscribe({
         next: (account: AccountModel) => {
           this.currentAccount = account;
+          this.filterLinks();
         },
         error: (error: any) => {
           this.toastService.error(error.message);
@@ -126,6 +117,10 @@ export class SidenavComponent implements OnInit, OnDestroy, AfterViewInit {
   private setupSubscriptions(): void {
     const loginSub = this.authService.$toggleLogin.subscribe((isLogged) => {
       this.isLogged = isLogged;
+
+      if (isLogged) {
+        this.getCurrentAccount();
+      }
     });
 
     const expandedSub = this.sidenavService.expanded$.subscribe((expanded) => {

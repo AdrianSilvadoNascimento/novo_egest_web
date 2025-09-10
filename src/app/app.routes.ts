@@ -15,6 +15,7 @@ import { CheckoutComponent } from './components/checkout/checkout.component';
 import { FinancialComponent } from './components/financial/financial.component';
 import { TeamComponent } from './components/team/team.component';
 import { InviteComponent } from './components/invite/invite.component';
+import { TeamGuard } from './guards/team.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -31,7 +32,7 @@ export const routes: Routes = [
   { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'financial', component: FinancialComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'team', component: TeamComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'team', component: TeamComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard, TeamGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'invite/accept/:token', component: InviteComponent },

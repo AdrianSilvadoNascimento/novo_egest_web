@@ -1,4 +1,5 @@
 import { AccountSettingsModel } from "./account_settings.model";
+import { AccountUserType } from "./account_user.model";
 import { PlanFeaturesModel, PlanModel } from "./plan.model";
 
 export class AccountModel {
@@ -14,7 +15,7 @@ export class AccountModel {
   card!: AccountCardModel;
   is_trial!: boolean;
   is_assinant!: boolean;
-  type!: number;
+  type!: AccountUserType;
   subscription_plan!: number;
   subscription_id!: number;
   expiration_trial!: Date;
