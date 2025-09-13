@@ -1,4 +1,5 @@
 import { CategoryModel } from "./category.model";
+import { UnitOfMeasureModel } from "./unit-of-measure.model";
 
 export class ItemModel {
   id!: string;
@@ -15,6 +16,9 @@ export class ItemModel {
 
   category!: CategoryModel
   category_id!: string;
+
+  unit_of_measure?: UnitOfMeasureModel;
+  unit_of_measure_id?: string;
 
   created_at!: Date;
   updated_at!: Date | null;

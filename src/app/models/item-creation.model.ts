@@ -9,4 +9,5 @@ export class ItemCreationModel {
   quantity!: number;
   description!: string;
   active!: boolean;
+  unit_of_measure_id?: string;
 }

@@ -16,6 +16,7 @@ import { FinancialComponent } from './components/financial/financial.component';
 import { TeamComponent } from './components/team/team.component';
 import { InviteComponent } from './components/invite/invite.component';
 import { TeamGuard } from './guards/team.guard';
+import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -28,8 +29,9 @@ export const routes: Routes = [
   { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'movementations', component: MovementationComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
-  { path: 'settings/account', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
-  { path: 'settings/account/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'account-settings', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'account-settings/:id', component: AccountSettingsPageComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
+  { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'customers', component: CustomerComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard] },
   { path: 'financial', component: FinancialComponent, canActivate: [AuthGuard, PasswordConfirmationGuard] },
   { path: 'team', component: TeamComponent, canActivate: [AuthGuard, PasswordConfirmationGuard, TrialStatusGuard, TeamGuard] },

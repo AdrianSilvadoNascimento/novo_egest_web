@@ -281,11 +281,18 @@
             <div class="flex-1">
               <div class="font-semibold text-gray-700">{{ product.name }}</div>
               <p class="text-sm text-gray-600">{{ product.category }}</p>
+              @if (product.unitOfMeasure) {
+                <p class="text-xs text-blue-600">{{ product.unitOfMeasure.abbreviation }}</p>
+              }
             </div>
             <div class="flex items-center space-x-3">
               <div class="text-right">
-                <div class="font-semibold text-gray-600">{{ product.currentQuantity }} un.</div>
-                <div class="text-xs text-gray-500">Min: {{ product.minQuantity }}</div>
+                <div class="font-semibold text-gray-600">
+                  {{ product.currentQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
+                </div>
+                <div class="text-xs text-gray-500">
+                  Min: {{ product.minQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
+                </div>
               </div>
               <span [class]="product.status === 'low' ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800' : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800'">
                 {{product.status === 'low' ? 'Baixo' : 'Esgotado'}}

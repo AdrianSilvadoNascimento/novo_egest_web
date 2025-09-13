@@ -1,0 +1,99 @@
+<div class="space-y-6 font-[Lora]">
+  <div class="mb-6">
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title class="font-[Lora]">Unidades de Medidas</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="space-y-4">
+          @for (unit of unitsOfMeasure; track unit.id) {
+          <div class="flex flex-wrap items-center justify-between p-4 border rounded-lg transition-colors"
+            [class.bg-gray-50]="!unit.active" [class.border-gray-200]="!unit.active"
+            [class.border-blue-200]="unit.active">
+
+            <!-- Checkbox e Nome da Unidade -->
+            <div class="flex items-center space-x-4">
+              <input type="checkbox" [checked]="unit.active" (change)="toggleUnit(unit)"
+                class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+
+            <span class="font-[Lora] font-medium text-gray-800 text-lg" [class.text-gray-400]="!unit.active">
+              {{ unit.name }} ({{ unit.abbreviation }})
+            </span>
+            </div>
+
+            <!-- Campo de Estoque Mínimo -->
+            <div class="flex items-center space-x-3">
+              <label class="text-sm text-gray-600 font-[Lora] font-medium">Estoque Mínimo:</label>
+              <input type="number" [value]="unit.low_stock_threshold" (input)="onThresholdChange(unit, $event)"
+                [disabled]="!unit.active" min="0"
+                class="w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                [class.bg-gray-100]="!unit.active" [class.border-gray-300]="!unit.active"
+                [class.border-blue-300]="unit.active">
+            </div>
+          </div>
+          }
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class="mb-6">
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title class="font-[Lora]">Configurações Avançadas</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="space-y-4">
+          <div
+            class="flex flex-wrap items-center justify-start md:justify-between p-4 border rounded-lg transition-colors">
+            <div class="flex-1 mb-4 md:mb-0">
+              <div class="flex flex-col gap-2">
+                <span class="font-[Lora] font-medium text-gray-800 text-lg">Gerar código de barras
+                  automaticamente</span>
+                <span class="text-sm text-gray-600 font-[Lora]">
+                  Se ativado, o código de barras será gerado automaticamente para os produtos.
+                </span>
+              </div>
+            </div>
+
+            <div class="ml-4">
+              <app-custom-toggle id="generate_barcode_automatically" [checked]="autoGenerateBarcode"
+                (checkedChange)="toggleBarcodeGeneration()">
+              </app-custom-toggle>
+            </div>
+          </div>
+
+          <div
+            class="flex flex-wrap items-center justify-start md:justify-between p-4 border rounded-lg transition-colors">
+            <div class="flex-1 mb-4 md:mb-0">
+              <div class="flex flex-col gap-2">
+                <span class="font-[Lora] font-medium text-gray-800 text-lg">Descrição obrigatória</span>
+                <span class="text-sm text-gray-600 font-[Lora]">
+                  Se ativado, a descrição do produto será obrigatória.
+                </span>
+              </div>
+            </div>
+
+            <div class="ml-4">
+              <app-custom-toggle id="description_required" [checked]="descriptionRequired"
+                (checkedChange)="toggleDescriptionRequired()">
+              </app-custom-toggle>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class="space-y-4">
+    @if (validateUserService.isOwnerOrManager(currentAccountUser.type)) {
+    <div class="mt-6 flex justify-end">
+      <button (click)="saveSettings()"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+        Salvar Configurações
+      </button>
+    </div>
+    }
+  </div>

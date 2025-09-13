@@ -51,6 +51,10 @@ export interface LowStockProduct {
   currentQuantity: number
   minQuantity: number
   status: 'low' | 'out'
+  unitOfMeasure?: {
+    name: string
+    abbreviation: string
+  }
 }
 
 export interface RecentActivity {

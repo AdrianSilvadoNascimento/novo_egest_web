@@ -56,7 +56,7 @@ export class WelcomeDialogComponent {
   }
 
   navigateToSettings(): void {
-    this.router.navigate(['/settings/account']);
+    this.router.navigate(['/account-settings']);
     this.dialogRef.close();
   }
 } 

@@ -51,7 +51,7 @@
         </button>
       </div>
       <mat-menu #userMenu="matMenu">
-        <button mat-menu-item [routerLink]="['/settings/account', authService.getAccountId()]"
+        <button mat-menu-item [routerLink]="['/account-settings', authService.getAccountId()]"
           routerLinkActive="router-link-active">
           <mat-icon class="mr-3">
             @if (userImage) {
