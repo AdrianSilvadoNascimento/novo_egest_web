@@ -17,9 +17,9 @@
               <input type="checkbox" [checked]="unit.active" (change)="toggleUnit(unit)"
                 class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
 
-            <span class="font-[Lora] font-medium text-gray-800 text-lg" [class.text-gray-400]="!unit.active">
-              {{ unit.name }} ({{ unit.abbreviation }})
-            </span>
+              <span class="font-[Lora] font-medium text-gray-800 text-lg" [class.text-gray-400]="!unit.active">
+                {{ unit.name }} ({{ unit.abbreviation }})
+              </span>
             </div>
 
             <!-- Campo de Estoque Mínimo -->
@@ -90,10 +90,16 @@
   <div class="space-y-4">
     @if (validateUserService.isOwnerOrManager(currentAccountUser.type)) {
     <div class="mt-6 flex justify-end">
-      <button (click)="saveSettings()"
-        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+      <button (click)="saveSettings()" [disabled]="isSavingSettings"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2">
+        @if (isSavingSettings) {
+        <mat-spinner diameter="20"></mat-spinner>
+        Salvando...
+        } @else {
         Salvar Configurações
+        }
       </button>
     </div>
     }
   </div>
+</div>

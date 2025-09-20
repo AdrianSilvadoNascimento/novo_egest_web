@@ -11,6 +11,9 @@ import { CustomToggleComponent } from '../../../shared/components/custom-toggle/
 import { UnitOfMeasureType, UnitOfMeasureAbbreviation } from '../../../enums/unit-of-measure.enum';
 import { UnitOfMeasureService } from '../../../services/unit-of-measure.service';
 import { UnitOfMeasureModel } from '../../../models/unit-of-measure.model';
+import { ProductSettingsService } from '../../../services/product-settings.service';
+import { ProductSettingsModel, ProductSettingsCreationModel } from '../../../models/product-settings.model';
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 // Interface para tipagem
 interface UnitOfMeasure {
@@ -24,7 +27,7 @@ interface UnitOfMeasure {
 @Component({
   selector: 'app-products-settings',
   standalone: true,
-  imports: [CommonModule, MatExpansionModule, CustomToggleComponent],
+  imports: [CommonModule, MatExpansionModule, CustomToggleComponent, MatProgressSpinner],
   templateUrl: './products-settings.component.html',
   styleUrl: './products-settings.component.scss'
 })
@@ -32,32 +35,22 @@ export class ProductsSettingsComponent implements OnInit {
   currentAccountUser: AccountUserModel = new AccountUserModel();
   unitsOfMeasure: UnitOfMeasureModel[] = [];
 
-  // // Dados mockados das unidades de medidas
-  // unitsOfMeasure: UnitOfMeasure[] = [
-  //   { id: 1, name: UnitOfMeasureType.SACA, abbreviation: UnitOfMeasureAbbreviation.S, active: true, lowStockThreshold: 5 },
-  //   { id: 2, name: UnitOfMeasureType.FARDO, abbreviation: UnitOfMeasureAbbreviation.F, active: true, lowStockThreshold: 10 },
-  //   { id: 3, name: UnitOfMeasureType.UNIDADE, abbreviation: UnitOfMeasureAbbreviation.UN, active: true, lowStockThreshold: 20 },
-  //   { id: 4, name: UnitOfMeasureType.KG, abbreviation: UnitOfMeasureAbbreviation.KG, active: true, lowStockThreshold: 50 },
-  //   { id: 5, name: UnitOfMeasureType.GRAMAS, abbreviation: UnitOfMeasureAbbreviation.G, active: true, lowStockThreshold: 1000 },
-  //   { id: 6, name: UnitOfMeasureType.METROS, abbreviation: UnitOfMeasureAbbreviation.M, active: true, lowStockThreshold: 100 },
-  //   { id: 7, name: UnitOfMeasureType.CENTIMETROS, abbreviation: UnitOfMeasureAbbreviation.CM, active: true, lowStockThreshold: 500 },
-  //   { id: 8, name: UnitOfMeasureType.LITROS, abbreviation: UnitOfMeasureAbbreviation.L, active: true, lowStockThreshold: 25 },
-  //   { id: 9, name: UnitOfMeasureType.MILILITROS, abbreviation: UnitOfMeasureAbbreviation.ML, active: true, lowStockThreshold: 5000 }
-  // ];
-
-  // Configurações avançadas
   autoGenerateBarcode: boolean = false;
   descriptionRequired: boolean = false;
+  isSavingSettings: boolean = false;
 
   constructor(
     private readonly toastService: ToastService,
     private readonly accountUserService: AccountUserService,
     private readonly unitOfMeasureService: UnitOfMeasureService,
+    private readonly productSettingsService: ProductSettingsService,
     readonly validateUserService: ValidateUserService,
   ) { }
 
   ngOnInit(): void {
     this.getCurrentAccountUser();
+    this.getUnitsOfMeasure();
+    this.loadProductSettings();
   }
 
   /**
@@ -66,8 +59,26 @@ export class ProductsSettingsComponent implements OnInit {
   getCurrentAccountUser(): void {
     this.accountUserService.$accountUserData.subscribe({
       next: (accountUser: AccountUserModel) => {
+        if (!accountUser.id) {
+          this.fetchCurrentAccountUser();
+          return;
+        }
+
         this.currentAccountUser = accountUser;
-        this.getUnitsOfMeasure();
+      },
+      error: (error: any) => {
+        this.toastService.error(error.error?.message || "Erro ao carregar dados do usuário");
+      }
+    });
+  }
+
+  /**
+   * Fallback para buscar os dados do usuário atual
+   */
+  fetchCurrentAccountUser(): void {
+    this.accountUserService.getAccountUser().subscribe({
+      next: (accountUser: AccountUserModel) => {
+        this.currentAccountUser = accountUser;
       },
       error: (error: any) => {
         this.toastService.error(error.error?.message || "Erro ao carregar dados do usuário");
@@ -82,6 +93,42 @@ export class ProductsSettingsComponent implements OnInit {
     this.unitOfMeasureService.getUnitsOfMeasure().subscribe({
       next: (unitsOfMeasure: UnitOfMeasureModel[]) => {
         this.unitsOfMeasure = unitsOfMeasure;
+      }
+    });
+  }
+
+  /**
+   * Carrega as configurações de produtos
+   */
+  loadProductSettings(): void {
+    this.productSettingsService.getProductSettings().subscribe({
+      next: (settings: ProductSettingsModel) => {
+        this.autoGenerateBarcode = settings.autoGenerateBarcode;
+        this.descriptionRequired = settings.descriptionRequired;
+
+        if (settings.unitsOfMeasure && settings.unitsOfMeasure.length > 0) {
+          this.updateUnitsFromSettings(settings.unitsOfMeasure);
+        }
+      },
+      error: (error: any) => {
+        console.log('Nenhuma configuração encontrada ou erro:', error);
+        if (error.status !== 404) {
+          this.toastService.error(error.error?.message || "Erro ao carregar configurações");
+        }
+      }
+    });
+  }
+
+  /**
+   * Atualiza as unidades de medida com as configurações salvas
+   * @param savedUnits - Unidades de medida salvas
+   */
+  private updateUnitsFromSettings(savedUnits: any[]): void {
+    this.unitsOfMeasure.forEach(unit => {
+      const savedUnit = savedUnits.find(saved => saved.id === unit.id);
+      if (savedUnit) {
+        unit.active = savedUnit.active;
+        unit.low_stock_threshold = savedUnit.lowStockThreshold;
       }
     });
   }
@@ -134,21 +181,45 @@ export class ProductsSettingsComponent implements OnInit {
   /**
    * Salva as configurações
    */
-  saveSettings() {
+  saveSettings(): void {
+    this.isSavingSettings = true;
+
     const activeUnits = this.unitsOfMeasure.filter(unit => unit.active).map(unit => ({
       id: unit.id,
       name: unit.name,
-      abbreviation: unit.abbreviation,
+      abbreviation: unit.abbreviation || '',
       active: unit.active,
       lowStockThreshold: unit.low_stock_threshold
     }));
-    const settings = {
+
+    const settings: ProductSettingsCreationModel = {
       unitsOfMeasure: activeUnits,
       autoGenerateBarcode: this.autoGenerateBarcode,
       descriptionRequired: this.descriptionRequired
     };
 
-    console.log('Configurações salvas:', settings);
-    // TODO: Enviar para o backend quando estiver pronto
+    this.productSettingsService.updateProductSettings({ productSettings: settings, isSkipLoading: true }).subscribe({
+      next: (savedSettings: ProductSettingsModel) => {
+        this.toastService.success('Configurações salvas com sucesso!');
+        this.isSavingSettings = false;
+      },
+      error: (updateError: any) => {
+        if (updateError.status === 404) {
+          this.productSettingsService.saveProductSettings({ productSettings: settings, isSkipLoading: true }).subscribe({
+            next: (savedSettings: ProductSettingsModel) => {
+              this.toastService.success('Configurações salvas com sucesso!');
+              this.isSavingSettings = false;
+            },
+            error: (createError: any) => {
+              this.toastService.error(createError.error?.message || 'Erro ao salvar configurações');
+              this.isSavingSettings = false;
+            }
+          });
+        } else {
+          this.toastService.error(updateError.error?.message || 'Erro ao salvar configurações');
+          this.isSavingSettings = false;
+        }
+      }
+    });
   }
 }

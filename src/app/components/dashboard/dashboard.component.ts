@@ -186,8 +186,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onViewDetails(): void {
-    // TODO: Implementar detalhes da movimentação
-    console.log('Ver detalhes clicado');
+    this.router.navigate(['/movementations']);
   }
 
   getMaxValue(movement: any[]): number {

@@ -17,11 +17,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { CategoryModel } from '../../../models/category.model';
 import { PaginatedItemsModel } from '../../../models/paginated-items.model';
 import { ItemModel } from '../../../models/item.model';
+import { UnitOfMeasureModel } from '../../../models/unit-of-measure.model';
+import { UnitOfMeasureService } from '../../../services/unit-of-measure.service';
+import { CustomSelectComponent, SelectOption } from '../../../shared/components/custom-select/custom-select.component';
+import { ProductSettingsService } from '../../../services/product-settings.service';
+import { ProductSettingsModel } from '../../../models/product-settings.model';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-    imports: [
+  imports: [
     MatCheckboxModule,
     MatInputModule,
     MatButtonModule,
@@ -32,7 +37,8 @@ import { ItemModel } from '../../../models/item.model';
     ReactiveFormsModule,
     MatCard,
     LucideAngularModule,
-    CurrencyPipe
+    CurrencyPipe,
+    CustomSelectComponent
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
@@ -47,19 +53,29 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   draftKey: string = 'product_form_draft';
   hasDraft: boolean = false;
   readonly packageIcon = Package;
-  
-  // Drag & Drop Properties
+
   isDragOver: boolean = false;
   errorMessage: string | null = null;
   maxFileSize: number = 5 * 1024 * 1024; // 5MB
   allowedTypes: string[] = ['image/png', 'image/jpeg', 'image/jpg'];
-  
+
   categories: CategoryModel[] = [];
   paginatedItems!: PaginatedItemsModel
+  unitsOfMeasure: UnitOfMeasureModel[] = [];
+
+  categoryOptions: SelectOption[] = [];
+  unitOfMeasureOptions: SelectOption[] = [];
+
+  // Configurações de produtos
+  productSettings: ProductSettingsModel | null = null;
+  autoGenerateBarcode: boolean = false;
+  descriptionRequired: boolean = false;
 
   constructor(
     private toast: ToastService,
     private itemService: ItemsService,
+    private unitOfMeasureService: UnitOfMeasureService,
+    private productSettingsService: ProductSettingsService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ProductFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { item: ItemCreationModel, isEdit: boolean }
@@ -68,6 +84,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.getCategories();
+      this.loadProductSettings();
     })
   }
 
@@ -87,18 +104,169 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /**
+   * Obtém as categorias
+   */
   getCategories(): void {
     this.itemService.getCategories().subscribe((categories: CategoryModel[]) => {
       this.categories = categories;
+      this.categoryOptions = categories.map(category => ({
+        value: category.id,
+        label: category.name,
+        disabled: false
+      }));
     })
   }
 
+  /**
+   * Obtém as unidades de medida
+   */
+  getUnitsOfMeasure(): void {
+    this.unitOfMeasureService.$unitOfMeasureData.subscribe({
+      next: (unitsOfMeasure: UnitOfMeasureModel[]) => {
+        this.unitsOfMeasure = unitsOfMeasure;
+        this.unitOfMeasureOptions = unitsOfMeasure.map(unit => ({
+          value: unit.id,
+          label: `${unit.name} (${unit.abbreviation})`,
+          disabled: !unit.active
+        }));
+
+        if (!this.unitsOfMeasure.length) this.fetchUnitsOfMeasure();
+      },
+      error: (error: any) => {
+        this.toast.error(error.error?.message || "Erro ao carregar unidades de medida");
+      }
+    })
+  }
+
+  /**
+   * Faz fetch das unidades de medida
+   */
+  fetchUnitsOfMeasure(): void {
+    this.unitOfMeasureService.getUnitsOfMeasure().subscribe({
+      next: (unitsOfMeasure: UnitOfMeasureModel[]) => {
+        this.unitsOfMeasure = unitsOfMeasure;
+        this.unitOfMeasureOptions = unitsOfMeasure.map(unit => ({
+          value: unit.id,
+          label: `${unit.name} (${unit.abbreviation})`,
+          disabled: !unit.active
+        }));
+      },
+      error: (error: any) => {
+        this.toast.error(error.error?.message || "Erro ao carregar unidades de medida");
+      }
+    })
+  }
+
+  /**
+   * Carrega as configurações de produtos
+   */
+  loadProductSettings(): void {
+    this.productSettingsService.$productSettingsData.subscribe({
+      next: (settings: ProductSettingsModel | null) => {
+        if (settings) {
+          this.productSettings = settings;
+          this.autoGenerateBarcode = settings.autoGenerateBarcode;
+          this.descriptionRequired = settings.descriptionRequired;
+
+          this.applySettingsToForm();
+
+          this.filterActiveUnitsOfMeasure();
+        } else {
+          this.fetchProductSettings();
+        }
+      },
+      error: (error: any) => {
+        console.log('Erro ao carregar configurações:', error);
+      }
+    });
+  }
+
+  /**
+   * Busca as configurações do servidor
+   */
+  fetchProductSettings(): void {
+    this.productSettingsService.getProductSettings().subscribe({
+      next: (settings: ProductSettingsModel) => {
+        this.productSettings = settings;
+        this.autoGenerateBarcode = settings.autoGenerateBarcode;
+        this.descriptionRequired = settings.descriptionRequired;
+
+        this.applySettingsToForm();
+
+        this.filterActiveUnitsOfMeasure();
+      },
+      error: (error: any) => {
+        console.log('Nenhuma configuração encontrada, usando padrões');
+        this.autoGenerateBarcode = false;
+        this.descriptionRequired = false;
+
+        this.getUnitsOfMeasure();
+      }
+    });
+  }
+
+  /**
+   * Aplica as configurações ao formulário
+   */
+  applySettingsToForm(): void {
+    if (!this.form) return;
+
+    const descriptionControl = this.form.get('description');
+    if (descriptionControl) {
+      if (this.descriptionRequired) {
+        descriptionControl.setValidators([Validators.required]);
+      } else {
+        descriptionControl.clearValidators();
+      }
+      descriptionControl.updateValueAndValidity();
+    }
+
+    const barcodeControl = this.form.get('barcode');
+    if (barcodeControl && this.autoGenerateBarcode) {
+      if (!this.data.isEdit) {
+        barcodeControl.setValue('');
+        barcodeControl.disable();
+      }
+    }
+  }
+
+  /**
+   * Filtra unidades de medida ativas conforme configuração
+   */
+  filterActiveUnitsOfMeasure(): void {
+    if (this.productSettings && this.productSettings.unitsOfMeasure) {
+      const activeUnitIds = this.productSettings.unitsOfMeasure
+        .filter(unit => unit.active)
+        .map(unit => unit.id);
+
+      const filteredUnits = this.unitsOfMeasure.filter(unit =>
+        activeUnitIds.includes(unit.id)
+      );
+
+      this.unitOfMeasureOptions = filteredUnits.map(unit => ({
+        value: unit.id,
+        label: `${unit.name} (${unit.abbreviation})`,
+        disabled: false
+      }));
+    } else {
+      this.getUnitsOfMeasure();
+    }
+  }
+
+  /**
+   * Atualiza as categorias
+   */
   updatedCategories(): void {
     this.itemService.$categoryData.subscribe((categories: CategoryModel[]) => {
       this.categories = categories;
     })
   }
 
+  /**
+   * Cria o formulário
+   * @param productModel - Modelo do produto
+   */
   createForm(productModel: ItemCreationModel): void {
     this.updatedCategories();
 
@@ -112,13 +280,22 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       barcode: [productModel.barcode],
       active: [productModel.active],
       product_image: [productModel.product_image],
+      unit_of_measure_id: [productModel.unit_of_measure_id, Validators.required],
     });
 
     if (this.data.isEdit) {
       this.form.get('quantity')?.disable();
     }
+
+    // Aplicar configurações ao formulário após criação
+    setTimeout(() => {
+      this.applySettingsToForm();
+    }, 100);
   }
 
+  /**
+   * Cria um novo formulário
+   */
   newForm(): void {
     this.clearDraft();
     this.createForm(new ItemCreationModel());
@@ -128,14 +305,24 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /**
+   * Salva o formulário
+   */
   save(): void {
     this.sendData(false);
   }
 
+  /**
+   * Salva e fecha o formulário
+   */
   saveAndClose(): void {
     this.sendData();
   }
 
+  /**
+   * Envia os dados
+   * @param isToClose - Se deve fechar o formulário
+   */
   sendData(isToClose: boolean = true): void {
     if (this.form.valid) {
       if (!this.data.isEdit) {
@@ -147,18 +334,22 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /**
+   * Atualiza o item
+   * @param isToClose - Se deve fechar o formulário
+   */
   updateItem(isToClose: boolean = true): void {
     const productData = this.form.getRawValue();
 
     if (!this.imageBase64) productData.product_image = '';
-    
+
     this.itemService.updateItem(this.data.item.id, productData).subscribe({
       next: (updatedItem: ItemModel) => {
         this.toast.success('Produto atualizado com sucesso!');
         this.clearDraft();
-  
+
         if (isToClose) this.dialogRef.close(updatedItem);
-  
+
         this.form.reset();
       }, error: (error) => {
         this.toast.error(error.error.message || 'Erro ao atualizar o produto!');
@@ -166,6 +357,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     })
   }
 
+  /**
+   * Cria um novo item
+   * @param isToClose - Se deve fechar o formulário
+   */
   createItem(isToClose: boolean = true): void {
     const productData = this.form.getRawValue();
 
@@ -175,9 +370,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       next: (createdItem: ItemModel) => {
         this.toast.success('Produto salvo com sucesso!');
         this.clearDraft();
-  
+
         if (isToClose) this.dialogRef.close(createdItem);
-  
+
         this.form.reset();
       }, error: (error) => {
         this.toast.error(error.error.message || 'Erro ao salvar o produto!');
@@ -185,12 +380,18 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     })
   }
 
+  /**
+   * Fecha o formulário
+   */
   close() {
     this.clearDraft();
     this.dialogRef.close();
   }
 
-  // Drag & Drop Event Handlers
+  /**
+   * Evento de arrastar sobre o formulário
+   * @param event - Evento de arrastar
+   */
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -198,12 +399,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.clearError();
   }
 
+  /**
+   * Evento de sair do formulário
+   * @param event - Evento de sair
+   */
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver = false;
   }
 
+  /**
+   * Evento de soltar sobre o formulário
+   * @param event - Evento de soltar
+   */
   onDrop(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -215,23 +424,34 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // File Input Handlers
+  /**
+   * Evento de seleção de imagem
+   * @param event - Evento de seleção de imagem
+   */
   onImageSelected(event: any): void {
     const file = event.target.files[0];
     if (file) this.handleFileSelection(file);
 
-    // Limpar o input para permitir selecionar o mesmo arquivo novamente
     event.target.value = '';
   }
 
+  /**
+   * Trigger do input de arquivo
+   */
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();
   }
 
+  /**
+   * Muda a imagem
+   */
   changeImage(): void {
     this.fileInputChange.nativeElement.click();
   }
 
+  /**
+   * Remove a imagem
+   */
   removeImage(): void {
     this.imagePreview = null;
     this.imageBase64 = null;
@@ -239,21 +459,26 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.clearError();
   }
 
-  // File Processing
+  /**
+   * Handle da seleção de arquivo
+   * @param file - Arquivo selecionado
+   */
   private handleFileSelection(file: File): void {
     if (this.validateFile(file)) this.processFile(file);
   }
 
+  /**
+   * Valida o arquivo
+   * @param file - Arquivo selecionado
+   */
   private validateFile(file: File): boolean {
     this.clearError();
 
-    // Verificar tipo de arquivo
     if (!this.allowedTypes.includes(file.type)) {
       this.setError('Formato não suportado. Use PNG ou JPG.');
       return false;
     }
 
-    // Verificar tamanho do arquivo
     if (file.size > this.maxFileSize) {
       this.setError('Arquivo muito grande. Máximo 5MB.');
       return false;
@@ -262,11 +487,15 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return true;
   }
 
+  /**
+   * Processa o arquivo
+   * @param file - Arquivo selecionado
+   */
   private processFile(file: File): void {
     const base64Reader = new FileReader();
     base64Reader.onload = () => {
       const base64String = base64Reader.result as string;
-      
+
       const base64Data = base64String.split(',')[1];
       this.imageBase64 = base64Data;
       this.imagePreview = base64String;
@@ -276,21 +505,34 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     base64Reader.readAsDataURL(file);
   }
 
+  /**
+   * Define o erro
+   * @param message - Mensagem de erro
+   */
   private setError(message: string): void {
     this.errorMessage = message;
-    setTimeout(() => this.clearError(), 5000); // Limpar erro após 5 segundos
+    setTimeout(() => this.clearError(), 5000);
   }
 
+  /**
+   * Limpa o erro
+   */
   private clearError(): void {
     this.errorMessage = null;
   }
 
+  /**
+   * Salva o draft
+   */
   private saveDraft(): void {
     if (!this.form.dirty) return;
 
     sessionStorage.setItem(this.draftKey, JSON.stringify(this.form.getRawValue()));
   }
 
+  /**
+   * Carrega o draft
+   */
   loadDraft(): void {
     const draft = sessionStorage.getItem(this.draftKey);
     if (draft) {
@@ -305,17 +547,38 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       draftItem.barcode = parsedDraft.barcode;
       draftItem.active = parsedDraft.active;
       draftItem.product_image = parsedDraft.product_image;
+      draftItem.unit_of_measure_id = parsedDraft.unit_of_measure_id;
 
       this.createForm(draftItem as ItemCreationModel);
     }
   }
 
+  /**
+   * Limpa o draft
+   */
   clearDraft(): void {
     sessionStorage.removeItem(this.draftKey);
     this.hasDraft = false;
     this.imagePreview = null;
   }
 
+  /**
+   * Handles category selection change
+   */
+  onCategoryChange(option: SelectOption): void {
+    this.form.patchValue({ category_id: option.value });
+  }
+
+  /**
+   * Handles unit of measure selection change
+   */
+  onUnitOfMeasureChange(option: SelectOption): void {
+    this.form.patchValue({ unit_of_measure_id: option.value });
+  }
+
+  /**
+   * Destrói o componente
+   */
   ngOnDestroy(): void {
     if (!this.form.valid) this.saveDraft();
   }

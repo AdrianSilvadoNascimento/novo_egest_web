@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 import { UnitOfMeasureModel } from '../models/unit-of-measure.model';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
 import { UtilsService } from './utils/utils.service';
 
@@ -13,16 +13,29 @@ import { UtilsService } from './utils/utils.service';
 export class UnitOfMeasureService {
   private readonly baseUrl = `${environment.apiUrl}/unit-of-measure`
 
-  private headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  })
+  private unitOfMeasureData: BehaviorSubject<UnitOfMeasureModel[]>
+  $unitOfMeasureData: Observable<UnitOfMeasureModel[]>;
 
   constructor(
     private http: HttpClient, 
     private authService: AuthService,
     private utilsService: UtilsService
-  ) { }
+  ) {
+    const storedUnitOfMeasureData = sessionStorage.getItem('unitOfMeasureData');
+    const parsedUnitOfMeasureData = storedUnitOfMeasureData ? JSON.parse(storedUnitOfMeasureData) : [] as UnitOfMeasureModel[];
+
+    this.unitOfMeasureData = new BehaviorSubject<UnitOfMeasureModel[]>(parsedUnitOfMeasureData);
+    this.$unitOfMeasureData = this.unitOfMeasureData.asObservable();
+  }
+
+  /**
+   * Obtém os dados das unidades de medida
+   * @returns Observable com os dados das unidades de medida
+   */
+  setUnitOfMeasureData(unitsOfMeasure: UnitOfMeasureModel[]): void {
+    sessionStorage.setItem('unitOfMeasureData', JSON.stringify(unitsOfMeasure));
+    this.unitOfMeasureData.next(unitsOfMeasure);
+  }
 
   /**
    * Obtém todas as unidades de medidas
@@ -31,7 +44,7 @@ export class UnitOfMeasureService {
   getUnitsOfMeasure(): Observable<UnitOfMeasureModel[]> {    
     return this.http.get<UnitOfMeasureModel[]>(`${this.baseUrl}/${this.authService.getAccountId()}`, {
       headers: this.utilsService.withAuth()
-    });
+    }).pipe(tap((unitsOfMeasure: UnitOfMeasureModel[]) => this.setUnitOfMeasureData(unitsOfMeasure)));
   }
 
   /**
@@ -41,7 +54,7 @@ export class UnitOfMeasureService {
   getActiveUnitsOfMeasure(): Observable<UnitOfMeasureModel[]> {    
     return this.http.get<UnitOfMeasureModel[]>(`${this.baseUrl}/${this.authService.getAccountId()}/active`, {
       headers: this.utilsService.withAuth()
-    });
+    }).pipe(tap((unitsOfMeasure: UnitOfMeasureModel[]) => this.setUnitOfMeasureData(unitsOfMeasure)));
   }
 
   /**

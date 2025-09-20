@@ -9,8 +9,8 @@
   </button>
 </div>
 
-<mat-dialog-content>  
-  @if (hasDraft) {
+<mat-dialog-content>
+  @if (hasDraft && !data.isEdit) {
   <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow mb-6 text-sm flex items-center gap-2">
     <span class="material-icons text-yellow-600">info</span>
     Você tem alterações salvas como rascunho.
@@ -171,38 +171,67 @@
 
           <!-- Descrição -->
           <div class="mb-4">
-            <label for="description" class="text-sm block text-gray-700 font-[Lora] mb-1">Descrição</label>
+            <label for="description" class="text-sm block text-gray-700 font-[Lora] mb-1">
+              Descrição
+              @if (descriptionRequired) {
+                <span class="text-red-500 ml-1">*</span>
+              }
+            </label>
             <div class="relative">
               <textarea id="description" name="description" formControlName="description"
                 class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-                placeholder="Insira a descrição do produto"></textarea>
+                [placeholder]="descriptionRequired ? 'Descrição obrigatória' : 'Insira a descrição do produto'"></textarea>
             </div>
+            @if (form.get('description')?.invalid && form.get('description')?.touched && descriptionRequired) {
+              <div class="text-red-500 text-sm mt-1 font-[Lora]">Descrição é obrigatória</div>
+            }
           </div>
 
           <!-- Código de barras -->
           <div class="mb-4">
-            <label for="barcode" class="text-sm block text-gray-700 font-[Lora] mb-1">Código de Barras</label>
+            <label for="barcode" class="text-sm block text-gray-700 font-[Lora] mb-1">
+              Código de Barras
+              @if (autoGenerateBarcode && !data.isEdit) {
+                <span class="text-blue-600 text-xs ml-2">(Gerado automaticamente)</span>
+              }
+            </label>
             <div class="relative">
               <input id="barcode" name="barcode" type="text" formControlName="barcode"
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]"
-                placeholder="Insira o código de barras do produto">
+                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                [placeholder]="autoGenerateBarcode && !data.isEdit ? 'Será gerado automaticamente' : 'Insira o código de barras do produto'">
             </div>
+            @if (autoGenerateBarcode && !data.isEdit) {
+              <div class="text-blue-600 text-xs mt-1 font-[Lora]">
+                O código de barras será gerado automaticamente pelo sistema
+              </div>
+            }
           </div>
 
           <!-- Categoria -->
           <div class="mb-4">
             <label for="category_id" class="text-sm block text-gray-700 font-[Lora] mb-1">Categoria</label>
-            <div class="relative">
-              <select id="category_id" name="category_id" formControlName="category_id"
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2fade3]">
-                <option value="">Selecione</option>
-                @for (category of categories; track category.id) {
-                <option [value]=category.id>{{category.name}}</option>
-                }
-              </select>
-            </div>
-            @if (form.get('category')?.invalid && form.get('category')?.touched) {
+            <app-custom-select
+              [options]="categoryOptions"
+              placeholder="Selecione uma categoria"
+              formControlName="category_id"
+              (selectionChange)="onCategoryChange($event)">
+            </app-custom-select>
+            @if (form.get('category_id')?.invalid && form.get('category_id')?.touched) {
             <mat-error>Categoria é obrigatória</mat-error>
+            }
+          </div>
+
+          <!-- Unidade de medida -->
+          <div class="mb-4">
+            <label for="unit_of_measure_id" class="text-sm block text-gray-700 font-[Lora] mb-1">Unidade de Medida</label>
+            <app-custom-select
+              [options]="unitOfMeasureOptions"
+              placeholder="Selecione uma unidade"
+              formControlName="unit_of_measure_id"
+              (selectionChange)="onUnitOfMeasureChange($event)">
+            </app-custom-select>
+            @if (form.get('unit_of_measure_id')?.invalid && form.get('unit_of_measure_id')?.touched) {
+            <mat-error>Unidade de medida é obrigatória</mat-error>
             }
           </div>
         </mat-card>

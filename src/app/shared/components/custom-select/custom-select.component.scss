@@ -1,0 +1,22 @@
+/* Minimal custom styles - most styling done with Tailwind */
+.custom-select-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.checkmark-animation {
+  animation: checkmark 0.3s ease;
+}
