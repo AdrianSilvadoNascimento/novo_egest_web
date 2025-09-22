@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { DashboardModel } from '../models/dashboard.model';
-import { BehaviorSubject, Observable, tap, of, NEVER } from 'rxjs';
+import { BehaviorSubject, Observable, tap, of, Subscription } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, retry, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { SocketService } from './socket.service';
 
 interface CachedDashboardData {
   data: DashboardModel;
@@ -36,16 +37,10 @@ interface DashboardStatus {
   };
 }
 
-interface SSEEvent {
-  type: 'connected' | 'status' | 'dashboard-updated' | 'calculation-failed' | 'heartbeat';
-  data?: any;
-  error?: string;
-  timestamp: number;
-  accountId?: string;
-}
+// Interfaces removidas - agora usando WebSocket
 
 /**
- * DashboardService - Gerencia dados do dashboard com cache inteligente e SSE
+ * DashboardService - Gerencia dados do dashboard com cache inteligente e WebSocket
  * 
  * IMPORTANTE: Este serviço usa header 'X-Skip-Loading' em todas as requisições
  * para evitar conflito com o LoadingInterceptor global. O dashboard possui
@@ -79,13 +74,14 @@ export class DashboardService {
     'Accept': 'application/json',
   })
 
-  private accountId!: string | null
-  private eventSource: EventSource | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
+  private accountId!: string | null;
+  private webSocketSubscriptions: Subscription[] = [];
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(
+    private http: HttpClient, 
+    private authService: AuthService,
+    private socketService: SocketService
+  ) { }
 
   setDashboardData(data: DashboardModel): void {
     this.dashboardData.next(data);
@@ -135,6 +131,18 @@ export class DashboardService {
   getDashboardData(forceRefresh: boolean = false): Observable<DashboardModel> {
     this.accountId = this.authService.getAccountId();
     
+    if (!this.accountId) {
+      console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
+      this.loadingState.next(false);
+      return of({} as DashboardModel);
+    }
+
+    if (!this.authService.getToken()) {
+      console.error('❌ Dashboard: Token não encontrado - usuário não está autenticado');
+      this.loadingState.next(false);
+      return of({} as DashboardModel);
+    }
+    
     if (!forceRefresh) {
       const cachedData = this.getCachedData();
       if (cachedData) {
@@ -152,6 +160,11 @@ export class DashboardService {
       tap((data: DashboardModel) => {
         this.setDashboardData(data);
         this.loadingState.next(false);
+      }),
+      catchError((error) => {
+        console.error('❌ Dashboard: Erro ao buscar dados:', error);
+        this.loadingState.next(false);
+        return of({} as DashboardModel);
       })
     );
   }
@@ -180,6 +193,18 @@ export class DashboardService {
   getDashboardQuick(forceRefresh: boolean = false): Observable<DashboardModel> {
     this.accountId = this.authService.getAccountId();
     
+    if (!this.accountId) {
+      console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
+      this.loadingState.next(false);
+      return of({} as DashboardModel);
+    }
+
+    if (!this.authService.getToken()) {
+      console.error('❌ Dashboard: Token não encontrado - usuário não está autenticado');
+      this.loadingState.next(false);
+      return of({} as DashboardModel);
+    }
+    
     // Verificar cache local primeiro (se não for refresh forçado)
     if (!forceRefresh) {
       const cachedData = this.getCachedData();
@@ -202,7 +227,6 @@ export class DashboardService {
       map((response: QuickDashboardResponse) => response.data),
       catchError((error) => {
         this.loadingState.next(false);
-
         return this.getDashboardData(forceRefresh);
       })
     );
@@ -213,6 +237,17 @@ export class DashboardService {
    */
   forceRefresh(): Observable<{ success: boolean; jobId?: string; message: string }> {
     this.accountId = this.authService.getAccountId();
+    
+    if (!this.accountId) {
+      console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
+      return of({ success: false, message: 'Usuário não está logado' });
+    }
+
+    if (!this.authService.getToken()) {
+      console.error('❌ Dashboard: Token não encontrado - usuário não está autenticado');
+      return of({ success: false, message: 'Usuário não está autenticado' });
+    }
+
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true');
     
@@ -255,140 +290,164 @@ export class DashboardService {
   }
 
   /**
-   * Conecta ao stream SSE para updates em tempo real
+   * Conecta ao WebSocket para updates em tempo real
    */
-  connectToUpdates(): Observable<SSEEvent> {
+  connectToWebSocket(): void {
     this.accountId = this.authService.getAccountId();
     
-    if (this.eventSource) {
-      this.disconnectFromUpdates();
+    if (!this.accountId) {
+      console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
+      this.connectionStatus.next('disconnected');
+      return;
+    }
+
+    // Verificar se o token ainda é válido
+    if (!this.authService.getToken()) {
+      console.error('❌ Dashboard: Token não encontrado - usuário não está autenticado');
+      this.connectionStatus.next('disconnected');
+      return;
+    }
+
+    // Desconectar se já estiver conectado
+    if (this.socketService.isSocketConnected()) {
+      this.disconnectFromWebSocket();
     }
 
     this.connectionStatus.next('connecting');
-    console.log('📡 Dashboard: Conectando ao stream SSE');
+    console.log('📡 Dashboard: Conectando ao WebSocket');
 
-    const token = this.authService.getToken();
-    if (!token) {
+    // Conectar ao WebSocket
+    this.socketService.connect(this.accountId).then(() => {
+      console.log('✅ Dashboard: WebSocket conectado');
+      this.setupWebSocketListeners();
+    }).catch((error) => {
+      console.error('❌ Dashboard: Erro ao conectar WebSocket', error);
       this.connectionStatus.next('disconnected');
-      return NEVER;
-    }
+    });
+  }
 
-    const url = `${this.API_URL}/${this.accountId}/stream?api_token=${token}`;
-    
-    this.eventSource = new EventSource(url);
+  /**
+   * Configura listeners para eventos WebSocket
+   */
+  private setupWebSocketListeners(): void {
+    // Limpar subscriptions anteriores
+    this.webSocketSubscriptions.forEach(sub => sub.unsubscribe());
+    this.webSocketSubscriptions = [];
 
-    return new Observable<SSEEvent>((observer) => {
-      if (!this.eventSource) return;
-
-      this.eventSource.onopen = () => {
+    // Status de conexão
+    const connectionSub = this.socketService.$connectionStatus.subscribe(status => {
+      if (status.status === 'connected') {
         this.connectionStatus.next('connected');
-        this.reconnectAttempts = 0;
-      };
-
-      this.eventSource.onmessage = (event) => {
-        try {
-          const data: SSEEvent = JSON.parse(event.data);
-          observer.next(data);
-          
-          // Processar eventos específicos
-          this.handleSSEEvent(data);
-          
-        } catch (error) {
-          console.error('❌ Dashboard: Erro ao processar evento SSE', error);
-        }
-      };
-
-      this.eventSource.onerror = (error) => {
-        console.error('❌ Dashboard: Erro na conexão SSE', error);
+        // Solicitar status inicial
+        this.socketService.requestDashboardStatus();
+      } else if (status.status === 'disconnected' || status.status === 'error') {
         this.connectionStatus.next('disconnected');
+      }
+    });
+    this.webSocketSubscriptions.push(connectionSub);
 
-        if (this.eventSource?.readyState === EventSource.CLOSED) {
-          console.error('❌ Dashboard: Conexão fechada (possivelmente token inválido)');
-          observer.error(new Error('Token de autorização inválido ou expirado'));
-          return;
-        }
+    // Atualizações do dashboard
+    const dashboardSub = this.socketService.onDashboard().subscribe(data => {
+      console.log('✨ Dashboard: Dados atualizados via WebSocket');
+      this.setDashboardData(data);
+    });
+    this.webSocketSubscriptions.push(dashboardSub);
 
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++;
-          console.log(`🔄 Dashboard: Tentando reconectar (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-          
-          setTimeout(() => {
-            this.connectToUpdates().subscribe(observer);
-          }, this.reconnectDelay * this.reconnectAttempts);
-        } else {
-          console.error('❌ Dashboard: Máximo de tentativas de reconexão excedido');
-          observer.error(error);
-        }
-      };
+    // Status do dashboard
+    const statusSub = this.socketService.onDashboardStatus().subscribe(status => {
+      console.log('📊 Dashboard: Status atualizado via WebSocket');
+      this.dashboardStatus.next(status);
+    });
+    this.webSocketSubscriptions.push(statusSub);
 
-      // Cleanup
-      return () => {
-        this.disconnectFromUpdates();
-      };
-    }).pipe(
-      retry({ count: 3, delay: 2000 }),
-      catchError((error) => {
-        console.error('❌ Dashboard: Falha definitiva na conexão SSE', error);
-        this.connectionStatus.next('disconnected');
-        return NEVER;
-      })
-    );
+    // Erros do dashboard
+    const errorSub = this.socketService.onDashboardError().subscribe(error => {
+      console.error('❌ Dashboard: Erro via WebSocket', error);
+    });
+    this.webSocketSubscriptions.push(errorSub);
+
+    // Eventos de refresh
+    const refreshSub = this.socketService.onRefreshEvents().subscribe(event => {
+      this.handleRefreshEvent(event);
+    });
+    this.webSocketSubscriptions.push(refreshSub);
   }
 
   /**
-   * Desconecta do stream SSE
+   * Desconecta do WebSocket
    */
-  disconnectFromUpdates(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-      this.connectionStatus.next('disconnected');
-    }
+  disconnectFromWebSocket(): void {
+    // Limpar subscriptions
+    this.webSocketSubscriptions.forEach(sub => sub.unsubscribe());
+    this.webSocketSubscriptions = [];
+
+    // Desconectar WebSocket
+    this.socketService.disconnect();
+    this.connectionStatus.next('disconnected');
+    console.log('📡 Dashboard: WebSocket desconectado');
   }
 
   /**
-   * Processa eventos SSE recebidos
+   * Processa eventos de refresh recebidos via WebSocket
    */
-  private handleSSEEvent(event: SSEEvent): void {
+  private handleRefreshEvent(event: any): void {
     switch (event.type) {
-      case 'connected':
-        console.log('📡 Dashboard: Stream conectado');
+      case 'dashboard-refresh-started':
+        console.log('🔄 Dashboard: Refresh iniciado via WebSocket');
         break;
         
-      case 'status':
-        console.log('📊 Dashboard: Status atualizado');
-        this.dashboardStatus.next(event.data);
+      case 'dashboard-refresh-result':
+        console.log('✅ Dashboard: Refresh concluído via WebSocket', event.message);
+        if (event.success && event.jobId) {
+          console.log('📋 Dashboard: Job ID:', event.jobId);
+        }
         break;
         
-      case 'dashboard-updated':
-        console.log('✨ Dashboard: Dados atualizados via SSE');
-        this.setDashboardData(event.data);
-        break;
-        
-      case 'calculation-failed':
-        console.error('❌ Dashboard: Falha no cálculo', event.error);
-        break;
-        
-      case 'heartbeat':
+      case 'dashboard-refresh-error':
+        console.error('❌ Dashboard: Erro no refresh via WebSocket', event.error);
         break;
         
       default:
-        console.log('📡 Dashboard: Evento SSE desconhecido', event);
+        console.log('📡 Dashboard: Evento de refresh desconhecido', event);
     }
   }
 
   /**
-   * Verifica se está conectado ao stream
+   * Verifica se está conectado ao WebSocket
    */
   isConnectedToUpdates(): boolean {
-    return this.eventSource !== null && this.eventSource.readyState === EventSource.OPEN;
+    return this.socketService.isSocketConnected();
+  }
+
+  /**
+   * Solicita refresh do dashboard via WebSocket
+   */
+  requestWebSocketRefresh(force: boolean = false): void {
+    if (this.isConnectedToUpdates()) {
+      this.socketService.requestDashboardRefresh(force);
+    } else {
+      console.warn('⚠️ Dashboard: WebSocket não conectado - usando refresh via API');
+      this.forceRefresh().subscribe();
+    }
+  }
+
+  /**
+   * Solicita status do dashboard via WebSocket
+   */
+  requestWebSocketStatus(): void {
+    if (this.isConnectedToUpdates()) {
+      this.socketService.requestDashboardStatus();
+    } else {
+      console.warn('⚠️ Dashboard: WebSocket não conectado - usando status via API');
+      this.getStatus().subscribe();
+    }
   }
 
   /**
    * Método de cleanup (chame quando destruir componente)
    */
   cleanup(): void {
-    this.disconnectFromUpdates();
+    this.disconnectFromWebSocket();
     this.dashboardData.complete();
     this.loadingState.complete();
     this.connectionStatus.complete();

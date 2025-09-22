@@ -84,6 +84,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.getCategories();
+      this.getUnitsOfMeasure();
       this.loadProductSettings();
     })
   }

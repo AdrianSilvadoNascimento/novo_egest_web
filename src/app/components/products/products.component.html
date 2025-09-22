@@ -38,7 +38,7 @@
   </mat-drawer>
 
   <div class="mb-6 flex flex-row items-center justify-end gap-4 flex-wrap md:flex-nowrap">
-    @if (account.subscription.plan.features.import_features.excel_import) {
+    @if (account && account.subscription!.plan!.features!.import_features!.excel_import) {
       <button mat-stroked-button color="primary" class="user-menu text-gray-700" matTooltip="Importar produtos"
         (click)="fileInput.click()">
         <div class="flex justify-be tween items-center">

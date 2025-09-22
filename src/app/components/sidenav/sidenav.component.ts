@@ -81,11 +81,14 @@ export class SidenavComponent implements OnInit, OnDestroy {
    * Filtra os links com base no plano do usuário
    */
   private filterLinks(): void {
+    if (!this.isLogged || !this.currentAccount) return;
+
     this.links = this.links.filter((link) => {
-      if (link.route === '/team') {
-        return this.currentAccount.subscription.plan.features.team_features.enabled;
-      }
-      return true;
+      if (link.route !== '/team') return true;
+
+      if (this.currentAccount && this.currentAccount.subscription?.plan?.features.team_features.enabled) return true;
+
+      return false;
     });
   }
 
@@ -98,7 +101,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
       this.filterLinks();
     });
 
-    if (!this.currentAccount.id) {
+    if (!this.currentAccount) {
       this.accountService.getAccount().subscribe({
         next: (account: AccountModel) => {
           this.currentAccount = account;

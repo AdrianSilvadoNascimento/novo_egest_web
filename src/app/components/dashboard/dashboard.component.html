@@ -149,7 +149,7 @@
 
     <hr class="my-4">
     
-    @if (dashboardData!.weeklyMovement) {
+    @if (dashboardData && dashboardData.weeklyMovement) {
       <div class="movement-chart">
         @for (item of dashboardData.weeklyMovement; track item.day) {
           <div class="chart-row">

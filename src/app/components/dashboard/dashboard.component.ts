@@ -88,9 +88,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isLoading = loading;
     });
 
-    // Subscrever ao status da conexão SSE
+    // Subscrever ao status da conexão WebSocket
     this.dashboardService.$connectionStatus.subscribe(status => {
-      console.log(`📡 Dashboard: Status conexão: ${status}`);
+      console.log(`📡 Dashboard: Status conexão WebSocket: ${status}`);
     });
 
     // Subscrever aos dados do dashboard
@@ -99,9 +99,18 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dashboardData = data;
       }
     });
-    
-    this.getData();
-    this.connectToRealTimeUpdates();
+
+    this.authService.$toggleLogin.subscribe({
+      next: (isLoggedIn) => {
+        if (isLoggedIn && this.authService.getAccountId()) {
+          this.getData();
+          this.connectToRealTimeUpdates();
+        } else {
+          this.dashboardData = {} as DashboardModel;
+          this.dashboardService.disconnectFromWebSocket();
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -124,32 +133,61 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshData(): void {
     this.isLoadingRefresh = true;
     
-    // Usar método de refresh forçado
-    this.dashboardService.forceRefresh().subscribe((response) => {
-      if (response.success) {
-        console.log(`✅ Refresh iniciado: ${response.message}`);
-      } else {
-        console.error(`❌ Erro no refresh: ${response.message}`);
-      }
-      this.isLoadingRefresh = false;
-    });
+    // Tentar usar WebSocket primeiro, fallback para API
+    if (this.dashboardService.isConnectedToUpdates()) {
+      console.log('🔄 Dashboard: Solicitando refresh via WebSocket');
+      this.dashboardService.requestWebSocketRefresh(true);
+      // WebSocket não retorna resposta imediata, resetar loading após delay
+      setTimeout(() => {
+        this.isLoadingRefresh = false;
+      }, 1000);
+    } else {
+      console.log('🔄 Dashboard: WebSocket não disponível, usando API');
+      // Usar método de refresh forçado via API
+      this.dashboardService.forceRefresh().subscribe((response) => {
+        if (response.success) {
+          console.log(`✅ Refresh iniciado: ${response.message}`);
+        } else {
+          console.error(`❌ Erro no refresh: ${response.message}`);
+        }
+        this.isLoadingRefresh = false;
+      });
+    }
   }
 
   /**
-   * Conecta aos updates em tempo real via SSE
+   * Conecta aos updates em tempo real via WebSocket
    */
   private connectToRealTimeUpdates(): void {
-    this.dashboardService.connectToUpdates().subscribe({
-      next: (event) => {
-        // Eventos SSE são processados automaticamente no service
-        if (event.type === 'dashboard-updated') {
-          console.log('✨ Dashboard atualizado via tempo real!');
-        }
-      },
-      error: (error) => {
-        console.error('❌ Erro na conexão tempo real:', error);
-      }
-    });
+    // Conectar ao WebSocket
+    this.dashboardService.connectToWebSocket();
+    
+    // Os eventos WebSocket são processados automaticamente no service
+    // Não precisamos de subscription manual aqui
+    console.log('📡 Dashboard: Conectando ao WebSocket para updates em tempo real');
+  }
+
+  /**
+   * Obtém informações da conexão WebSocket
+   */
+  getWebSocketInfo(): { isConnected: boolean; status: string } {
+    let status = '';
+    this.dashboardService.$connectionStatus.subscribe(status => status);
+    return {
+      isConnected: this.dashboardService.isConnectedToUpdates(),
+      status,
+    };
+  }
+
+  /**
+   * Reconecta ao WebSocket se necessário
+   */
+  reconnectWebSocket(): void {
+    console.log('🔄 Dashboard: Reconectando WebSocket...');
+    this.dashboardService.disconnectFromWebSocket();
+    setTimeout(() => {
+      this.dashboardService.connectToWebSocket();
+    }, 1000);
   }
 
   onAddProduct(): void {
