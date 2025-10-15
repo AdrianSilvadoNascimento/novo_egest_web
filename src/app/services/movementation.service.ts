@@ -8,17 +8,13 @@ import { ItemsService } from './items.service';
 import { ItemModel } from '../models/item.model';
 import { PaginatedItemsModel } from '../models/paginated-items.model';
 import { UtilsService } from './utils/utils.service';
+import { DashboardService } from './dashboard.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovementationService {
   private readonly apiUrl: string = `${environment.apiUrl}/movementation`;
-
-  private headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  });
 
   private movementationData = new BehaviorSubject<PaginatedMovementationModel>({} as PaginatedMovementationModel);
   $movementationData = this.movementationData.asObservable();
@@ -27,7 +23,8 @@ export class MovementationService {
     private readonly http: HttpClient,
     private readonly authService: AuthService,
     private readonly itemService: ItemsService,
-    private readonly utilsService: UtilsService
+    private readonly utilsService: UtilsService,
+    private readonly dashboardService: DashboardService
   ) { }
 
   /**
@@ -55,7 +52,7 @@ export class MovementationService {
   ): Observable<PaginatedMovementationModel> {
     const accountId = this.authService.getAccountId();
     const params = new URLSearchParams();
-    
+
     if (cursor) params.set('offset', cursor);
     params.set('limit', String(limit));
     if (filters?.moveType) params.set('move_type', filters.moveType);
@@ -102,6 +99,8 @@ export class MovementationService {
     const accountId = this.authService.getAccountId();
     const accountUserId = this.authService.getAccountUserId();
 
+    this.dashboardService.clearDashboardCache();
+
     return this.http.post<ItemModel>(`${this.apiUrl}/${accountId}`, {
       ...movementation,
       account_id: accountId,
@@ -109,11 +108,10 @@ export class MovementationService {
     }, {
       headers: this.utilsService.withAuth()
     }).pipe(tap((updatedItem: ItemModel) => {
-      // Atualizar os dados do item no service de itens
       const itemData = JSON.parse(sessionStorage.getItem('itemData') || '{}');
       if (itemData.data) {
         const paginatedItems = {
-          data: itemData.data.map((item: ItemModel) => 
+          data: itemData.data.map((item: ItemModel) =>
             item.id === movementation.item_id ? updatedItem : item
           ),
           nextCursor: itemData.nextCursor,
@@ -129,7 +127,9 @@ export class MovementationService {
   revertMovementation(movementationId: string): Observable<ItemModel> {
     return this.http.delete<ItemModel>(`${this.apiUrl}/${movementationId}`, {
       headers: this.utilsService.withAuth()
-    });
+    }).pipe(tap(() => {
+      this.dashboardService.clearDashboardCache();
+    }));
   }
 
   /**

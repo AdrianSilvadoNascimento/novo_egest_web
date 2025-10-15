@@ -29,7 +29,9 @@ export class AppComponent implements OnInit {
 
   isLogged: boolean = false;
 
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {

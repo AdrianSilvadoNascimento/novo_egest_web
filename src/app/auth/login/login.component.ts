@@ -23,6 +23,7 @@ import { LoginModel } from '../../models/login.model';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { GoogleAuthService, GoogleUserData } from '../../services/google-auth.service';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-login',
@@ -47,7 +48,8 @@ export class LoginComponent implements OnInit {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private googleAuthService: GoogleAuthService,
-    private router: Router
+    private router: Router,
+    private readonly accountService: AccountService
   ) { }
 
   ngOnInit(): void {
@@ -84,6 +86,7 @@ export class LoginComponent implements OnInit {
       next: () => {
         this.toast.success('Login realizado com sucesso!');
         this.loginForm.reset();
+        this.accountService.getAccount().subscribe();
       },
       error: (err: any) => {
         this.toast.error(err.error.message || 'Erro ao realizar login!');
@@ -97,7 +100,6 @@ export class LoginComponent implements OnInit {
     try {
       this.googleAuthService.signInWithGoogle().subscribe({
         next: (googleUser: GoogleUserData) => {
-          // Obter o ID Token do usuário autenticado no Firebase
           this.googleAuthService.getAuthToken().subscribe({
             next: (idToken) => {
               if (!idToken) {
@@ -105,7 +107,6 @@ export class LoginComponent implements OnInit {
                 return;
               }
 
-              // Sempre tentar login no backend. Se não existir, vamos redirecionar para registro
               this.authService.loginWithGoogle({
                 uid: googleUser.uid,
                 email: googleUser.email,
@@ -114,6 +115,7 @@ export class LoginComponent implements OnInit {
               }).subscribe({
                 next: () => {
                   this.toast.success('Login realizado com sucesso!');
+                  this.accountService.getAccount().subscribe();
                 },
                 error: (error) => {
                   const status = error?.status;

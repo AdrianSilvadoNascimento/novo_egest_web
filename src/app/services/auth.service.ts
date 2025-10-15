@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { environment } from '../../environments/environment';
@@ -30,7 +30,10 @@ export class AuthService {
 
   private storage: Storage = localStorage;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) { }
 
   isLoggedIn(): boolean {
     const token = this.getToken();
@@ -103,11 +106,12 @@ export class AuthService {
    * @param loginModel - Modelo de login
    * @returns Observable com o resultado do login
    */
-  login(loginModel: LoginModel): Observable<any> {
+  login(loginModel: LoginModel): Observable<any> {    
     return this.http.post(`${this.API_URL}/login`, loginModel, {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
-      tap((res: any) => {
+      tap(async (res: any) => {
+        this.setAccountUserName(res.account_user.name);
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -115,10 +119,10 @@ export class AuthService {
           user_id: res.account_user.id,
           user_image: res.account_user.user_image,
         });
-        this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
         this.firstAccess.next(res.account_user.first_access);
         this.setPasswordConfirmed(res.account_user.password_confirmed || true);
+        
         this.redirectBasedOnFlags();
       })
     )
@@ -261,7 +265,7 @@ export class AuthService {
     return this.http.post(`${this.API_URL}/login/google`, googleLoginData, {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
-      tap((res: any) => {
+      tap(async (res: any) => {
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -273,6 +277,7 @@ export class AuthService {
         this.setLoginStatus(true, res.token);
         this.firstAccess.next(res.account_user.first_access);
         this.setPasswordConfirmed(res.account_user.password_confirmed || false);
+        
         this.redirectBasedOnFlags();
       })
     )
@@ -284,13 +289,11 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.getToken()}`
     }
-    
+
     return this.http.post(`${this.API_URL}/update-password`, { accountUserId, password }, { headers })
       .pipe(
         tap((res: any) => {
-          // Marcar senha como confirmada
           this.setPasswordConfirmed(true);
-          // Marcar first_access como false (usuário configurou a conta)
           this.setFirstAccess(false);
         })
       );
@@ -321,7 +324,7 @@ export class AuthService {
     localStorage.clear();
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
     this.setLoginStatus(false);
     this.setFirstAccess(false);
     this.setPasswordConfirmed(true);

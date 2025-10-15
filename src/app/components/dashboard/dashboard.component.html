@@ -217,7 +217,7 @@
     </mat-card>
 
     <!-- Resumo Semanal -->
-    @if (dashboardData.weeklySummary) {
+    @if (dashboardData && dashboardData.weeklySummary) {
       <mat-card class="weekly-summary-card">
         <div class="section-title text-lg text-gray-500 font-semibold">Resumo Semanal</div>
 
@@ -265,7 +265,7 @@
 
     <hr class="my-4">
 
-    @if (dashboardData.lowStockProducts && dashboardData.lowStockProducts.length > 0) {
+    @if (dashboardData && dashboardData.lowStockProducts && dashboardData.lowStockProducts.length > 0) {
       <div class="space-y-4">
         @for (product of dashboardData.lowStockProducts; track product.id) {
           <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
@@ -318,7 +318,7 @@
 
     <hr class="my-4">
 
-    @if (dashboardData.recentActivities && dashboardData.recentActivities.length > 0) {
+    @if (dashboardData && dashboardData.recentActivities && dashboardData.recentActivities.length > 0) {
       <div class="space-y-4">
         @for (activity of dashboardData.recentActivities; track activity.id) {
           <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
