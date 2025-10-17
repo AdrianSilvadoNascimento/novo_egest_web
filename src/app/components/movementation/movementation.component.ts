@@ -342,21 +342,7 @@ export class MovementationComponent implements OnInit {
    * Obtém o ícone para o tipo de movimentação
    */
   getMovementTypeIcon(type: string): any {
-    const iconName = this.movementationService.getMovementTypeIcon(type);
-    switch (iconName) {
-      case 'trending-up':
-        return this.trendingUpIcon;
-      case 'trending-down':
-        return this.trendingDownIcon;
-      case 'shopping-cart':
-        return this.shoppingCartIcon;
-      case 'repeat':
-        return this.repeatIcon;
-      case 'settings':
-        return this.settingsIcon;
-      default:
-        return this.packageIcon;
-    }
+    return this.movementationService.getMovementTypeIcon(type);
   }
 
   /**

@@ -12,6 +12,9 @@ export class DashboardModel {
   
   // Status/mensagens
   lowStockStatus?: string
+
+  thisMonthEntriesQuantity?: number
+  thisMonthExitsQuantity?: number
   
   // Novas seções
   weeklyMovement?: WeeklyMovementData[]

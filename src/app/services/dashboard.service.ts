@@ -48,7 +48,7 @@ interface DashboardStatus {
 })
 export class DashboardService {
   private readonly API_URL = `${environment.apiUrl}/dashboard`
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutos em milliseconds
+  private readonly CACHE_TTL = 1 * 60 * 1000; // 5 minutos em milliseconds
   private readonly CACHE_KEY = 'dashboardData';
 
   private dashboardData = new BehaviorSubject<DashboardModel>({} as DashboardModel);

@@ -1,44 +1,44 @@
 <!-- Loading Skeleton -->
 @if (isLoading) {
-  <div class="dashboard-skeleton">
-    <!-- Skeleton Cards Superiores -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-      @for (item of [1,2,3,4]; track item) {
-        <div class="skeleton-card">
-          <div class="skeleton-content">
-            <div class="skeleton-title"></div>
-            <div class="skeleton-value"></div>
-            <div class="skeleton-growth"></div>
-          </div>
-          <div class="skeleton-icon"></div>
-        </div>
-      }
+<div class="dashboard-skeleton">
+  <!-- Skeleton Cards Superiores -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    @for (item of [1,2,3,4]; track item) {
+    <div class="skeleton-card">
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-value"></div>
+        <div class="skeleton-growth"></div>
+      </div>
+      <div class="skeleton-icon"></div>
     </div>
-
-    <!-- Skeleton Seções do Meio -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-      @for (item of [1,2,3]; track item) {
-        <div class="skeleton-section">
-          <div class="skeleton-section-title"></div>
-          <div class="skeleton-section-content"></div>
-        </div>
-      }
-    </div>
-
-    <!-- Skeleton Blocos Finais -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      @for (item of [1,2]; track item) {
-        <div class="skeleton-section">
-          <div class="skeleton-section-title"></div>
-          <div class="skeleton-list">
-            @for (listItem of [1,2,3,4,5]; track listItem) {
-              <div class="skeleton-list-item"></div>
-            }
-          </div>
-        </div>
-      }
-    </div>
+    }
   </div>
+
+  <!-- Skeleton Seções do Meio -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+    @for (item of [1,2,3]; track item) {
+    <div class="skeleton-section">
+      <div class="skeleton-section-title"></div>
+      <div class="skeleton-section-content"></div>
+    </div>
+    }
+  </div>
+
+  <!-- Skeleton Blocos Finais -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @for (item of [1,2]; track item) {
+    <div class="skeleton-section">
+      <div class="skeleton-section-title"></div>
+      <div class="skeleton-list">
+        @for (listItem of [1,2,3,4,5]; track listItem) {
+        <div class="skeleton-list-item"></div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</div>
 } @else {
 <!-- Dashboard Real -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -50,10 +50,10 @@
         <div class="card-title text-md text-gray-500 font-semibold">Produtos em Estoque</div>
         <div class="card-value">{{dashboardData.products | number}}</div>
         @if (dashboardData.productsGrowth !== undefined) {
-          <div class="card-growth positive">
-            <span class="growth-icon">↗</span>
-            +{{dashboardData.productsGrowth}}% vs mês anterior
-          </div>
+        <div class="card-growth positive">
+          <span class="growth-icon">↗</span>
+          {{dashboardData.productsGrowth}}% vs mês anterior
+        </div>
         }
       </div>
       <div class="card-icon blue">
@@ -67,12 +67,12 @@
     <div class="card-content">
       <div class="card-info">
         <div class="card-title text-md text-gray-500 font-semibold">Entradas do Mês</div>
-        <div class="card-value">{{dashboardData.entereds | number}}</div>
-        @if (dashboardData.enteredsGrowth !== undefined) {
-          <div class="card-growth positive">
-            <span class="growth-icon">↗</span>
-            +{{dashboardData.enteredsGrowth}}% vs mês anterior
-          </div>
+        <div class="card-value">{{dashboardData.thisMonthEntriesQuantity | number}}</div>
+        @if (dashboardData.thisMonthEntriesQuantity !== undefined) {
+        <div class="card-growth positive">
+          <span class="growth-icon">↗</span>
+          {{dashboardData.enteredsGrowth}}% vs mês anterior
+        </div>
         }
       </div>
       <div class="card-icon green">
@@ -86,12 +86,12 @@
     <div class="card-content">
       <div class="card-info">
         <div class="card-title text-md text-gray-500 font-semibold">Saídas do Mês</div>
-        <div class="card-value">{{dashboardData.exits | number}}</div>
-        @if (dashboardData.exitsGrowth !== undefined) {
-          <div class="card-growth negative">
-            <span class="growth-icon">↘</span>
-            {{dashboardData.exitsGrowth}}% vs mês anterior
-          </div>
+        <div class="card-value">{{dashboardData.thisMonthExitsQuantity | number}}</div>
+        @if (dashboardData.thisMonthExitsQuantity !== undefined) {
+        <div class="card-growth negative">
+          <span class="growth-icon">↘</span>
+          {{dashboardData.exitsGrowth}}% vs mês anterior
+        </div>
         }
       </div>
       <div class="card-icon orange">
@@ -120,7 +120,8 @@
 </div>
 
 <div class="flex flex-wrap gap-4 md:justify-start justify-center mt-10 main-buttons">
-  <button mat-raised-button color="primary" class="text-gray-700" (click)="onAddProduct()" matTooltip="Inserir novo produto">
+  <button mat-raised-button color="primary" class="text-gray-700" (click)="onAddProduct()"
+    matTooltip="Inserir novo produto">
     <div class="flex justify-between items-center">
       <mat-icon class="mr-3">
         <lucide-icon [img]="packageIcon" class="w-6 h-6"></lucide-icon>
@@ -148,48 +149,46 @@
     </div>
 
     <hr class="my-4">
-    
+
     @if (dashboardData && dashboardData.weeklyMovement) {
-      <div class="movement-chart">
-        @for (item of dashboardData.weeklyMovement; track item.day) {
-          <div class="chart-row">
-            <div class="day-label">{{item.dayLabel}}</div>
-            <div class="bars-container">
-              <div class="bar-section entries">
-                <div 
-                  class="bar entries-bar" 
-                  [style.width.%]="(item.entries / getMaxValue(dashboardData.weeklyMovement!)) * 100">
-                </div>
-                <span class="bar-value entries-value">+{{item.entries}} Entradas</span>
-              </div>
-              <div class="bar-section exits">
-                <div 
-                  class="bar exits-bar" 
-                  [style.width.%]="(item.exits / getMaxValue(dashboardData.weeklyMovement!)) * 100">
-                </div>
-                <span class="bar-value exits-value">-{{item.exits}} Saídas</span>
-              </div>
+    <div class="movement-chart">
+      @for (item of dashboardData.weeklyMovement; track item.day) {
+      <div class="chart-row">
+        <div class="day-label">{{item.dayLabel}}</div>
+        <div class="bars-container">
+          <div class="bar-section entries">
+            <div class="bar entries-bar"
+              [style.width.%]="(item.entries / getMaxValue(dashboardData.weeklyMovement!)) * 100">
             </div>
+            <span class="bar-value entries-value">+{{item.entries}} Entradas</span>
           </div>
-        }
+          <div class="bar-section exits">
+            <div class="bar exits-bar"
+              [style.width.%]="(item.exits / getMaxValue(dashboardData.weeklyMovement!)) * 100">
+            </div>
+            <span class="bar-value exits-value">-{{item.exits}} Saídas</span>
+          </div>
+        </div>
       </div>
+      }
+    </div>
     } @else {
-      <div class="empty-movement">
-        <div class="empty-icon">
-          <lucide-icon [img]="chartIcon" class="empty-chart-icon"></lucide-icon>
-        </div>
-        <div>
-          <div class="empty-title text-lg text-gray-500 font-semibold w-full">Nenhuma movimentação registrada</div>
-          <p class="empty-description">Não há entradas ou saídas de produtos nos últimos 7 dias.</p>
-        </div>
+    <div class="empty-movement">
+      <div class="empty-icon">
+        <lucide-icon [img]="chartIcon" class="empty-chart-icon"></lucide-icon>
       </div>
-     }
+      <div>
+        <div class="empty-title text-lg text-gray-500 font-semibold w-full">Nenhuma movimentação registrada</div>
+        <p class="empty-description">Não há entradas ou saídas de produtos nos últimos 7 dias.</p>
+      </div>
+    </div>
+    }
   </mat-card>
 
   <!-- Lado Direito: Ações e Resumo -->
   <div class="right-section">
     <!-- Ações Rápidas -->
-    <mat-card class="quick-actions-card">
+    <!-- <mat-card class="quick-actions-card">
       <div class="section-title text-lg text-gray-500 font-semibold">Ações Rápidas</div>
 
       <hr class="my-4">
@@ -214,34 +213,34 @@
           Relatórios
         </button>
       </div>
-    </mat-card>
+    </mat-card> -->
 
     <!-- Resumo Semanal -->
     @if (dashboardData && dashboardData.weeklySummary) {
-      <mat-card class="weekly-summary-card">
-        <div class="section-title text-lg text-gray-500 font-semibold">Resumo Semanal</div>
+    <mat-card class="weekly-summary-card">
+      <div class="section-title text-lg text-gray-500 font-semibold">Resumo Semanal</div>
 
-        <hr class="my-4">
-        
-        <div class="summary-metrics">
-          <div class="metric-item">
-            <span class="metric-label">Vendas</span>
-            <span class="metric-value">{{dashboardData.weeklySummary!.sales | currency:'BRL':'symbol':'1.0-0'}}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Produtos Vendidos</span>
-            <span class="metric-value">{{dashboardData.weeklySummary!.productsSold}}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Novos Produtos</span>
-            <span class="metric-value">{{dashboardData.weeklySummary!.newProducts}}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Clientes Ativos</span>
-            <span class="metric-value">{{dashboardData.weeklySummary!.activeClients}}</span>
-          </div>
+      <hr class="my-4">
+
+      <div class="summary-metrics">
+        <div class="metric-item">
+          <span class="metric-label">Vendas</span>
+          <span class="metric-value">{{dashboardData.weeklySummary!.sales | currency:'BRL':'symbol':'1.0-0'}}</span>
         </div>
-      </mat-card>
+        <div class="metric-item">
+          <span class="metric-label">Produtos Vendidos</span>
+          <span class="metric-value">{{dashboardData.weeklySummary!.productsSold}}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">Novos Produtos</span>
+          <span class="metric-value">{{dashboardData.weeklySummary!.newProducts}}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">Clientes Ativos</span>
+          <span class="metric-value">{{dashboardData.weeklySummary!.activeClients}}</span>
+        </div>
+      </div>
+    </mat-card>
     }
   </div>
 </div>
@@ -255,7 +254,7 @@
         <div class="section-title text-lg text-gray-500 font-semibold">Produtos com Baixo Estoque</div>
         <p class="text-sm text-gray-500">Produtos que precisam de reposição</p>
       </div>
-      <button 
+      <button
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
         (click)="onViewAllLowStock()">
         <lucide-icon [img]="eyeIcon" class="w-4 h-4 mr-2"></lucide-icon>
@@ -266,38 +265,39 @@
     <hr class="my-4">
 
     @if (dashboardData && dashboardData.lowStockProducts && dashboardData.lowStockProducts.length > 0) {
-      <div class="space-y-4">
-        @for (product of dashboardData.lowStockProducts; track product.id) {
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div class="flex-1">
-              <div class="font-semibold text-gray-700">{{ product.name }}</div>
-              <p class="text-sm text-gray-600">{{ product.category }}</p>
-              @if (product.unitOfMeasure) {
-                <p class="text-xs text-blue-600">{{ product.unitOfMeasure.abbreviation }}</p>
-              }
+    <div class="space-y-4">
+      @for (product of dashboardData.lowStockProducts; track product.id) {
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+        <div class="flex-1">
+          <div class="font-semibold text-gray-700">{{ product.name }}</div>
+          <p class="text-sm text-gray-600">{{ product.category }}</p>
+          @if (product.unitOfMeasure) {
+          <p class="text-xs text-blue-600">{{ product.unitOfMeasure.abbreviation }}</p>
+          }
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <div class="font-semibold text-gray-600">
+              {{ product.currentQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
             </div>
-            <div class="flex items-center space-x-3">
-              <div class="text-right">
-                <div class="font-semibold text-gray-600">
-                  {{ product.currentQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
-                </div>
-                <div class="text-xs text-gray-500">
-                  Min: {{ product.minQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
-                </div>
-              </div>
-              <span [class]="product.status === 'low' ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800' : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800'">
-                {{product.status === 'low' ? 'Baixo' : 'Esgotado'}}
-              </span>
+            <div class="text-xs text-gray-500">
+              Min: {{ product.minQuantity }} {{ product.unitOfMeasure?.abbreviation || 'un' }}
             </div>
           </div>
-        }
+          <span
+            [class]="product.status === 'low' ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800' : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800'">
+            {{product.status === 'low' ? 'Baixo' : 'Esgotado'}}
+          </span>
+        </div>
       </div>
+      }
+    </div>
     } @else {
-      <div class="flex flex-col items-center justify-center border border-gray-200 rounded-lg py-8 text-center">
-        <lucide-icon [img]="packageIcon" class="w-12 h-12 text-gray-400 mb-3"></lucide-icon>
-        <div class="empty-title text-lg text-gray-500 font-semibold mb-1">Nenhum produto com baixo estoque</div>
-        <p class="empty-description">Todos os produtos estão com estoque adequado.</p>
-      </div>
+    <div class="flex flex-col items-center justify-center border border-gray-200 rounded-lg py-8 text-center">
+      <lucide-icon [img]="packageIcon" class="w-12 h-12 text-gray-400 mb-3"></lucide-icon>
+      <div class="empty-title text-lg text-gray-500 font-semibold mb-1">Nenhum produto com baixo estoque</div>
+      <p class="empty-description">Todos os produtos estão com estoque adequado.</p>
+    </div>
     }
   </div>
 
@@ -308,7 +308,7 @@
         <div class="section-title text-lg text-gray-500 font-semibold">Atividades Recentes</div>
         <p class="text-sm text-gray-500">Últimas movimentações do estoque</p>
       </div>
-      <button 
+      <button
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
         (click)="onViewHistory()">
         <lucide-icon [img]="calendarIcon" class="w-4 h-4 mr-2"></lucide-icon>
@@ -319,31 +319,31 @@
     <hr class="my-4">
 
     @if (dashboardData && dashboardData.recentActivities && dashboardData.recentActivities.length > 0) {
-      <div class="space-y-4">
-        @for (activity of dashboardData.recentActivities; track activity.id) {
-          <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div [class]="activity.type === 'entry' ? 'flex items-center justify-center w-8 h-8 bg-green-100 rounded-full' : 'flex items-center justify-center w-8 h-8 bg-red-100 rounded-full'">
-              <lucide-icon 
-                [img]="activity.type === 'entry' ? arrowUpActivityIcon : arrowDownActivityIcon" 
-                [class]="activity.type === 'entry' ? 'w-4 h-4 text-green-600' : 'w-4 h-4 text-red-600'">
-              </lucide-icon>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold text-gray-700">{{activity.productName}}</div>
-              <p class="text-sm text-gray-600">{{activity.description}} • {{activity.user}}</p>
-            </div>
-            <div class="text-xs text-gray-500 flex-shrink-0">
-              {{activity.timestamp}}
-            </div>
-          </div>
-        }
+    <div class="space-y-4">
+      @for (activity of dashboardData.recentActivities; track activity.id) {
+      <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full"
+          [class]="movementationService.getMovementTypeColor(activity.type)">
+          <lucide-icon [img]="movementationService.getMovementTypeIcon(activity.type)" class="w-3 h-3" class="w-4 h-4'">
+          </lucide-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-gray-700">{{activity.productName}}</div>
+          <p class="text-sm text-gray-600">{{movementationService.getMovementTypeLabel(activity.type)}}
+            {{activity.description}} • {{activity.user}}</p>
+        </div>
+        <div class="text-xs text-gray-500 flex-shrink-0">
+          {{activity.timestamp}}
+        </div>
       </div>
+      }
+    </div>
     } @else {
-      <div class="flex flex-col items-center justify-center border border-gray-200 rounded-lg py-8 text-center">
-        <lucide-icon [img]="chartIcon" class="w-12 h-12 text-gray-400 mb-3"></lucide-icon>
-        <div class="empty-title text-lg text-gray-500 font-semibold mb-1">Nenhuma atividade recente</div>
-        <p class="empty-description">Não há movimentações registradas recentemente.</p>
-      </div>
+    <div class="flex flex-col items-center justify-center border border-gray-200 rounded-lg py-8 text-center">
+      <lucide-icon [img]="chartIcon" class="w-12 h-12 text-gray-400 mb-3"></lucide-icon>
+      <div class="empty-title text-lg text-gray-500 font-semibold mb-1">Nenhuma atividade recente</div>
+      <p class="empty-description">Não há movimentações registradas recentemente.</p>
+    </div>
     }
   </div>
 </div>

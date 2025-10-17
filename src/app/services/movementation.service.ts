@@ -9,12 +9,21 @@ import { ItemModel } from '../models/item.model';
 import { PaginatedItemsModel } from '../models/paginated-items.model';
 import { UtilsService } from './utils/utils.service';
 import { DashboardService } from './dashboard.service';
+import { LucideIconData, Package, Repeat, Settings, ShoppingCart, TrendingDown, TrendingUp } from 'lucide-angular';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovementationService {
   private readonly apiUrl: string = `${environment.apiUrl}/movementation`;
+
+  // Ícones para tipos de movimentação
+  readonly trendingUpIcon = TrendingUp;
+  readonly trendingDownIcon = TrendingDown;
+  readonly shoppingCartIcon = ShoppingCart;
+  readonly repeatIcon = Repeat;
+  readonly settingsIcon = Settings;
+  readonly packageIcon = Package;
 
   private movementationData = new BehaviorSubject<PaginatedMovementationModel>({} as PaginatedMovementationModel);
   $movementationData = this.movementationData.asObservable();
@@ -33,13 +42,6 @@ export class MovementationService {
   setMovementationData(data: PaginatedMovementationModel) {
     this.movementationData.next(data);
     sessionStorage.setItem('movementationData', JSON.stringify(data));
-  }
-
-  /**
-   * Obtém os dados de movimentação do sessionStorage
-   */
-  private fetchMovementationData(): PaginatedMovementationModel {
-    return JSON.parse(sessionStorage.getItem('movementationData') || '{}');
   }
 
   /**
@@ -175,20 +177,20 @@ export class MovementationService {
   /**
    * Obtém o ícone para cada tipo de movimentação
    */
-  getMovementTypeIcon(type: string): string {
+  getMovementTypeIcon(type: string): any {
     switch (type) {
       case MovementationType.ENTRADA:
-        return 'trending-up'; // Seta para cima
+        return this.trendingUpIcon;
       case MovementationType.SAIDA:
-        return 'trending-down'; // Seta para baixo
+        return this.trendingDownIcon;
       case MovementationType.VENDA:
-        return 'shopping-cart'; // Carrinho de compras
+        return this.shoppingCartIcon;
       case MovementationType.TRANSFERENCIA:
-        return 'repeat'; // Setas bidirecionais
+        return this.repeatIcon;
       case MovementationType.AJUSTE:
-        return 'settings'; // Engrenagem
+        return this.settingsIcon;
       default:
-        return 'package';
+        return this.packageIcon;
     }
   }
 

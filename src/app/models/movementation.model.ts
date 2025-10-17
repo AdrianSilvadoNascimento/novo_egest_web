@@ -34,11 +34,11 @@ export interface PaginatedMovementationModel {
 
 // Enum para tipos de movimentação
 export enum MovementationType {
-  ENTRADA = 'ENTRADA',
-  SAIDA = 'SAIDA',
-  TRANSFERENCIA = 'TRANSFERENCIA',
-  VENDA = 'VENDA',
-  AJUSTE = 'AJUSTE'
+  ENTRADA = 'ENTRY',
+  SAIDA = 'OUT',
+  TRANSFERENCIA = 'TRANSFER',
+  VENDA = 'SALE',
+  AJUSTE = 'ADJUST'
 }
 
 // Interface para filtros

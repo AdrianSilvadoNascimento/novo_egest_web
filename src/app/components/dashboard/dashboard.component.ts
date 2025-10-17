@@ -24,6 +24,7 @@ import { ProductFormComponent } from '../products/product-form/product-form.comp
 import { AuthService } from '../../services/auth.service';
 import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
 import { DashboardGatewayService } from '../../services/utils/gateways/dashboard-gateway.service';
+import { MovementationService } from '../../services/movementation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -55,6 +56,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly dashboardService: DashboardService,
     private readonly dashboardGatewayService: DashboardGatewayService,
     private readonly authService: AuthService,
+    readonly movementationService: MovementationService,
     private dialog: MatDialog,
     private router: Router,
     private breakpointObserver: BreakpointObserver
