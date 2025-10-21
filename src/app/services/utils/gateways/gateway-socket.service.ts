@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 
 import { environment } from '../../../../environments/environment';
+import { AccountUserModel } from '../../../models/account_user.model';
+import { UtilsAuthService } from '../utils-auth.service';
+import { AuthService } from '../../auth.service';
 
 const wsUrl = environment.wsUrl || environment.apiUrl.replace('/api', '');
 
@@ -9,12 +12,17 @@ const wsUrl = environment.wsUrl || environment.apiUrl.replace('/api', '');
   providedIn: 'root'
 })
 export class GatewaySocketService {
-  public readonly socket: Socket;
+  public socket!: Socket;
+  currentAccountUser: AccountUserModel = new AccountUserModel();
 
-  constructor() {
-    const token = this.getAuthToken();
+  token!: string
+  refreshToken!: string
 
-    if (!token) {
+  constructor(private readonly utilsAuthService: UtilsAuthService, private readonly authService: AuthService) {
+    this.getAuthToken();
+    this.getRefreshToken();
+
+    if (!this.token) {
       console.warn('⚠️ Nenhum token de autenticação encontrado para WebSocket');
     }
 
@@ -23,23 +31,19 @@ export class GatewaySocketService {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
-      auth: { token }
+      auth: { token: this.token, refreshToken: this.refreshToken },
     });
 
     this.socket.on('connect', () => {
-      // console.log('✅ WebSocket conectado! ID:', this.socket.id);
     });
 
     this.socket.on('connected', (data) => {
-      // console.log('✅ WebSocket autenticado:', data);
     });
 
     this.socket.on('error', (error) => {
-      // console.error('❌ Erro recebido do servidor:', error);
     });
 
     this.socket.on('disconnect', (reason) => {
-      // console.log('❌ WebSocket desconectado:', reason);
 
       if (reason === 'io server disconnect') {
         this.reconnectWithNewToken();
@@ -56,23 +60,43 @@ export class GatewaySocketService {
   /**
    * Obtém o token de autenticação do storage correto
    */
-  private getAuthToken(): string | null {
-    const rememberMe = localStorage.getItem('remember_me') === 'true';
-    const token = rememberMe
-      ? localStorage.getItem('token')
-      : sessionStorage.getItem('token');
+  private getAuthToken(): void {
+    this.utilsAuthService.currentAccountUser().subscribe({
+      next: (currentAccountUser) => {
+        this.currentAccountUser = currentAccountUser;
 
-    return token;
+        this.token = currentAccountUser.remember_me
+          ? localStorage.getItem('token')!!
+          : sessionStorage.getItem('token')!!;
+      },
+    });
+  }
+
+  private getRefreshToken(): void {
+    this.utilsAuthService.currentAccountUser().subscribe({
+      next: (currentAccountUser) => {
+        this.currentAccountUser = currentAccountUser;
+
+        if (currentAccountUser.remember_me) {
+          const fromLocalStorage = localStorage.getItem('refresh_token')!!;
+          this.refreshToken = currentAccountUser.refresh_token || fromLocalStorage;
+        }
+      }
+    })
+
+    if (!this.refreshToken) {
+      this.refreshToken = localStorage.getItem('refresh_token')!!;
+    }
   }
 
   /**
    * Reconecta o WebSocket com um novo token
    */
   private reconnectWithNewToken(): void {
-    const newToken = this.getAuthToken();
+    this.getAuthToken();
 
-    if (newToken) {
-      this.socket.auth = { token: newToken };
+    if (this.token) {
+      this.socket.auth = { token: this.token };
       this.socket.connect();
     } else {
       console.error('❌ Não foi possível obter novo token para reconexão');

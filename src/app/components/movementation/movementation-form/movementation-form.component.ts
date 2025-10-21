@@ -10,14 +10,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  ShoppingCart, 
-  Repeat, 
-  Settings, 
+import {
+  TrendingUp,
+  TrendingDown,
+  ShoppingCart,
+  Repeat,
+  Settings,
   Package,
-  LucideAngularModule 
+  LucideAngularModule
 } from "lucide-angular";
 
 import { ItemModel } from '../../../models/item.model';
@@ -27,6 +27,8 @@ import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
 import { MatIcon } from "@angular/material/icon";
 import { MatCard } from "@angular/material/card";
+import { AccountUserModel } from '../../../models/account_user.model';
+import { UtilsAuthService } from '../../../services/utils/utils-auth.service';
 
 export interface MovementationFormData {
   item: ItemModel;
@@ -48,7 +50,7 @@ export interface MovementationFormData {
     LucideAngularModule,
     MatIcon,
     MatCard
-],
+  ],
   templateUrl: './movementation-form.component.html',
   styleUrl: './movementation-form.component.scss'
 })
@@ -60,10 +62,11 @@ export class MovementationFormComponent implements OnInit {
   readonly repeatIcon = Repeat;
   readonly settingsIcon = Settings;
 
+  currentAccountUser: AccountUserModel = new AccountUserModel();
+
   movementationForm!: FormGroup;
   selectedMovementType: string = '';
-  currentUser: any;
-  
+
   movementTypes = [
     {
       type: MovementationType.ENTRADA,
@@ -120,17 +123,22 @@ export class MovementationFormComponent implements OnInit {
     private formBuilder: FormBuilder,
     private movementationService: MovementationService,
     private authService: AuthService,
-    private toast: ToastService
-  ) {}
+    private toast: ToastService,
+    private readonly utilsAuthService: UtilsAuthService,
+  ) { }
 
   ngOnInit(): void {
-    this.currentUser = {
-      name: this.authService.accountUserName(),
-      email: 'usuario@exemplo.com' // TODO: Implementar método para obter email
-    };
-    
+    this.fetchCurrentAccountUser();
     this.createForm();
     this.selectMovementType(MovementationType.ENTRADA); // Seleciona Entrada por padrão
+  }
+
+  fetchCurrentAccountUser(): void {
+    this.utilsAuthService.currentAccountUser().subscribe({
+      next: (currentAccountUser) => {
+        this.currentAccountUser = currentAccountUser;
+      }
+    });
   }
 
   createForm(): void {
@@ -159,7 +167,7 @@ export class MovementationFormComponent implements OnInit {
   selectMovementType(type: string): void {
     this.selectedMovementType = type;
     this.movementationForm.patchValue({ move_type: type });
-    
+
     // Atualizar cores dos botões
     this.movementTypes.forEach(mt => {
       if (mt.type === type) {
@@ -174,7 +182,7 @@ export class MovementationFormComponent implements OnInit {
     const quantity = this.movementationForm.get('quantity')?.value || 0;
     const unitPrice = this.movementationForm.get('unit_price')?.value || 0;
     const totalValue = quantity * unitPrice;
-    
+
     this.movementationForm.patchValue({ total_value: totalValue }, { emitEvent: false });
   }
 
@@ -185,7 +193,7 @@ export class MovementationFormComponent implements OnInit {
   onSubmit(): void {
     if (this.movementationForm.valid) {
       const formValue = this.movementationForm.value;
-      
+
       const movementationData: Partial<MovementationModel> = {
         move_type: formValue.move_type,
         quantity: formValue.quantity,
@@ -221,7 +229,7 @@ export class MovementationFormComponent implements OnInit {
   }
 
   getCurrentUserName(): string {
-    return this.currentUser?.name || 'Usuário Atual';
+    return this.currentAccountUser?.name || 'Usuário Atual';
   }
 
   decreaseQuantity(): void {

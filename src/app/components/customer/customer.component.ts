@@ -28,6 +28,7 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AccountModel } from '../../models/account.model';
 import { AccountService } from '../../services/account.service';
+import { UtilsAuthService } from '../../services/utils/utils-auth.service';
 
 @Component({
   selector: 'app-customer',
@@ -102,7 +103,7 @@ export class CustomerComponent implements OnInit {
     private customerService: CustomerService,
     private toast: ToastService,
     private breakpointObserver: BreakpointObserver,
-    private accountService: AccountService
+    private readonly utilsAuthService: UtilsAuthService,
   ) {}
 
   ngOnInit(): void {
@@ -114,9 +115,11 @@ export class CustomerComponent implements OnInit {
    * Obtém a conta do usuário logado
    */
   getCurrentAccount(): void {
-    this.accountService.$accountData.subscribe((account: AccountModel) => {
-      this.currentAccount = account;
-    })
+    this.utilsAuthService.currentAccount().subscribe({
+      next: (currentAccount) => {
+        this.currentAccount = currentAccount;
+      }
+    });
   }
 
   /**

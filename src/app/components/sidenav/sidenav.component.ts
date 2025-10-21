@@ -25,6 +25,7 @@ import { SidenavService } from '../../services/sidenav.service';
 import { AccountModel } from '../../models/account.model';
 import { AccountService } from '../../services/account.service';
 import { ToastService } from '../../services/toast.service';
+import { UtilsAuthService } from '../../services/utils/utils-auth.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -69,6 +70,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     private readonly sidenavService: SidenavService,
     private readonly breakpointObserver: BreakpointObserver,
     private readonly accountService: AccountService,
+    private readonly utilsAuthService: UtilsAuthService,
     private readonly toastService: ToastService
   ) { }
 
@@ -96,22 +98,15 @@ export class SidenavComponent implements OnInit, OnDestroy {
    * Obtém a conta do usuário logado
    */
   getCurrentAccount(): void {
-    this.accountService.$accountData.subscribe((account: AccountModel) => {
-      this.currentAccount = account;
-      this.filterLinks();
-    });
-
-    if (!this.currentAccount) {
-      this.accountService.getAccount().subscribe({
-        next: (account: AccountModel) => {
-          this.currentAccount = account;
-          this.filterLinks();
-        },
-        error: (error: any) => {
-          this.toastService.error(error.message);
-        }
-      });
-    }
+    this.utilsAuthService.currentAccount().subscribe({
+      next: (currentAccount) => {
+        this.currentAccount = currentAccount;
+        this.filterLinks();
+      },
+      error: (error: any) => {
+        this.toastService.error(error.message);
+      }
+    })
   }
 
   /**

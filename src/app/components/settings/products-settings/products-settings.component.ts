@@ -14,6 +14,7 @@ import { UnitOfMeasureModel } from '../../../models/unit-of-measure.model';
 import { ProductSettingsService } from '../../../services/product-settings.service';
 import { ProductSettingsModel, ProductSettingsCreationModel } from '../../../models/product-settings.model';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { UtilsAuthService } from '../../../services/utils/utils-auth.service';
 
 // Interface para tipagem
 interface UnitOfMeasure {
@@ -41,9 +42,9 @@ export class ProductsSettingsComponent implements OnInit {
 
   constructor(
     private readonly toastService: ToastService,
-    private readonly accountUserService: AccountUserService,
     private readonly unitOfMeasureService: UnitOfMeasureService,
     private readonly productSettingsService: ProductSettingsService,
+    private readonly utilsAuthService: UtilsAuthService,
     readonly validateUserService: ValidateUserService,
   ) { }
 
@@ -57,34 +58,29 @@ export class ProductsSettingsComponent implements OnInit {
    * Obtém os dados do usuário atual
    */
   getCurrentAccountUser(): void {
-    this.accountUserService.$accountUserData.subscribe({
+    this.utilsAuthService.currentAccountUser().subscribe({
       next: (accountUser: AccountUserModel) => {
-        if (!accountUser.id) {
-          this.fetchCurrentAccountUser();
-          return;
-        }
-
         this.currentAccountUser = accountUser;
       },
       error: (error: any) => {
         this.toastService.error(error.error?.message || "Erro ao carregar dados do usuário");
       }
-    });
+    })
   }
 
   /**
    * Fallback para buscar os dados do usuário atual
    */
-  fetchCurrentAccountUser(): void {
-    this.accountUserService.getAccountUser().subscribe({
-      next: (accountUser: AccountUserModel) => {
-        this.currentAccountUser = accountUser;
-      },
-      error: (error: any) => {
-        this.toastService.error(error.error?.message || "Erro ao carregar dados do usuário");
-      }
-    });
-  }
+  // fetchCurrentAccountUser(): void {
+  //   this.accountUserService.getAccountUser().subscribe({
+  //     next: (accountUser: AccountUserModel) => {
+  //       this.currentAccountUser = accountUser;
+  //     },
+  //     error: (error: any) => {
+  //       this.toastService.error(error.error?.message || "Erro ao carregar dados do usuário");
+  //     }
+  //   });
+  // }
 
   /**
    * Obtém as unidades de medida

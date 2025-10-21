@@ -7,6 +7,7 @@ import { HeaderComponent } from "./components/header/header.component";
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { AuthService } from './services/auth.service';
+// import { RefreshAuthTokenGatewayService, RefreshToken } from './services/utils/gateways/refresh-auth-token-gateway.service';
 
 @Component({
   selector: 'app-root',
@@ -29,9 +30,7 @@ export class AppComponent implements OnInit {
 
   isLogged: boolean = false;
 
-  constructor(
-    private readonly authService: AuthService
-  ) { }
+  constructor(private readonly authService: AuthService) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {

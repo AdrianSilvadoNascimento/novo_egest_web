@@ -65,12 +65,6 @@ export class AccountService {
    * @returns Os dados da conta
    */
   getAccount(): Observable<AccountModel> {
-    const accountData = sessionStorage.getItem('account_data');
-
-    if (accountData?.length) {
-      return of(JSON.parse(accountData));
-    }
-
     const accountId = this.authService.getAccountId()
     return this.http.get<AccountModel>(`${this.API_URL}/${accountId}`).pipe(
       tap(res => this.setAccountData(res))

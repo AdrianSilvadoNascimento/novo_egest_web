@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { LoginModel } from '../models/login.model';
 import { RegisterModel } from '../models/register.model';
+import { RefreshToken } from './utils/gateways/refresh-auth-token-gateway.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,6 @@ export class AuthService {
 
   private registeredEmail = new BehaviorSubject<string>('');
   $registeredEmail = this.registeredEmail.asObservable();
-
-  private userName = new BehaviorSubject<string>(this.accountUserName());
-  $userName = this.userName.asObservable();
 
   private firstAccess = new BehaviorSubject<boolean>(false);
   $firstAccess = this.firstAccess.asObservable();
@@ -37,23 +35,8 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     const token = this.getToken();
-    this.storage = localStorage.getItem('remember_me') === 'true' ? localStorage : sessionStorage;
 
     return !!token && token.trim() !== ''
-  }
-
-  accountUserName(): string {
-    if (this.isLoggedIn()) {
-      return this.storage.getItem('userName') || '';
-    }
-
-    return '';
-  }
-
-  setAccountUserName(userName: string): void {
-    this.storage = this.rememberMe() ? localStorage : sessionStorage;
-    this.storage.setItem('userName', userName);
-    this.userName.next(userName);
   }
 
   setEmail(email: string): void {
@@ -106,12 +89,13 @@ export class AuthService {
    * @param loginModel - Modelo de login
    * @returns Observable com o resultado do login
    */
-  login(loginModel: LoginModel): Observable<any> {    
-    return this.http.post(`${this.API_URL}/login`, loginModel, {
+  login(loginModel: LoginModel): Observable<any> {
+    const url = `${this.API_URL}/login`
+    return this.http.post(url, loginModel, {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
       tap(async (res: any) => {
-        this.setAccountUserName(res.account_user.name);
+        this.storage = sessionStorage;
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -122,7 +106,7 @@ export class AuthService {
         this.setLoginStatus(true, res.token);
         this.firstAccess.next(res.account_user.first_access);
         this.setPasswordConfirmed(res.account_user.password_confirmed || true);
-        
+
         this.redirectBasedOnFlags();
       })
     )
@@ -172,9 +156,9 @@ export class AuthService {
   }
 
   refreshToken(): Observable<string> {
-    const refreshToken = this.storage.getItem('refresh_token');
+    let currentAccountUser = JSON.parse(this.storage.getItem('account_user_data')!!);
 
-    if (!refreshToken) {
+    if (!currentAccountUser?.refresh_token) {
       return of('').pipe(
         tap(() => {
           this.setLoginStatus(false);
@@ -183,8 +167,8 @@ export class AuthService {
       );
     }
 
-    return this.http.post<{ token: string, refreshToken?: string }>(`${this.API_URL}/refresh-token`, {}, {
-      headers: { 'Authorization': `Bearer ${refreshToken}` }
+    return this.http.post<{ token: string, refreshToken?: string }>(`${this.API_URL}/refresh-token?user-id=${currentAccountUser.id}`, {}, {
+      headers: { 'Authorization': `Bearer ${currentAccountUser.refresh_token}` }
     }).pipe(
       tap(response => {
         if (response.token) {
@@ -201,6 +185,19 @@ export class AuthService {
         return of('');
       })
     );
+  }
+
+  /**
+   * Atualiza o auth token no cache do client
+   * @param data RefreshToken 
+   */
+  updateAuthToken(data: RefreshToken): void {
+    if (!data.token) {
+      this.logout();
+      return;
+    }
+
+    this.setLoginStatus(true, data.token);
   }
 
   getToken(): string | null {
@@ -252,7 +249,6 @@ export class AuthService {
           user_id: res.account_user.id,
           user_image: res.account_user.user_image,
         });
-        this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
         this.firstAccess.next(res.account_user.first_access);
         this.setPasswordConfirmed(false);
@@ -266,6 +262,7 @@ export class AuthService {
       headers: { 'Content-Type': 'application/json' },
     }).pipe(
       tap(async (res: any) => {
+        this.storage = sessionStorage;
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -273,11 +270,10 @@ export class AuthService {
           user_id: res.account_user.id,
           user_image: res.account_user.user_image,
         });
-        this.setAccountUserName(res.account_user.name);
         this.setLoginStatus(true, res.token);
         this.firstAccess.next(res.account_user.first_access);
         this.setPasswordConfirmed(res.account_user.password_confirmed || false);
-        
+
         this.redirectBasedOnFlags();
       })
     )
@@ -312,7 +308,6 @@ export class AuthService {
     this.storage.setItem('user_id', res.user_id);
     this.storage.setItem('user_image', res.user_image);
 
-    // Verificar se há dados de password_confirmed no cache
     const passwordConfirmed = this.storage.getItem('password_confirmed');
     if (passwordConfirmed !== null) {
       this.setPasswordConfirmed(passwordConfirmed === 'true');
@@ -330,7 +325,6 @@ export class AuthService {
     this.setPasswordConfirmed(true);
     this.clearCache();
     localStorage.removeItem('refresh_token');
-    this.setAccountUserName('');
     this.router.navigate(['/login']);
   }
 }

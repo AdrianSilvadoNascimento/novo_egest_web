@@ -25,6 +25,8 @@ import { AuthService } from '../../services/auth.service';
 import { WelcomeDialogComponent } from '../../shared/components/welcome/welcome-dialog.component';
 import { DashboardGatewayService } from '../../services/utils/gateways/dashboard-gateway.service';
 import { MovementationService } from '../../services/movementation.service';
+import { AccountModel } from '../../models/account.model';
+import { UtilsAuthService } from '../../services/utils/utils-auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,6 +54,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = false;
   isLoadingRefresh: boolean = false;
 
+  currentAccount: AccountModel = new AccountModel();
+
   constructor(
     private readonly dashboardService: DashboardService,
     private readonly dashboardGatewayService: DashboardGatewayService,
@@ -59,7 +63,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly movementationService: MovementationService,
     private dialog: MatDialog,
     private router: Router,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private readonly utilsAuthService: UtilsAuthService,
+
   ) { }
 
   ngAfterViewInit(): void {
@@ -82,6 +88,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.utilsAuthService.currentAccount().subscribe({
+      next: (currentAccount) => {
+        this.currentAccount = currentAccount;
+      }
+    })
+
     this.authService.$firstAccess.subscribe(data => {
       this.isFirstLogin = data && !this.hasShownWelcomeModal;
     })

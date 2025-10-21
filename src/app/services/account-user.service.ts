@@ -37,8 +37,10 @@ export class AccountUserService {
    * Obtém os dados do usuário
    * @returns Observable com os dados do usuário
    */
-  getAccountUser(): Observable<AccountUserModel> {
-    const accountUserId = this.authService.getAccountUserId();
+  getAccountUser(accountUserId: string = ''): Observable<AccountUserModel> {
+    if (accountUserId === '') {
+      accountUserId = this.authService.getAccountUserId()!;
+    }
 
     return this.http.get<AccountUserModel>(`${this.API_URL}/${accountUserId}`, { headers: this.utilsService.withAuth() }).pipe(
       tap(res => this.setAccountUserData(res))

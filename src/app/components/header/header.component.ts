@@ -12,6 +12,8 @@ import { SidenavService } from '../../services/sidenav.service';
 import { AccountModel } from '../../models/account.model';
 import { AccountService } from '../../services/account.service';
 import { TrialUtilsService } from '../../services/utils/trial-utils.service';
+import { AccountUserModel } from '../../models/account_user.model';
+import { UtilsAuthService } from '../../services/utils/utils-auth.service';
 
 @Component({
   selector: 'app-header',
@@ -29,6 +31,8 @@ export class HeaderComponent implements OnInit {
 
   @Output() toggleSidenav = new EventEmitter<void>()
 
+  currentAccountUser: AccountUserModel = new AccountUserModel();
+  
   userName!: string;
   userImage!: string;
   isLogged: boolean = false;
@@ -40,22 +44,29 @@ export class HeaderComponent implements OnInit {
     readonly sidenavService: SidenavService,
     readonly accountService: AccountService,
     readonly router: Router,
-    readonly trialUtils: TrialUtilsService
+    readonly trialUtils: TrialUtilsService,
+    private readonly utilsAuthService: UtilsAuthService
   ) { }
 
   ngOnInit(): void {
     this.authService.$toggleLogin.subscribe((isLogged) => {
       this.isLogged = isLogged
       this.getUserImage()
+
+      this.fetchCurrentAccountUser();
       
       if (isLogged) {
         this.getAccount();
         this.toggleSidenav.emit()
       }
     })
+  }
 
-    this.authService.$userName.subscribe((userName) => {
-      this.userName = userName || 'Fulano'
+  fetchCurrentAccountUser(): void {
+    this.utilsAuthService.currentAccountUser().subscribe({
+      next: (currentAccountUser) => {
+        this.currentAccountUser = currentAccountUser;
+      }
     })
   }
 
@@ -76,6 +87,11 @@ export class HeaderComponent implements OnInit {
     } else {
       return `Seu teste grátis termina em ${daysRemaining} ${daysMessage}`;
     }
+  }
+
+  get accountUserName(): string {
+    if (!this.isLogged) return 'Usuário';
+    return this.currentAccountUser.name;
   }
 
   /**

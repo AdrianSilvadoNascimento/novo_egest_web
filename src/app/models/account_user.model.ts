@@ -6,10 +6,12 @@ export class AccountUserModel {
   user_image!: string;
   phone_number!: string;
   confirm_password!: string;
+  refresh_token?: string
   type!: AccountUserType;
   role!: AccountUserRole;
   first_access!: boolean;
   password_confirmed!: boolean;
+  remember_me?: boolean;
   address!: string;
   city!: string;
   state!: string;
