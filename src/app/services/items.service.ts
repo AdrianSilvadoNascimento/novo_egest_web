@@ -8,6 +8,9 @@ import { AuthService } from './auth.service';
 import { ItemCreationModel } from '../models/item-creation.model';
 import { ItemModel } from '../models/item.model';
 import { CategoryModel } from '../models/category.model';
+import { AccountUserModel } from '../models/account_user.model';
+import { AccountModel } from '../models/account.model';
+import { UtilsAuthService } from './utils/utils-auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +32,13 @@ export class ItemsService {
   private categoryData: BehaviorSubject<CategoryModel[]>
   $categoryData: Observable<CategoryModel[]>;
 
-  constructor(private http: HttpClient, private authService: AuthService) {
+  currentAccountUser: AccountUserModel = new AccountUserModel();
+  currentAccount: AccountModel = new AccountModel();
+
+  constructor(
+    private http: HttpClient, private authService: AuthService,
+    private readonly utilsAuthService: UtilsAuthService
+  ) {
     const storedItemData = sessionStorage.getItem('itemData');
     const storedAllItemData = sessionStorage.getItem('allItemData');
     const storedCategoryData = sessionStorage.getItem('categoryData');
@@ -41,6 +50,9 @@ export class ItemsService {
     this.$itemData = this.itemData.asObservable();
     this.$allItemData = this.allItemData.asObservable();
     this.$categoryData = this.categoryData.asObservable();
+
+    this.utilsAuthService.currentAccount().subscribe(account => this.currentAccount = account);
+    this.utilsAuthService.currentAccountUser().subscribe(user => this.currentAccountUser = user);
   }
 
   /**
@@ -81,9 +93,8 @@ export class ItemsService {
   getPaginatedItems(page: string, limit: number, isIgnoringLoading: boolean = false): Observable<PaginatedItemsModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', isIgnoringLoading ? 'true' : 'false');
-    const accountId = this.authService.getAccountId();
 
-    return this.http.get<PaginatedItemsModel>(`${this.baseUrl}/${accountId}/paginated?offset=${page}&limit=${limit}`, {
+    return this.http.get<PaginatedItemsModel>(`${this.baseUrl}/${this.currentAccount.id}/paginated?offset=${page}&limit=${limit}`, {
       headers: this.headers
     }).pipe((tap((data: any) => {
       this.setItemData(data);
@@ -99,9 +110,8 @@ export class ItemsService {
   searchItems(searchTerm: string, limit: number = 50): Observable<ItemModel[]> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true'); // Skip global loading for search
-    const accountId = this.authService.getAccountId();
 
-    return this.http.get<ItemModel[]>(`${this.baseUrl}/${accountId}/search?term=${encodeURIComponent(searchTerm)}&limit=${limit}`, {
+    return this.http.get<ItemModel[]>(`${this.baseUrl}/${this.currentAccount.id}/search?term=${encodeURIComponent(searchTerm)}&limit=${limit}`, {
       headers: this.headers
     });
   }
@@ -112,9 +122,8 @@ export class ItemsService {
    */
   getAllItems(): Observable<ItemModel[]> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    const accountId = this.authService.getAccountId();
 
-    return this.http.get<ItemModel[]>(`${this.baseUrl}/${accountId}`, {
+    return this.http.get<ItemModel[]>(`${this.baseUrl}/${this.currentAccount.id}`, {
       headers: this.headers
     }).pipe((tap((data: ItemModel[]) => {
       this.setAllItemsData(data);
@@ -127,15 +136,12 @@ export class ItemsService {
    * @returns Observable com o dado criado
    */
   createItem(item: ItemCreationModel): Observable<ItemModel> {
-    this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    const accountId = this.authService.getAccountId();
-    const accountUserId = this.authService.getAccountUserId();
     const itemData = JSON.parse(sessionStorage.getItem('itemData')!!);
 
-    return this.http.post<ItemModel>(`${this.baseUrl}/register-item/${accountId}`, {
+    return this.http.post<ItemModel>(`${this.baseUrl}/register-item/${this.currentAccount.id}`, {
       ...item,
-      account_id: accountId,
-      account_user_id: accountUserId
+      account_id: this.currentAccount.id,
+      account_user_id: this.currentAccountUser.id
     }, {
       headers: this.headers
     }).pipe((tap((data: ItemModel) => {
@@ -159,8 +165,8 @@ export class ItemsService {
 
     return this.http.put<ItemModel>(`${this.baseUrl}/update-item/${id}`, {
       ...item,
-      account_id: this.authService.getAccountId(),
-      account_user_id: this.authService.getAccountUserId(),
+      account_id: this.currentAccount.id,
+      account_user_id: this.currentAccountUser.id,
 
     }, {
       headers: this.headers
@@ -182,13 +188,10 @@ export class ItemsService {
   importItems(file: File): Observable<any> {
     const formData = new FormData();
 
-    const accountId = this.authService.getAccountId();
-    const accountUserId = this.authService.getAccountUserId();
-
     formData.append('file', file);
-    if (accountId && accountUserId) {
-      formData.append('account_id', accountId);
-      formData.append('account_user_id', accountUserId);
+    if (this.currentAccount.id && this.currentAccountUser.id) {
+      formData.append('account_id', this.currentAccount.id);
+      formData.append('account_user_id', this.currentAccountUser.id);
     }
 
     return this.http.post<any>(`${this.baseUrl}/import`, formData, {
@@ -207,12 +210,9 @@ export class ItemsService {
   importCategories(file: File): Observable<any> {
     const formData = new FormData();
 
-    const accountId = this.authService.getAccountId();
-    const accountUserId = this.authService.getAccountUserId();
-
     formData.append('file', file);
-    if (accountId && accountUserId) {
-      formData.append('account_id', accountId);
+    if (this.currentAccount.id && this.currentAccountUser.id) {
+      formData.append('account_id', this.currentAccount.id);
     }
 
     return this.http.post<any>(`${this.baseUrl}/categories/import`, formData, {
@@ -264,10 +264,9 @@ export class ItemsService {
    */
   createCategory(category: CategoryModel): Observable<CategoryModel> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    const accountId = this.authService.getAccountId();
     const categories = JSON.parse(sessionStorage.getItem('categoryData')!!);
 
-    return this.http.post<CategoryModel>(`${this.baseUrl}/categories/${accountId}`, category, {
+    return this.http.post<CategoryModel>(`${this.baseUrl}/categories/${this.currentAccount.id}`, category, {
       headers: this.headers
     }).pipe((tap((data: CategoryModel) => {
       const categoryData = [...categories, data]
@@ -299,9 +298,8 @@ export class ItemsService {
    */
   getCategories(): Observable<any> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    const accountId = this.authService.getAccountId();
 
-    return this.http.get<any>(`${this.baseUrl}/categories/${accountId}`, {
+    return this.http.get<any>(`${this.baseUrl}/categories/${this.currentAccount.id}`, {
       headers: this.headers
     }).pipe((tap((data: CategoryModel[]) => {
       this.setCategoryData(data);
@@ -315,9 +313,8 @@ export class ItemsService {
    */
   deleteCategory(categoryId: string): Observable<any> {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
-    const accountId = this.authService.getAccountId();
 
-    return this.http.delete<any>(`${this.baseUrl}/categories/${accountId}/${categoryId}`, {
+    return this.http.delete<any>(`${this.baseUrl}/categories/${this.currentAccount.id}/${categoryId}`, {
       headers: this.headers
     }).pipe((tap((data: any) => {
       return data;

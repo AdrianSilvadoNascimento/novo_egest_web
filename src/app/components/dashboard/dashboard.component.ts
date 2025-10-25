@@ -27,6 +27,7 @@ import { DashboardGatewayService } from '../../services/utils/gateways/dashboard
 import { MovementationService } from '../../services/movementation.service';
 import { AccountModel } from '../../models/account.model';
 import { UtilsAuthService } from '../../services/utils/utils-auth.service';
+import { AccountUserModel } from '../../models/account_user.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -55,6 +56,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoadingRefresh: boolean = false;
 
   currentAccount: AccountModel = new AccountModel();
+  currentAccountUser: AccountUserModel = new AccountUserModel();
 
   constructor(
     private readonly dashboardService: DashboardService,
@@ -91,6 +93,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.utilsAuthService.currentAccount().subscribe({
       next: (currentAccount) => {
         this.currentAccount = currentAccount;
+
+        this.getData();
+      }
+    })
+
+    this.utilsAuthService.currentAccountUser().subscribe({
+      next: (currentAccountUser) => {
+        this.currentAccountUser = currentAccountUser;
+
+        this.authService.setAuthTimer(3600, currentAccountUser);
       }
     })
 
@@ -110,9 +122,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.authService.$toggleLogin.subscribe({
       next: (isLoggedIn) => {
-        if (isLoggedIn && this.authService.getAccountId()) {
-          this.getData();
-        } else {
+        if (!isLoggedIn && !this.authService.getAccountId()) {
           this.dashboardData = {} as DashboardModel;
         }
       }

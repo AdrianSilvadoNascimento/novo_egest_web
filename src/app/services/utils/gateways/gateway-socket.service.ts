@@ -61,15 +61,7 @@ export class GatewaySocketService {
    * Obtém o token de autenticação do storage correto
    */
   private getAuthToken(): void {
-    this.utilsAuthService.currentAccountUser().subscribe({
-      next: (currentAccountUser) => {
-        this.currentAccountUser = currentAccountUser;
-
-        this.token = currentAccountUser.remember_me
-          ? localStorage.getItem('token')!!
-          : sessionStorage.getItem('token')!!;
-      },
-    });
+    this.token = sessionStorage.getItem('token')!!;
   }
 
   private getRefreshToken(): void {
@@ -95,6 +87,7 @@ export class GatewaySocketService {
   private reconnectWithNewToken(): void {
     this.getAuthToken();
 
+    console.log("[GatewaySocket] Token:", this.token);
     if (this.token) {
       this.socket.auth = { token: this.token };
       this.socket.connect();

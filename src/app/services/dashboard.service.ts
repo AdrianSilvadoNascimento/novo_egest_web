@@ -6,6 +6,8 @@ import { catchError, map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { AccountModel } from '../models/account.model';
+import { UtilsAuthService } from './utils/utils-auth.service';
 
 interface CachedDashboardData {
   data: DashboardModel;
@@ -71,12 +73,15 @@ export class DashboardService {
     'Accept': 'application/json',
   })
 
-  private accountId!: string | null;
+  private currentAccount: AccountModel = new AccountModel();
 
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-  ) { }
+    private readonly utilsAuthService: UtilsAuthService
+  ) {
+    this.utilsAuthService.currentAccount().subscribe(account => this.currentAccount = account);
+  }
 
   setDashboardData(data: DashboardModel): void {
     this.dashboardData.next(data);
@@ -86,7 +91,7 @@ export class DashboardService {
     const cachedData: CachedDashboardData = {
       data,
       timestamp: Date.now(),
-      accountId: this.accountId || '',
+      accountId: this.currentAccount.id || '',
       totalProducts: data.totalProducts
     };
     sessionStorage.setItem(this.CACHE_KEY, JSON.stringify(cachedData));
@@ -99,7 +104,7 @@ export class DashboardService {
 
       const cachedData: CachedDashboardData = JSON.parse(cached);
 
-      if (cachedData.accountId !== this.accountId) {
+      if (cachedData.accountId !== this.currentAccount.id) {
         this.clearCache();
         return null;
       }
@@ -132,9 +137,7 @@ export class DashboardService {
   }
 
   getDashboardData(forceRefresh: boolean = false): Observable<DashboardModel> {
-    this.accountId = this.authService.getAccountId();
-
-    if (!this.accountId) {
+    if (!this.currentAccount.id) {
       console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
       this.loadingState.next(true);
       return of({} as DashboardModel);
@@ -159,7 +162,7 @@ export class DashboardService {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true');
 
-    return this.http.get<DashboardModel>(`${this.API_URL}/${this.accountId}`, { headers: this.headers }).pipe(
+    return this.http.get<DashboardModel>(`${this.API_URL}/${this.currentAccount.id}`, { headers: this.headers }).pipe(
       tap((data: DashboardModel) => {
         this.setDashboardData(data);
         this.loadingState.next(true);
@@ -194,9 +197,7 @@ export class DashboardService {
    * Carregamento super otimizado - usa endpoint /quick
    */
   getDashboardQuick(forceRefresh: boolean = false): Observable<DashboardModel> {
-    this.accountId = this.authService.getAccountId();
-
-    if (!this.accountId) {
+    if (!this.currentAccount.id) {
       console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
       this.loadingState.next(false);
       return of({} as DashboardModel);
@@ -222,7 +223,7 @@ export class DashboardService {
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true');
 
-    return this.http.get<QuickDashboardResponse>(`${this.API_URL}/${this.accountId}/quick`, { headers: this.headers }).pipe(
+    return this.http.get<QuickDashboardResponse>(`${this.API_URL}/${this.currentAccount.id}/quick`, { headers: this.headers }).pipe(
       tap((response: QuickDashboardResponse) => {
         this.setDashboardData(response.data);
         this.loadingState.next(false);
@@ -239,9 +240,7 @@ export class DashboardService {
    * Força refresh via backend (invalida cache)
    */
   forceRefresh(): Observable<{ success: boolean; jobId?: string; message: string }> {
-    this.accountId = this.authService.getAccountId();
-
-    if (!this.accountId) {
+    if (!this.currentAccount.id) {
       console.error('❌ Dashboard: AccountId não encontrado - usuário não está logado');
       return of({ success: false, message: 'Usuário não está logado' });
     }
@@ -255,7 +254,7 @@ export class DashboardService {
     this.headers = this.headers.set('X-Skip-Loading', 'true');
 
     return this.http.post<{ success: boolean; jobId?: string; message: string }>(
-      `${this.API_URL}/${this.accountId}/refresh`,
+      `${this.API_URL}/${this.currentAccount.id}/refresh`,
       {},
       { headers: this.headers }
     ).pipe(
@@ -274,11 +273,10 @@ export class DashboardService {
    * Busca status do cache e jobs background
    */
   getStatus(): Observable<DashboardStatus> {
-    this.accountId = this.authService.getAccountId();
     this.headers = this.headers.set('Authorization', `Bearer ${this.authService.getToken()}`);
     this.headers = this.headers.set('X-Skip-Loading', 'true');
 
-    return this.http.get<DashboardStatus>(`${this.API_URL}/${this.accountId}/status`, { headers: this.headers }).pipe(
+    return this.http.get<DashboardStatus>(`${this.API_URL}/${this.currentAccount.id}/status`, { headers: this.headers }).pipe(
       tap((status) => {
         this.dashboardStatus.next(status);
       }),

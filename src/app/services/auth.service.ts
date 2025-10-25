@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, map, Observable, of, switchMap, tap } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, catchError, finalize, map, Observable, of, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { environment } from '../../environments/environment';
 import { LoginModel } from '../models/login.model';
 import { RegisterModel } from '../models/register.model';
 import { RefreshToken } from './utils/gateways/refresh-auth-token-gateway.service';
+import { AccountUserModel } from '../models/account_user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,9 @@ export class AuthService {
   $passwordConfirmed = this.passwordConfirmed.asObservable();
 
   private storage: Storage = localStorage;
+  tokenTimer: any;
+  refreshInProgress = false;
+  refreshSubject = new Subject<boolean>();
 
   constructor(
     private http: HttpClient,
@@ -96,6 +100,7 @@ export class AuthService {
     }).pipe(
       tap(async (res: any) => {
         this.storage = sessionStorage;
+
         this.setCache({
           token: res.token,
           refresh_token: res.refresh_token,
@@ -114,7 +119,7 @@ export class AuthService {
 
   validateOrRefreshToken(): Observable<boolean> {
     const token = this.getToken();
-    const refreshToken = this.storage.getItem('refresh_token');
+    const refreshToken = localStorage.getItem('refresh_token');
 
     if (!token) {
       return of(false);
@@ -156,7 +161,7 @@ export class AuthService {
   }
 
   refreshToken(): Observable<string> {
-    let currentAccountUser = JSON.parse(this.storage.getItem('account_user_data')!!);
+    const currentAccountUser = JSON.parse(this.storage.getItem('account_user_data')!!);
 
     if (!currentAccountUser?.refresh_token) {
       return of('').pipe(
@@ -187,11 +192,62 @@ export class AuthService {
     );
   }
 
+  forceRefreshToken(): Observable<{ token: string; expiresIn: number }> {
+    const currentAccountUser = JSON.parse(sessionStorage.getItem('account_user_data') || 'null');
+    const token = sessionStorage.getItem('token')!!
+
+    if (!token) {
+      this.logout();
+      return throwError(() => new Error('No refresh token'));
+    }
+
+    const apiUrl = `${this.API_URL}/refresh-token?user-id=${currentAccountUser.id}`;
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'X-Skip-Loading': 'true'
+    });
+
+    if (this.refreshInProgress) {
+      return this.refreshSubject.asObservable().pipe(
+        shareReplay(1)
+      ) as unknown as Observable<{ token: string; expiresIn: number }>;
+    }
+
+    this.refreshInProgress = true;
+
+    return this.http.post<{ token: string; expiresIn: number }>(apiUrl, {}, { headers }).pipe(
+      tap((res) => {
+        console.log("RETORNO ", res);
+        this.updateAuthToken(res);
+        currentAccountUser.token = res.token;
+
+        const expiresInDuration = res.expiresIn;
+        const descountedTimer = expiresInDuration - expiresInDuration * 0.2;
+        const now = Date.now();
+        const expirationDate = new Date(now + descountedTimer * 1000);
+        this.setAuthTimer(expiresInDuration, currentAccountUser);
+        this.setTokenExpiration(expirationDate);
+      }),
+      catchError((err) => {
+        console.error('Refresh token falhou', err);
+        this.logout();
+        return throwError(() => err);
+      }),
+      finalize(() => {
+        this.refreshInProgress = false;
+        this.refreshSubject.next(true);
+      }),
+      shareReplay(1)
+    );
+  }
+
   /**
    * Atualiza o auth token no cache do client
    * @param data RefreshToken 
    */
   updateAuthToken(data: RefreshToken): void {
+    console.log("ATUALIZOU O TOKEN:", data)
     if (!data.token) {
       this.logout();
       return;
@@ -201,21 +257,23 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.rememberMe() ? localStorage.getItem('refresh_token') : sessionStorage.getItem('token');
+    return sessionStorage.getItem('token');
   }
 
   getAccountId(): string | null {
-    return this.rememberMe() ? localStorage.getItem('account_id') : sessionStorage.getItem('account_id');
+    return sessionStorage.getItem('account_id');
   }
 
   getAccountUserId(): string | null {
-    return this.rememberMe() ? localStorage.getItem('user_id') : sessionStorage.getItem('user_id');
+    return sessionStorage.getItem('user_id');
   }
 
   rememberMe(): boolean {
-    const rememberMe = localStorage.getItem('remember_me')
+    const accountUser = JSON.parse(sessionStorage.getItem('account_user_data')!!)
+    let rememberMe = false;
 
-    return rememberMe === 'true';
+    if (accountUser) rememberMe = accountUser.remember_me;
+    return rememberMe;
   }
 
   /**
@@ -295,6 +353,10 @@ export class AuthService {
       );
   }
 
+  setTokenExpiration(expiresIn: Date) {
+    localStorage.setItem('expiration', expiresIn.toISOString())
+  }
+
   setCache(res: {
     token: string,
     refresh_token: string,
@@ -324,7 +386,42 @@ export class AuthService {
     this.setFirstAccess(false);
     this.setPasswordConfirmed(true);
     this.clearCache();
-    localStorage.removeItem('refresh_token');
+    clearTimeout(this.tokenTimer);
+
     this.router.navigate(['/login']);
+  }
+
+  setAuthTimer(timer: number, accountUser: AccountUserModel): void {
+    const now = new Date();
+    const expirationDate = new Date(now.getTime() + timer * 1000);
+    this.setTokenExpiration(expirationDate);
+    
+    let isToLogout = true
+    let expireToken = timer;
+
+    if (accountUser && accountUser.remember_me) {
+      isToLogout = false;
+      expireToken = timer - (timer * 0.4);
+    }
+
+
+    clearTimeout(this.tokenTimer);
+    this.tokenTimer = setTimeout(() => {
+      const token = sessionStorage.getItem('token')!!;
+      if (!token) {
+        this.logout();
+        return;
+      }
+
+      if (isToLogout) {
+        this.logout();
+        return;
+      }
+
+      this.forceRefreshToken().subscribe({
+        next: () => { },
+        error: (err) => { console.error('Erro no refresh por timer', err); }
+      });
+    }, expireToken * 1000);
   }
 }

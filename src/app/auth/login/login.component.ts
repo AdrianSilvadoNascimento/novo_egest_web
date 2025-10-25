@@ -115,7 +115,6 @@ export class LoginComponent implements OnInit {
                 error: (error) => {
                   const status = error?.status;
                   if (status === 404 || status === 406) {
-                    // Usuário não existe no nosso backend: enviar para registro
                     this.toast.error('Conta não encontrada. Cadastre-se para continuar.');
                     this.router.navigate(['/register']);
                   } else if (status === 401) {

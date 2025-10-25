@@ -6,6 +6,7 @@ export class AccountUserModel {
   user_image!: string;
   phone_number!: string;
   confirm_password!: string;
+  token!: string;
   refresh_token?: string
   type!: AccountUserType;
   role!: AccountUserRole;
